@@ -1,0 +1,87 @@
+publiccodeYmlVersion: "0.2"
+name: Airvalidfe
+applicationSuite: SRRQA - Rilevamento della Qualità dell'Aria
+url: "https://github.com/regione-piemonte/airvalidfe"
+softwareVersion: "1.0.0" 
+releaseDate: "2023-09-29"
+logo: "img/logo-aria.svg"
+inputTypes:
+  - text/plain
+outputTypes:
+  - text/plain
+  - multipart/form-data
+platforms:
+  - web
+categories: 
+  - data-analytics
+  - data-collection
+  - data-visualization
+usedBy:
+  - ARPA Piemonte
+  - Regione Piemonte
+developmentStatus: stable 
+softwareType: "standalone/web" 
+intendedAudience:
+  scope:
+    - environment
+  countries:
+    - it
+description: 
+  it: 
+    localisedName: Airvalidfe
+    genericName: Airvalidfe
+    shortDescription: > 
+          Prodotto destinato alla validazione interattiva delle misure del SSRQA
+    longDescription: > 
+          L'applicazione è utilizzata dai tecnici ARPA per la consultazione, 
+          visualizzazione, validazione e certificazione delle misure 
+          del Sistema Regionale di Rilevamento della Qualità dell'Aria.
+          Consente di selezionare parametri in base al profilo di appartenenza
+          e visualizzarne le misure in formato grafico e tabellare; 
+          sul grafico si possono effettuare anche dei confronti dello stesso
+          paramtro su altri periodi dell'anno.
+          E' possibile operare delle modifiche sul dato validato
+          apportando delle correzioni manuali applicando una correzione lineare, 
+          oppure è possibile applicare una correzione in seguito alla taratura
+          dello strumento. Inoltre si puo' accettare la validazione o invalidare il dato. 
+          Infine è possibile effettuare la certificazione del dato.
+          Le misure possono inoltre essere scaricate in formato csv.
+    features:
+       - validazione giornaliera
+       - validazione mensile
+       - validazione annuale
+       - certificazione
+       - correzione delle misure
+       - esportazione delle misure
+       - visualizzazione grafica delle misure
+    screenshots:
+       - screenshoots/1_login.png
+       - screenshoots/2_schermata_principale.png
+       - screenshoots/3_opzioni_misure.png
+       - screenshoots/4_opzioni_parametro.png
+       - screenshoots/5_opzioni_grafico.png
+legal:
+  license: EUPL-1.2
+  mainCopyrightOwner: Regione Piemonte
+  repoOwner: Regione Piemonte
+  authorsFile: Copyrights.txt
+maintenance:
+  type: "internal"
+  contacts: 
+    - name: Flavio Bianchi
+      email: "flavio.bianchi@csi.it"
+      affiliation: CSI Piemonte
+      phone: ""
+localisation:
+  localisationReady: false
+  availableLanguages:
+    - it
+it: 
+  countryExtensionVersion: "0.2"
+  piattaforme:
+    spid: true
+    cie: false
+    anpr: false
+    pagopa: false
+  riuso: 
+    codiceIPA: r_piemon

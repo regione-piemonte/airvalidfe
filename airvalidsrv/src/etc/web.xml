@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd" id="WebApp_ID"
+	version="3.1">
+
+	<display-name>Backend Validatore Interattivo</display-name>
+
+	<!-- Auto scan REST service -->
+	<context-param>
+		<param-name>resteasy.scan</param-name>
+		<param-value>true</param-value>
+	</context-param>
+
+	<context-param>
+		<param-name>resteasy.servlet.mapping.prefix</param-name>
+		<!--Prefix for the endpoints -->
+		<param-value>/</param-value>
+	</context-param>
+
+	<listener>
+		<listener-class>it.csi.srrqa.airvalidsrv.rest.ContextListener</listener-class>
+	</listener>
+
+	<servlet>
+		<servlet-name>airvalidSrv</servlet-name>
+		<servlet-class>org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher</servlet-class>
+		<init-param>
+			<param-name>javax.ws.rs.Application</param-name>
+			<param-value>it.csi.srrqa.airvalidsrv.rest.AirValidApp</param-value>
+		</init-param>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>airvalidSrv</servlet-name>
+		<!--Prefix for endpoint -->
+		<url-pattern>/*</url-pattern>
+	</servlet-mapping>
+
+</web-app>

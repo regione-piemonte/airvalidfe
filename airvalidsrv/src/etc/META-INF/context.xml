@@ -1,0 +1,22 @@
+<Context path="/@@@@SERVICE_NAME@@@@" docBase="@@@@SERVICE_NAME@@@@" debug="0"
+	reloadable="false" crossContext="false">
+
+	<Parameter name="airDbServiceURL" value="@@@@SERVICE_URL@@@@" override="false" />
+	<Parameter name="airDbServiceUser" value="@@@@SERVICE_USER@@@@" override="false" />
+	<Parameter name="airDbServicePwd" value="@@@@SERVICE_PWD@@@@" override="false" />
+	<Parameter name="copDbServiceURL" value="@@@@COP_SRV_URL@@@@" override="false" />
+	<Parameter name="copDbServiceUser" value="@@@@COP_SRV_USER@@@@" override="false" />
+	<Parameter name="copDbServicePwd" value="@@@@COP_SRV_PWD@@@@" override="false" />
+	<Parameter name="authServiceURL" value="@@@@AUTH_URL@@@@" override="false" />
+	<Parameter name="authServiceUser" value="@@@@AUTH_USER@@@@" override="false" />
+	<Parameter name="authServicePwd" value="@@@@AUTH_PWD@@@@" override="false" />
+	<Parameter name="enableShibbolet" value="@@@@ENABLE_SHIBBOLET@@@@" override="false" />
+	<Parameter name="measureLockTimeout_m" value="@@@@MEASURE_LOCK_TIMEOUT_m@@@@" override="false" />
+	<Parameter name="trustManager" value="false" override="false" />
+	<Parameter name="referenceTemp_K" value="293.0" override="false" />
+	<Parameter name="referencePress_kPa" value="101.3" override="false" />
+	<Parameter name="expiryTime_m" value="15" override="false" />
+	<Parameter name="maxDataCached" value="256000" override="false" />
+	<Parameter name="cleanPeriod_s" value="60" override="false" />
+
+</Context>
