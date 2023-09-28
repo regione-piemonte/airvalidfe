@@ -1,0 +1,49 @@
+<!--  
+ Copyright Regione Piemonte - 2023
+ SPDX-License-Identifier: EUPL-1.2-or-later
+ -->
+<div mat-dialog-title class="dialog-title">
+  <button class="mat-elevation-z0" mat-icon-button aria-label="Chiudi la modale" mat-dialog-close class="btn-dialog--close">
+    <mat-icon >close</mat-icon>
+  </button>
+</div>
+<mat-dialog-content [formGroup]="form">
+    <h2 mat-dialog-title>Esportazione in CSV</h2>
+    
+    <p>Seleziona i parametri</p>
+      <div class="parameterSettings">
+        <mat-form-field appearance="fill" >
+          <mat-label>Formato Data</mat-label>
+          <mat-select formControlName="dataFormat"   >
+              <mat-option *ngFor="let element of listaFormatoData" [value]="element">{{element}}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      
+        <mat-form-field appearance="fill"  >
+          <mat-label>Separatore campi</mat-label>
+          <mat-select formControlName="dataSeparator" >
+            <mat-option *ngFor="let element of listaSeparatoreDati" [disabled]="form.get('numberSeparator')?.value ==',' && element==','" [value]="element">{{element}}</mat-option>
+          </mat-select>
+        </mat-form-field>
+  
+        <mat-form-field appearance="fill" >
+          <mat-label>Separatore decimale</mat-label>
+          <mat-select formControlName="numberSeparator"  >
+            <mat-option *ngFor="let element of listaSeparatoreDecimali" [disabled]="form.get('dataSeparator')?.value ==','  && element==','" [value]="element">{{element}}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" >
+          <mat-label>Tipo esportazione</mat-label>
+          <mat-select formControlName="type"  >
+            <mat-option *ngFor="let element of listaType"  [value]="element">{{element}}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+  </mat-dialog-content>
+  
+  <mat-dialog-actions class="btn-action-modal px-lg-2 justify-content-between">
+      <button mat-button class="mat-raised-button"(click)="close()" aria-label="Chiudi la modale">{{'button.annulla' | translate}}</button>
+      <button mat-button class="mat-raised-button mat-primary"(click)="save()" aria-label="Esporta i dati" [disabled]="form.invalid
+      ">{{'button.export' | translate}}</button>
+  </mat-dialog-actions>

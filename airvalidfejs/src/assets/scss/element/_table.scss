@@ -1,0 +1,169 @@
+.box-graphic-color {
+  width: 10px;
+  height: 8px;
+  display: inline-flex;
+  margin-right: 5px;
+}
+
+.selected {
+  background-color: $blue-200;
+}
+#app-ariaweb {
+  .overflow-x--visible{
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+  .summary-table{
+    min-width: 500px;
+    width: 100%;
+    tbody {
+      .mat-column-verification_flag {
+        @extend .text-center;
+      }
+      .mat-column-Parametro {
+        max-width: 200px;
+      }
+    }
+
+    &:not(.table--parameters) {
+      tr{
+        .mat-cell, .mat-header-cell {
+          &:not(:first-child):not(.mat-column-Parametro):not(.mat-column-giorno) {
+            @extend .text-center;
+          }
+          &.mat-column-validity_flag_state, &.mat-column-verification_flag {
+            @extend .text-center;
+          }
+        }
+      }
+    }
+    
+  }
+
+  // gestione tabella pagina impostazioni utente
+  .table--settings {
+    tr.mat-row {
+      height: 48px;
+    }
+
+    // .mat-cell, .mat-header-cell {
+      // @include font-size(16px);
+      //.material-icons {
+        // @include font-size(18px);
+      // }
+    // }
+
+    // per aggiungere il segno meno come spaziatura ai valori della tabella
+    .cell-element--multi {
+      &:not(:last-child) {
+        &::after {
+          content: '-';
+        }
+      }
+    }
+  }
+
+  .mat-paginator-container {
+    min-height: auto;
+  }
+  
+
+  // regole tabella che fanno parte della pagina validazioni
+  tr {
+    &.mat-row {
+      height: auto;
+      &:hover {
+        background-color: $blue-200;
+      }
+    }
+    &.mat-header-row {
+      height: 35px;
+      background-color: $blue;
+      .mat-header-cell {
+        color: $white;
+      }
+    }
+    .mat-column-validity_flag {
+      .mat-select {
+        width: 40px;
+      }
+    }
+    .mat-column-validity_flag_state {
+      position: relative;
+      .state-circle {
+       
+        position: absolute;
+        top: calc(50% - 5px);
+        left: calc(50% - 5px);
+      }
+      .state-color {
+        &--1 {
+          @extend %circle-state;
+          background-color: $green-500;
+        }
+        &--2 {
+          @extend %triangle-state;
+          border-bottom-color: $green-500;
+        }
+        &--3 {
+          width: 0;
+          height: 0;
+          border-left: 5px solid transparent;
+          border-bottom: 10px solid $green-500;
+          border-right: 5px solid transparent;
+          position: relative;
+          margin-top: 3px;
+          
+          &:after {
+            content: "";
+            width: 0;
+            height: 0;
+            border-left: 3px solid transparent;
+            border-bottom: 6px solid $white;
+            border-right: 3px solid transparent;
+            position: absolute;
+            top: 3px;
+            left: -2.5px;
+          }
+        }
+        &--grey {
+          @extend %circle-state;
+          background-color: #9EA2B6;
+        }
+        &---1 {
+          @extend %square-state;
+          background-color: $red;
+        }
+        &---99 {
+          @extend %square-state;
+          background-color: $orange-400;
+        }
+
+      }
+      .state-valid {
+        &--1,&--2,&--3,&---1,&---99 {
+          @extend %circle-state;
+          background-color: $blue-400;
+        }
+
+      }
+      .state-invalid {
+        &--1,&--2,&--3,&---1,&---99 {
+          @extend %square-state;
+          background-color: $blue-600;
+        }
+      }
+    }
+  }
+
+  .change-value {
+    background-color: $grey-400;
+  }
+  
+  .mat-cell, .mat-header-cell {
+    // font-size: 10px;
+    .material-icons {
+      // font-size: 14px;
+    }
+  }
+}

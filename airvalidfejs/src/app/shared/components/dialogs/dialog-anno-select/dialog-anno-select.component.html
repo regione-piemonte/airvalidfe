@@ -1,0 +1,42 @@
+<!--  
+ Copyright Regione Piemonte - 2023
+ SPDX-License-Identifier: EUPL-1.2-or-later
+ -->
+<mat-dialog-content [formGroup]="form">
+    <ng-container>
+      <div mat-dialog-title class="dialog-title">
+        <h2 mat-dialog-title>Scelta anno</h2>
+        <button
+          mat-icon-button
+          aria-label="close dialog"
+          mat-dialog-close
+          class="btn-dialog--close"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+  
+      <p>Selezionare l'anno</p>
+
+      <mat-form-field appearance="fill" >
+        <mat-label>Anno</mat-label>
+        <mat-select formControlName="anno"  >
+          <mat-option *ngFor="let element of listaAnno" [value]="element">{{element}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+  
+      <div class="btn-action-modal justify-content-end">
+          
+          <button
+            mat-button
+            class="mat-raised-button mat-primary"
+            attr.aria-label="{{'Vai alla pagina di ' + form.value.lavoro}}"
+            [disabled]="!form.valid"
+            (click)="save()"
+          >
+          {{'button.prosegui' | translate}}
+          </button>
+        </div>
+    </ng-container>
+  </mat-dialog-content>
+  

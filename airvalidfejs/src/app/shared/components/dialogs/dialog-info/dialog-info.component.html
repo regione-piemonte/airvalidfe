@@ -1,0 +1,28 @@
+<!--  
+ Copyright Regione Piemonte - 2023
+ SPDX-License-Identifier: EUPL-1.2-or-later
+ -->
+<mat-dialog-content role="alert">
+    <div mat-dialog-title class="dialog-title">
+        <button class="mat-elevation-z0 btn-dialog--close" mat-icon-button aria-label="{{'button.aria_label.chiudi' | translate}}" mat-dialog-close>
+            <mat-icon >close</mat-icon>
+          </button>
+    </div>
+    <div class="box-alert" [ngClass]="'box-alert--' + data.role">
+        <h2 mat-dialog-title [innerHTML]="data.title"></h2>
+        <p [innerHTML]="data.message"></p>
+    </div>
+
+
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="btn-action-modal justify-content-between">
+      <button mat-button class="mat-raised-button" (click)="close()" attr.aria-label="
+      {{'button.aria_label.chiudi' | translate}}">
+        {{'button.chiudi' | translate}}
+      </button>
+      <button *ngIf="data.actionButton" mat-button class="mat-raised-button mat-primary" (click)="save()"
+              attr.aria-label="{{'button.aria_label.chiudi' | translate}}">{{data.actionButton}}
+      </button>
+
+  </mat-dialog-actions>

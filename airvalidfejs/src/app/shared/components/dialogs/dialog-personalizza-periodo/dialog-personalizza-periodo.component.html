@@ -1,0 +1,37 @@
+<!--
+ Copyright Regione Piemonte - 2023
+ SPDX-License-Identifier: EUPL-1.2-or-later
+ -->
+<mat-dialog-content [formGroup]="form">
+  <ng-container>
+    <div mat-dialog-title class="dialog-title">
+      <h2 mat-dialog-title>{{'dialog_date.title' | translate}}</h2>
+      <div class="dialog-subtitle">
+        <span>{{'dialog_date.text_info' | translate}} {{periodoLocal.startDate | date: 'mediumDate': 'it'}} : {{periodoLocal.endDate | date: 'mediumDate': 'it'}}</span>
+      </div>
+      <button mat-icon-button aria-label="close dialog" mat-dialog-close class="btn-dialog--close">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <p>{{ "dialog_date.subtitle" | translate}}</p>
+
+    <mat-form-field appearance="fill">
+      <mat-label>{{"dialog_date.input_start" | translate}}</mat-label>
+      <input matInput placeholder="Start date" formControlName="start" type="date" [max]="periodoLocal.endDate" [min]="periodoLocal.startDate" />
+    </mat-form-field>
+    <mat-form-field appearance="fill">
+      <mat-label>{{"dialog_date.input_end" | translate}}</mat-label>
+      <input matInput placeholder="End date" formControlName="end" type="date" [max]="periodoLocal.endDate" [min]="periodoLocal.startDate" />
+    </mat-form-field>
+
+    <div class="btn-action-modal justify-content-end">
+
+      <button mat-button class="mat-raised-button mat-primary"
+              attr.aria-label="{{'Selezione un periodo personalizzato'}}" [disabled]="!form.valid" (click)="save()">
+        {{'button.prosegui' | translate}}
+      </button>
+    </div>
+  </ng-container>
+</mat-dialog-content>
+

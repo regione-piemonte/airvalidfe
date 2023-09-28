@@ -1,0 +1,143 @@
+<!--  
+ Copyright Regione Piemonte - 2023
+ SPDX-License-Identifier: EUPL-1.2-or-later
+ -->
+ <mat-dialog-content class="dialog--settings">
+  
+  <div mat-dialog-title class="dialog-title">
+    <h2 mat-dialog-title>{{'page.impostazioni.title' | translate}}</h2>
+    <button mat-icon-button aria-label="close dialog" mat-dialog-close class="btn-dialog--close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  {{validazioneLayout}}
+  <p>{{'page.impostazioni.paragraph' | translate}}</p>
+  <form [formGroup]="form">
+    <!-- scelta lingua -->
+    <section>
+      <h3 id="langOpt">{{'page.impostazioni.title_sec.lang' | translate}}</h3>
+      <mat-radio-group aria-labelledby="langOpt" formControlName="languageRadioControl">
+        <mat-radio-button value="gb">
+          <span class="fi fi-gb me-1"></span>
+          English
+        </mat-radio-button>
+        <mat-radio-button value="it">
+          <span class="fi fi-it me-1"></span>
+          Italiano
+        </mat-radio-button>
+      </mat-radio-group>
+    </section>
+
+    <!-- scelta tema -->
+    <section>
+      <h3 id="themeOpt">{{'page.impostazioni.title_sec.theme' | translate}}</h3>
+      <mat-radio-group aria-labelledby="themeOpt" formControlName="themeRadioControl">
+        <mat-radio-button value="light">{{'input.theme.light' | translate}}</mat-radio-button>
+        <mat-radio-button value="dark">{{'input.theme.dark' | translate}}</mat-radio-button>
+      </mat-radio-group>
+    </section>
+
+    <!-- scelta tema -->
+    <section>
+      <h3 id="layouOpt">{{'page.impostazioni.title_sec.layout' | translate}}</h3>
+      <mat-radio-group aria-labelledby="layoutOpt" formControlName="layoutRadioControl">
+        <mat-radio-button value="default">
+          {{'input.layout.option.0.name' | translate}}
+        </mat-radio-button>
+        <mat-radio-button value="col">
+          {{'input.layout.option.1.name' | translate}}
+        </mat-radio-button>
+        <mat-radio-button value="reverse">
+          {{'input.layout.option.2.name' | translate}}
+        </mat-radio-button>
+      </mat-radio-group>
+    </section>
+
+    <!-- scelta font -->
+    <section>
+      <h3 id="fontOpt">{{'page.impostazioni.title_sec.font' | translate}}</h3>
+      <mat-radio-group aria-labelledby="fontOpt" formControlName="fontRadioControl">
+        <mat-radio-button value="small">{{'input.font.option.0.name' | translate}}</mat-radio-button>
+        <mat-radio-button value="regular">{{'input.font.option.1.name' | translate}}</mat-radio-button>
+        <mat-radio-button value="big">{{'input.font.option.2.name' | translate}}</mat-radio-button>
+      </mat-radio-group>
+    </section>
+    <!-- tabella di riepilogo dei preset -->
+    <section>
+      <h3 id="tablePreset">
+        {{'page.impostazioni.title_sec.preset' | translate}}
+      </h3>
+      <table #table mat-table [dataSource]=" tablePreset" class="w-100 table--settings">
+        <!-- <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef>
+            {{ 'table.body.preset.0' | translate}}
+          </th>
+          <td mat-cell *matCellDef="let element">
+            {{element.id}}</td>
+        </ng-container> -->
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>
+            {{ 'table.body.preset.1' | translate}}
+          </th>
+          <td mat-cell *matCellDef="let element">
+            {{element}}
+          </td>
+        </ng-container>
+        <!-- <ng-container matColumnDef="rete">
+          <th mat-header-cell *matHeaderCellDef>
+            {{ 'table.body.preset.2' | translate}}
+          </th>
+          <td mat-cell *matCellDef="let element">
+            <span *ngFor="let rete of element.rete" class="cell-element--multi">
+              {{rete}}
+            </span>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="stazioni">
+          <th mat-header-cell *matHeaderCellDef>
+            {{ 'table.body.preset.3' | translate}}
+          </th>
+          <td mat-cell *matCellDef="let element">
+            <span *ngFor="let stazione of element.stazioni" class="cell-element--multi">
+              {{stazione}}
+            </span>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="parametri">
+          <th mat-header-cell *matHeaderCellDef>
+            {{ 'table.body.preset.4' | translate}}
+          </th>
+          <td mat-cell *matCellDef="let element">
+            <span *ngFor="let parametri of element.parametri" class="cell-element--multi">
+              {{parametri}}
+            </span>
+          </td>
+        </ng-container> -->
+        <ng-container matColumnDef="azioni">
+          <th mat-header-cell *matHeaderCellDef>
+            <span class="visually-hidden">{{ 'table.body.preset.5' | translate}}</span>
+          </th>
+          <td mat-cell *matCellDef="let element">
+            <button mat-icon-button matTooltip="{{'button.aria_label.delete' | translate }} {{element}}" class="text--error" (click)="deleteConfig(element)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; let i=index; columns: displayedColumns;">
+        </tr>
+
+      </table>
+    </section>
+
+    <div class="d-flex justify-content-between mt-5">
+      <button mat-button class="mat-raised-button" (click)="close()" attr.aria-label="{{'button.aria_label.annulla' | translate}}">
+        {{'button.annulla' | translate}}
+      </button>
+      <button mat-button class="mat-raised-button mat-primary" (click)="onSubmit()">
+        {{'button.save_settings' | translate}}
+      </button>
+    </div>
+  </form>
+</mat-dialog-content>

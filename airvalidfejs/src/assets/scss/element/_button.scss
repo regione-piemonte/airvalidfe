@@ -1,0 +1,275 @@
+#app-ariaweb {
+  .btn-home-link {
+    border: 2px solid $primary-color;
+    //@extend .py-3;
+    //@extend .w-100;
+  }
+
+  .btn-user {
+    &--menu {
+      width: 30px;
+      height: 30px;
+      min-width: 30px;
+      border-radius: 50%!important;
+      padding: 5px;
+      @include font-size(14px);
+      color: $primary-color;
+      background-color: $white;
+      @extend .d-flex;
+      @extend .align-items-center;
+      @extend .justify-content-center;
+
+      .mat-button-wrapper {
+        color: $primary!important;
+      }
+      &:hover,&:focus {
+        .mat-button-wrapper {
+          color: $white!important;
+        }
+      }
+    }
+  }
+  .btn-type-modal {
+    border: none;
+    gap: 32px;
+    .mat-button-toggle {
+      background-color: $white;
+      border: 1px solid $grey-500;
+      border-radius: 8px;
+      width: 150px;
+      &:not([disabled]) {
+        &:hover {
+          background-color: $blue-200;
+          color: $black;
+        }
+      }
+    }
+    .mat-button-toggle-checked {
+      background-color: transparent;
+      .mat-button-toggle-button {
+        background-color: $blue-500;
+        border-radius: 8px;
+        color: $white;
+        &:hover {
+          background-color: $blue-500;
+          color: $white;
+        }
+      }
+
+    }
+
+  }
+
+  .btn-type-graph {
+    background-color: #F5F5F5;
+    border: 1px solid #B1B1B1;
+    .mat-button-toggle-label-content {
+      color: $blue;
+      @extend .fw-bold;
+    }
+    .btn-period--secondary {
+      @extend .d-flex;
+      @extend .align-items-center;
+      border: none;
+      &:first-child {
+        border-right: 1px solid rgba(177, 177, 177, .5);
+      }
+      &:last-child {
+        border-left: 1px solid rgba(177, 177, 177, .5);
+      }
+      background-color: $white;
+
+      .mat-icon {
+        color: $primary;
+      }
+      &:hover {
+        background-color: $primary;
+        .mat-icon {
+          color: $white;
+        }
+      }
+      &[disabled] {
+        background-color: $grey-300;
+        .mat-icon {
+          color: $grey-500;
+        }
+        &:hover {
+          background-color: $grey-300;
+          .mat-icon {
+            color: $grey-500;
+          }
+        }
+      }
+    }
+    .mat-button-toggle-checked {
+      background-color: $blue;
+      .mat-button-toggle-label-content {
+        color: $white;
+      }
+      &:hover,&:focus {
+        background-color: $white;
+        .mat-button-toggle-label-content {
+          color: $blue;
+        }
+      }
+    }
+    &[aria-disabled="true"]{
+      .mat-button-toggle-checked, .mat-button-toggle-disabled {
+        background-color: $grey-300;
+        .mat-button-toggle-label-content {
+          color: $grey-500;
+        }
+        &:hover,&:focus {
+          background-color: $grey-300;
+          .mat-button-toggle-label-content {
+            color: $grey-500;
+          }
+        }
+      }
+    }
+  }
+
+  .mat-button  {
+    @extend .text-uppercase;
+    border-radius: 5px;
+    @extend .fw-bold;
+    box-shadow: none;
+    &.mat-primary {
+      color: $white;
+      &:not(.mat-button-disabled) {
+        background-color: $blue;
+        border: 2px solid $blue;
+
+        &:focus, &:hover {
+          background-color: $blue-900;
+        }
+      }
+
+    }
+    &.mat-primary-text {
+      color: $blue;
+    }
+    &.mat-button-base {
+      &:not(.mat-primary):not(.mat-primary-text) {
+        border: 2px solid $blue;
+        color: $blue;
+        &:hover,&:focus {
+          background-color: $blue-900;
+          color: $white;
+        }
+      }
+
+    }
+    
+  }
+
+  .mat-icon-button {
+    &.mat-danger {
+      color: $red;
+    }
+  }
+
+  .as-split-area {
+    .mat-button  {
+      height: 35px;
+      @extend .d-flex;
+      @extend .align-items-center;
+      @extend .justify-content-center;
+
+      i {
+        @extend .fw-bold;
+      }
+
+
+    }
+
+    .mat-info-tooltip {
+      i {
+        color: $orange;
+      }
+    }
+  }
+  .context-menu {
+    background-color: $blue-800;
+    button {
+      color: $white;
+      &:hover {
+        background-color: #4689F8;
+      }
+    }
+
+  }
+  .parameters {
+    &--cancel:hover i.material-icons {
+      color: $red;
+    }
+    &--valid:hover i.material-icons {
+      color: $green;
+    }
+  }
+  .mat-tooltip {
+    background: $grey-900;
+    @include font-size(14px);
+    white-space: pre-line;
+  }
+
+  .btn {
+    &--multiple {
+      justify-content: space-between;
+    }
+  }
+  .as-split-area {
+    .mat-button-toggle-appearance-standard .mat-button-toggle-label-content {
+      line-height: 30px;
+      padding: 0 6px;
+    }
+  }
+
+  // gestione tema scuro per i button presenti in pagina
+  .theme {
+    &--dark {
+      button {
+        &.mat-primary {
+          &:not(.mat-disabled) {
+            border-color: $white;
+            background-color: transparent;
+            color: $white;
+            &:focus, &:active, &:hover {
+              background-color: $blue-900;
+              color: $primary;
+            }
+          }
+        }
+      }
+
+      .btn-type-graph {
+        background-color: transparent;
+        .mat-button-toggle {
+          &:not(.mat-button-toggle-disabled) {
+            background-color: transparent;
+            .mat-button-toggle-label-content {
+              color: $yellow;
+            }
+            &.mat-button-toggle-checked {
+              background-color: $blue-900;
+              .mat-button-toggle-label-content {
+                color: $yellow;
+              }
+
+            }
+          }
+
+
+        }
+      }
+    }
+  }
+
+  mat-button-toggle button:disabled span {
+    color: #7a857e !important;
+    /* Altri stili personalizzati possono essere aggiunti qui */
+  }
+
+
+
+}

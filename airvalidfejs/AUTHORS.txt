@@ -1,0 +1,6 @@
+# This is the list of AIRSTATION authors for copyright purposes.
+Flavio Bianchi
+Massimo Lombardi
+Gaetano Sabino
+Daniel Scaletta
+Isabella Vespa

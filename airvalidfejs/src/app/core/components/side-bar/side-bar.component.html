@@ -1,0 +1,33 @@
+<!--  
+ Copyright Regione Piemonte - 2023
+ SPDX-License-Identifier: EUPL-1.2-or-later
+ -->
+<aside class="side-bar-content">
+  <mat-nav-list class="router-link" aria-label="Navigazione principale">
+    <mat-list-item [title]="(!openClose ? 'button.open_menu' : 'button.close_menu') | translate">
+      <button mat-button class="btn-flat--icon" [ngClass]="openClose ? 'menu--open' : 'menu--close'" (click)="openCloseMenu()">
+        <mat-icon aria-label="" *ngIf="!openClose">arrow_back</mat-icon>
+        <mat-icon aria-label="" *ngIf="openClose">arrow_forward</mat-icon>
+      </button>
+    </mat-list-item>
+    <mat-list-item *ngFor="let sideMenuItem of sideMenuItems" color="primary" [class.list-item-active]="routerLinkActiveInstance.isActive"
+    [attr.title]="sideMenuItem.name"
+    [attr.disabled]="sideMenuItem.disabled">
+      <a routerLinkActive
+      [routerLink]="!sideMenuItem.disabled ? sideMenuItem.path : ''" [attr.aria-label]="('button.aria_label.go_to_page.' + sideMenuItem.name.toLowerCase()) | translate"
+      #routerLinkActiveInstance="routerLinkActive"
+      >
+        <mat-icon aria-label="">{{sideMenuItem.icon}}</mat-icon>
+        <span *ngIf="openClose" class="titlePage">{{sideMenuItem.name}}</span>
+      </a>
+    </mat-list-item>
+  </mat-nav-list>
+  <mat-nav-list aria-label="opzioni di pagina">
+    <!-- <mat-list-item routerLink="#" title="modifica layout">
+      <mat-icon aria-label="">view_quilt</mat-icon>
+    </mat-list-item> -->
+    <mat-list-item (click)="ricaricaValidazione()" attr.title="{{'button.refresh_page' | translate}}">
+      <mat-icon aria-label="">cached</mat-icon>
+    </mat-list-item>
+  </mat-nav-list>
+</aside>

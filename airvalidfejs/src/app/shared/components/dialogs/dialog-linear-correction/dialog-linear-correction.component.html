@@ -1,0 +1,40 @@
+<!--  
+ Copyright Regione Piemonte - 2023
+ SPDX-License-Identifier: EUPL-1.2-or-later
+ -->
+ <mat-dialog-content>
+  <form [formGroup]="form">
+    <div mat-dialog-title class="dialog-title">
+      <h2 mat-dialog-title>{{'dialog_linear_correction.title' | translate}}</h2>
+      <button mat-icon-button aria-label="close dialog" mat-dialog-close class="btn-dialog--close">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <p>{{'dialog_linear_correction.subtitle' | translate}}</p>
+    <div class="text-center">
+      <mat-form-field appearance="fill">
+        <mat-label>Slope</mat-label>
+        <input matInput placeholder="Inserire il valore slope" formControlName="slope" id="slopeInput" />
+      </mat-form-field>
+    </div>
+      
+    <div class="text-center">
+      <mat-form-field appearance="fill">
+        <mat-label>Offset</mat-label>
+        <input matInput placeholder="Inserire il valore offset" formControlName="offset" id="offsetInput" />
+  
+      </mat-form-field>
+    </div>
+
+
+    <div class="btn-action-modal justify-content-end">
+
+      <button mat-button class="mat-raised-button mat-primary"
+        attr.aria-label="{{'Vai alla pagina di ' + form.value.lavoro}}" [disabled]="!form.valid" (click)="save()">
+        {{'button.prosegui' | translate}}
+      </button>
+    </div>
+  </form>
+
+</mat-dialog-content>

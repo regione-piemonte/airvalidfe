@@ -1,0 +1,248 @@
+<!--
+ Copyright Regione Piemonte - 2023
+ SPDX-License-Identifier: EUPL-1.2-or-later
+ -->
+ <div class="row justify-content-between align-items-end mb-1">
+  <div class="col-auto d-flex align-items-center">
+    <h2 class="d-inline-flex mb-0 me-3">{{'page.validazione.split_dettaglio.title' | translate}}</h2>
+
+    <mat-slide-toggle class="toggle--decimal" *ngIf="dataSourceMat?.data?.length" [(ngModel)]="decimalToggle" [matTooltip]="(decimalToggle) ? ('button.tooltip.toggle_decimal_original' | translate) : ('button.tooltip.toggle_decimal' | translate)">
+      <span>{{ 'input.toggle_original' | translate}}</span>
+    </mat-slide-toggle>
+
+    <button mat-icon-button color="primary" (click)="loadOriginalData()" matTooltip="{{'button.refresh' | translate}}">
+      <mat-icon>refresh</mat-icon>
+    </button>
+
+
+
+    <!--<button mat-icon-button color="primary"   matTooltip="ricarica la tabella">
+      <mat-icon>refresh</mat-icon>
+    </button>-->
+    <button [disabled]="!input?.parameter?.area?.extraInfo?.length && !!input?.parameter?.locked" mat-icon-button
+      color="primary" aria-label="Salva i dati modificati" (click)="saveData()"
+      matTooltip="{{'button.save' | translate}}">
+      <i class="material-icons mr-1">save</i>
+      <span class="visually-hidden">{{'button.save' | translate}}</span>
+    </button>
+  </div>
+
+  <div class="col-auto d-lg-flex"
+    *ngIf="input?.parameter?.area?.extraInfo?.includes('write')  && !input?.parameter?.locked">
+    <!--<button mat-button class="mat-primary-text parameters--cancel" matTooltip="Invalida tutto"
+      aria-label="Invalida tutti i parametri di validazione" (click)="invalidaTutto()">
+      <i class="material-icons mr-1">highlight_off</i>
+      <span class="visually-hidden">Invalida tutto</span>
+    </button>-->
+    <button mat-button [disabled]="disableValidaTutto" class="mat-primary-text parameters--valid"
+      matTooltip="Accetta tutto" aria-label="Convalida tutti i parametri di di validazione" (click)="validaTutto()">
+      <i class="material-icons mr-1">check_circle</i>
+      <span class="visually-hidden">{{'button.valid' | translate}}</span>
+    </button>
+    <button mat-button *ngIf="!!(dataService.taraturaObs$ | async)?.length" class="mat-primary-text parameters--valid"
+            matTooltip="Taratura" aria-label="Richiesta taratura per periodo da selezionare" (click)="taraturaParametri()">
+      <i class="material-icons mr-1">compass_calibration</i>
+      <span class="visually-hidden">{{'button.invalid' | translate}}</span>
+    </button>
+  </div>
+
+  <div class="col-auto d-lg-flex"
+    *ngIf="input?.parameter?.area?.extraInfo?.includes('advanced')  && !input?.parameter?.locked">
+    <button mat-button class="mat-primary-text parameters--cancel" matTooltip="{{'button.decertifica' | translate}}"
+      aria-label="Decertifica tutti i parametri di validazione" (click)="decertificaTutto()">
+      <i class="material-icons mr-1">thumb_down</i>
+      <span class="visually-hidden">{{'button.decertifica' | translate}}</span>
+    </button>
+    <button mat-button class="mat-primary-text parameters--valid" matTooltip="{{'button.certifica' | translate}}"
+      aria-label="Certifica tutti i parametri di di validazione" (click)="certificaTutto()">
+      <i class="material-icons mr-1">thumb_up</i>
+      <span class="visually-hidden">{{'button.certifica' | translate}}</span>
+    </button>
+  </div>
+
+
+</div>
+
+<div class="row justify-content-between align-items-end mb-1">
+  <div *ngIf="parametro && stazione" class="col-12">
+    <dl class="data-list--params">
+      <dt>
+        {{'page.validazione.split_dettaglio.parametro' | translate}}
+      </dt>
+      <dd>
+        {{parametro}}
+      </dd>
+      <dt>
+        {{'page.validazione.split_dettaglio.stazione' | translate}}
+      </dt>
+      <dd>
+        {{stazione}} [<span [innerHTML]="unitaMisura.extraInfo"></span>]
+      </dd>
+    </dl>
+  </div>
+</div>
+<div>
+
+  <div class="overflow-x--visible">
+    <mat-paginator #paginatorTop showFirstLastButtons [pageIndex]="page" [pageSize]="24"
+      (page)="pageEvent = handlePageTop($event)" aria-label="Select page">
+    </mat-paginator>
+
+
+    <table #table mat-table [dataSource]="dataSourceMat" [trackBy]="trackElement" class="summary-table">
+
+      <ng-container matColumnDef="select">
+        <th mat-header-cell *matHeaderCellDef>
+          <mat-checkbox *ngIf="!!input?.parameter?.area?.extraInfo?.length " (change)="$event ? toggleAllRows() : null"
+            [checked]="selection.hasValue() && isAllSelected()"
+            [indeterminate]="selection.hasValue() && !isAllSelected()" [aria-label]="checkboxLabel()">
+          </mat-checkbox>
+        </th>
+        <td mat-cell *matCellDef="let row">
+
+          <mat-checkbox
+            *ngIf="row.tipologia_validaz != 'FFF' && row.verification_flag != 1 && !!input?.parameter?.area?.extraInfo?.length"
+            (click)="$event.stopPropagation()" (change)="$event ? selection.toggle(row) : null"
+            [checked]="selection.isSelected(row)" [aria-label]="checkboxLabel(row)"
+            [disabled]="!input?.parameter?.area?.extraInfo?.length|| input?.parameter?.locked || isRelativeScale">
+          </mat-checkbox>
+        </td>
+      </ng-container>
+
+
+
+      <ng-container matColumnDef="giorno">
+        <th mat-header-cell *matHeaderCellDef>Giorno</th>
+        <!--<td mat-cell *matCellDef="let element">{{element.timestamp}}</td>-->
+        <td mat-cell *matCellDef="let element">{{element.timestamp| date: 'dd/MM/yyyy'}}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="ora">
+        <th mat-header-cell *matHeaderCellDef>Ora</th>
+        <td mat-cell *matCellDef="let element">{{element.timestamp| date: 'HH:mm' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="originale">
+        <th mat-header-cell *matHeaderCellDef>Misurato</th>
+        <td mat-cell *matCellDef="let element">
+            {{element.valore_originale }}
+        </td>
+      </ng-container>
+
+
+      <ng-container matColumnDef="validato">
+        <th mat-header-cell *matHeaderCellDef>Validato</th>
+
+        <td mat-cell *matCellDef="let element; let i=index">
+          <input matInput placeholder="" [value]="decimalToggle ? roundNumber(element.valore_validato, 0) : element.valore_validato"
+            [disabled]="decimalToggle || element.tipologia_validaz=='FFF' || element.tipologia_validaz=='MMM' || !input?.parameter?.parametro?.extraInfo?.includes('write')  || input?.parameter?.locked || element.verification_flag ==1 || isRelativeScale"
+            (input)="onKeyUpEvent($event,element,i) " [id]="'input' + '_' + i">
+        </td>
+
+      </ng-container>
+
+
+      <ng-container matColumnDef="codice">
+        <th mat-header-cell *matHeaderCellDef>Codice</th>
+        <td [matTooltip]="dataService.getCodeDescription(element.tipologia_validaz)" matTooltipPosition="left" mat-cell
+          *matCellDef="let element">{{element.tipologia_validaz}}</td>
+      </ng-container>
+
+
+      <ng-container matColumnDef="flag">
+        <th mat-header-cell *matHeaderCellDef>Auto</th>
+        <td mat-cell *matCellDef="let element">{{element.flag_validaz_autom}}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="validity_flag">
+        <th mat-header-cell *matHeaderCellDef>Validity</th>
+        <!--<td mat-cell *matCellDef="let element">{{element.validity_flag}}</td>-->
+
+        <td mat-cell *matCellDef="let element">
+          <!--<mat-label>Parametri</mat-label>-->
+          <mat-select
+            [disabled]="element.tipologia_validaz=='FFF'|| element.tipologia_validaz=='MMM' || !input?.parameter?.area?.extraInfo?.includes('write')  || input?.parameter?.locked || element.verification_flag==1 || isRelativeScale"
+            [(value)]="element.validity_flag" (selectionChange)="selectedValidity($event,element)">
+            <mat-option *ngFor="let element of listaValidityFlag" [value]="element">{{element}}</mat-option>
+          </mat-select>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="validity_flag_state">
+        <th mat-header-cell *matHeaderCellDef>State</th>
+        <td mat-cell *matCellDef="let element" [matTooltip]="validityStateTooltip(element.validity_flag)">
+          <div class="state-circle"
+            [ngClass]="element.tipologia_validaz=='FFF' ? 'state-color--grey' : element.verification_flag != 3 ? 'state-color--' + element.validity_flag : element.flag_validaz_autom == 0 ? 'state-valid--' + element.validity_flag : 'state-invalid--' + element.validity_flag">
+            <p class="visually-hidden">
+              {{validityStateTooltip(element.validity_flag)}}
+            </p>
+          </div>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="verification_flag">
+        <th mat-header-cell *matHeaderCellDef>Verification</th>
+        <td mat-cell *matCellDef="let element">{{element.verification_flag}} <span><i
+              class="material-icons mr-1">{{element.verification_flag==2 ? 'done' : element.verification_flag==1 ? 'done_all' : ''}}</i></span>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns, sticky: true"></tr>
+
+      <tr mat-row (contextmenu)="onContextMenu($event, row)" [class.demo-row-is-clicked]="clickedRows.has(row)"
+        *matRowDef="let row; let i=index; columns: displayedColumns;" [ngClass]="{'change-value' : row.changed == true}">
+      </tr>
+    </table>
+  </div>
+  <div>
+
+    <!--<mat-paginator   #paginator1 showFirstLastButtons [pageIndex]="page" [pageSize]="24"
+    (page)="onPaginate($event)" aria-label="Select page">
+  </mat-paginator>-->
+
+    <mat-paginator #paginatorBottom [pageSize]="24" (page)="pageEvent = handlePageBottom($event)" showFirstLastButtons>
+    </mat-paginator>
+
+
+  </div>
+</div>
+
+<div role="button" style="visibility: hidden; position: fixed" [style.left]="contextMenuPosition.x"
+  [style.top]="contextMenuPosition.y" [matMenuTriggerFor]="contextMenu">
+</div>
+
+<mat-menu #contextMenu="matMenu" class="context-menu">
+  <ng-template matMenuContent let-item="item">
+    <ng-container *ngIf="input?.parameter?.area?.extraInfo?.includes('write')  && !input?.parameter?.locked">
+      <button mat-menu-item (click)="onContextMenuAction(item,'correzione lineare')">
+        {{'page.validazione.split_dettaglio.menu_contx_dx.correzione_lineare' | translate}}
+      </button>
+    </ng-container>
+
+    <ng-container *ngIf="input?.parameter?.area?.extraInfo?.includes('write')  && !input?.parameter?.locked">
+      <button mat-menu-item (click)="onContextMenuAction(item,'valida')">
+        {{'page.validazione.split_dettaglio.menu_contx_dx.valida' | translate}}
+      </button>
+      <button mat-menu-item (click)="onContextMenuAction(item,'invalida')">
+        {{'page.validazione.split_dettaglio.menu_contx_dx.invalida' | translate}}
+      </button>
+
+    </ng-container>
+
+    <ng-container *ngIf="input?.parameter?.area?.extraInfo?.includes('advanced')  && !input?.parameter?.locked">
+      <button mat-menu-item (click)="onContextMenuAction(item,'certifica')">
+        {{'page.validazione.split_dettaglio.menu_contx_dx.certifica' | translate}}
+      </button>
+      <button mat-menu-item (click)="onContextMenuAction(item,'decertifica')">
+        {{'page.validazione.split_dettaglio.menu_contx_dx.decertifica' | translate}}
+      </button>
+    </ng-container>
+
+    <!--<button mat-menu-item (click)="onContextMenuAction(item,'')">Confronta nel tempo</button>
+        <button mat-menu-item (click)="onContextMenuAction(item,'')">Visualizza sul grafico 1</button>
+        <button mat-menu-item (click)="onContextMenuAction(item,'')">Visualizza sul grafico 2</button>
+        <button mat-menu-item (click)="onContextMenuAction(item,'showNotValidData')">{{item.visibleNotValid?'Nascondi dati non validi':'Mostra dati non validi'}}</button>
+        <button mat-menu-item (click)="onContextMenuAction(item,'color-picker')">Assegna colore</button>-->
+
+  </ng-template>
+</mat-menu>

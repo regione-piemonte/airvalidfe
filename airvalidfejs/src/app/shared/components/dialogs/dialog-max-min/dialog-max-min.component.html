@@ -1,0 +1,38 @@
+<!--  
+ Copyright Regione Piemonte - 2023
+ SPDX-License-Identifier: EUPL-1.2-or-later
+ -->
+ <mat-dialog-content [formGroup]="form">
+  <ng-container>
+    <div mat-dialog-title class="dialog-title">
+      <h2 mat-dialog-title>{{'dialog_manual_correction.title' | translate}}</h2>
+      <button mat-icon-button aria-label="close dialog" mat-dialog-close class="btn-dialog--close">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <p>{{ "dialog_manual_correction.subtitle" | translate}}</p>
+    <p><strong>{{ "input.required" | translate}}</strong></p>
+    <div class="text-center">
+      <mat-form-field appearance="fill">
+        <mat-label>{{"dialog_linear_correction.input_max" | translate}}</mat-label>
+        <input matInput placeholder="Max" formControlName="max" />
+      </mat-form-field>
+    </div>
+    <div class="text-center">
+      
+      <mat-form-field appearance="fill">
+        <mat-label>{{"dialog_linear_correction.input_min" | translate}}</mat-label>
+        <input matInput formControlName="min" />
+
+      </mat-form-field>
+  </div>
+    <div class="btn-action-modal justify-content-end">
+
+      <button mat-button class="mat-raised-button mat-primary"
+        attr.aria-label="{{'Vai alla pagina di ' + form.value.lavoro}}" [disabled]="!form.valid" (click)="save()">
+        {{'button.prosegui' | translate}}
+      </button>
+    </div>
+  </ng-container>
+</mat-dialog-content>

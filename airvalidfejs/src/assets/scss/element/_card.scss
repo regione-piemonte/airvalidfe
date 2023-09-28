@@ -1,0 +1,17 @@
+.card-body {
+  &--info {
+    @include cardType(blueColor);
+  }
+
+  &--danger {
+    @include cardType(redColor);
+  }
+
+  &--success {
+    @include cardType(greenColor);
+  }
+
+  &--warning {
+    @include cardType(orangeColor);
+  }
+}

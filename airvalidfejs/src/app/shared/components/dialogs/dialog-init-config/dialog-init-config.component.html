@@ -1,0 +1,125 @@
+<!--  
+ Copyright Regione Piemonte - 2023
+ SPDX-License-Identifier: EUPL-1.2-or-later
+ -->
+<mat-dialog-content [formGroup]="form">
+  <ng-container *ngIf="!showStep2">
+    
+    <div mat-dialog-title class="dialog-title">
+      <h2 mat-dialog-title>
+        {{'dialog_init_config.step_1.title' | translate}}
+      </h2>
+      <button mat-icon-button aria-label="close dialog" mat-dialog-close class="btn-dialog--close">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    
+
+      <p>
+        {{'dialog_init_config.step_1.paragraph' | translate}}
+      </p>
+      <nav>
+      <mat-button-toggle-group formControlName="lavoro"  aria-label="Seleziona la tipologia di lavoro" class="btn-type-modal mb-5">
+        <mat-button-toggle value="validazione">{{'main_menu.validazione' | translate}}</mat-button-toggle>
+        <mat-button-toggle disabled value="elaborazione">
+          {{'main_menu.elaborazione' | translate}}
+        </mat-button-toggle>
+        <mat-button-toggle disabled value="reportistica"
+          >{{'main_menu.reportistica' | translate}}</mat-button-toggle
+        >
+      </mat-button-toggle-group>
+      </nav>
+      <div class="btn-action-modal justify-content-end">
+      
+        <button
+          mat-button
+          aria-label="Prosegui allo step 2"
+          class="mat-raised-button mat-primary"
+          [disabled]="!form.get(['lavoro'])?.valid"
+          (click)="next()"
+        >
+        {{'button.prosegui' | translate}}
+        </button>
+      </div>
+  </ng-container>
+
+  <ng-container *ngIf="showStep2">
+    <div mat-dialog-title class="dialog-title">
+      <h2 mat-dialog-title>{{'dialog_init_config.step_2.title' | translate}}</h2>
+      <button mat-icon-button aria-label="close dialog" mat-dialog-close  class="btn-dialog--close">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+      <p>
+        {{'dialog_init_config.step_1.paragraph' | translate}}
+      </p>
+      <mat-button-toggle-group #group="matButtonToggleGroup" attr.aria-label="{{'button.group.scelta_periodo_parametri.label' | translate}}" (change)="setPeriod(group.value)" value="giornaliera"  class="btn-type-modal">
+        <mat-button-toggle value="giornaliera">
+          {{ 'button.group.scelta_periodo_parametri.toggle_group.0.name' | translate}}
+        </mat-button-toggle>
+        <mat-button-toggle value="mensile">
+          {{ 'button.group.scelta_periodo_parametri.toggle_group.1.name' | translate}}
+        </mat-button-toggle>
+        <mat-button-toggle value="annuale">
+          {{ 'button.group.scelta_periodo_parametri.toggle_group.2.name' | translate}}
+        </mat-button-toggle>
+      </mat-button-toggle-group>
+
+      <div class="d-flex justify-content-between my-5">
+        <mat-form-field appearance="fill">
+          <mat-label>
+            {{ 'dialog_init_config.step_1.from' | translate }}
+          </mat-label>
+          <input
+            matInput
+            [max]="maxDate" 
+            [matDatepicker]="pickerFrom"
+            formControlName="startDate"
+          />
+          <mat-hint>DD/MM/YYYY</mat-hint>
+          <mat-datepicker-toggle
+            matSuffix
+            [for]="pickerFrom"
+          ></mat-datepicker-toggle>
+          <mat-datepicker  #pickerFrom   [startView]="currentView"
+                           (yearSelected)="chosenDateHandler($event, pickerFrom, 'anno')"
+                           (monthSelected)="chosenDateHandler($event, pickerFrom, 'mese')">
+          </mat-datepicker>
+        </mat-form-field>
+
+       <mat-form-field appearance="fill" *ngIf="period=='giornaliera'">
+          
+          <mat-label>
+            {{ 'dialog_init_config.step_1.to' | translate }}
+          </mat-label>
+          <input
+            matInput
+            [max]="maxDate" 
+            [matDatepicker]="pickerTo"
+            formControlName="endDate"
+          />
+          <mat-hint>DD/MM/YYYY</mat-hint>
+          <mat-datepicker-toggle
+            matSuffix
+            [for]="pickerTo"
+          ></mat-datepicker-toggle>
+          <mat-datepicker #pickerTo></mat-datepicker>
+        </mat-form-field>
+      </div>
+
+
+
+      <div class="btn-action-modal justify-content-end">
+        
+        <button
+          mat-button
+          class="mat-raised-button mat-primary"
+          attr.aria-label="{{'Vai alla pagina di ' + form.value.lavoro}}"
+          [disabled]="!form.valid"
+          (click)="save()"
+        >
+        {{'button.prosegui' | translate}}
+        </button>
+      </div>
+  </ng-container>
+</mat-dialog-content>

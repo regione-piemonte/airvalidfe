@@ -1,0 +1,116 @@
+<!--  
+ Copyright Regione Piemonte - 2023
+ SPDX-License-Identifier: EUPL-1.2-or-later
+ -->
+<mat-toolbar class="main-navigation">
+  <mat-toolbar-row class="mat-toolbar-row--first">
+    <div class="d-flex align-items-center">
+      <!-- <button mat-icon-button aria-label="Menù di navigazione principale di Ariaweb">
+        <mat-icon>menu</mat-icon>
+      </button> -->
+      <span class="title me-2">Ariaweb - </span>
+      <app-page-title [titlePage]="titlePage"></app-page-title>
+    </div>
+    <div class="d-flex align-items-center">
+
+      <button mat-button 
+      [matMenuTriggerFor] = "userSettings"
+      [matTooltip]="('button.settings') | translate">
+      <mat-icon> settings</mat-icon>
+      </button>
+      <button mat-button 
+              [matMenuTriggerFor] = "userInfo"
+              class="btn-user--menu"
+              matTooltip="user menu">
+      
+        <ng-container *ngIf="(user$ | async) as user">
+          {{user.firstName |initialChar}}{{user.lastName |initialChar}}
+        </ng-container>
+      
+      </button>
+      <mat-menu #userSettings="matMenu" yPosition="below" class="menu-user">
+        <div class="menu-user">
+          <ul class="list-unstyled p-3 mb-0">
+            <li>
+              <mat-form-field appearance="fill">
+                <mat-label>{{'input.lang.label' | translate}}</mat-label>
+                <mat-select [(value)]="selectedLanguage" (valueChange)="changeLanguage()">
+                  <mat-option disabled>{{'input.lang.disabledLabel' | translate}}</mat-option>
+                  <mat-option *ngFor="let language of supportedLanguages" [value]="language.value" [ngClass]="'app-lang--' + language.value">
+                    <span class="fi me-1" [ngClass]="'fi-' + language.value"></span>
+                    {{ language.name }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </li>
+            <li>
+              <mat-form-field appearance="fill">
+                <mat-label>Dimensioni del font</mat-label>
+                <mat-select [(value)]="fontSizeSelect" id="fontSizeSelect" (valueChange)="changeSize()">
+                  <mat-option disabled>Dimensioni</mat-option>
+                  <mat-option *ngFor="let fontSize of fontSizes" [value]="fontSize.value">{{fontSize.name}}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </li>
+            <li>
+              <mat-form-field appearance="fill">
+                <mat-label>Scelta del tema</mat-label>
+                <mat-select [(value)]="themeSelect" id="themeSelect" (valueChange)="changeTheme()">
+                  <mat-option disabled>Dimensioni</mat-option>
+                  <mat-option *ngFor="let themeColor of themeColors" [value]="themeColor.value">{{themeColor.size}}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </li>
+            <li>
+              <button mat-button class="btn text-start" aria-label="vai alle impostazioni" (click)="openDialogSettings()">
+                <mat-icon>settings</mat-icon>
+                {{'main_menu.impostazioni' | translate}}
+              </button>
+            </li>
+          </ul>
+          
+            
+        </div>
+      </mat-menu>
+      <mat-menu #userInfo="matMenu" yPosition="below" class="menu-user">
+          <ul class="list-unstyled p-3 mb-0">
+            <!-- <li>
+              <a href="#" class="btn btn-text">Profilo</a>
+            </li>
+            <li>
+              <button class="btn btn-text">Modalità notte</button>
+            </li> -->
+            <li>
+              <dl class="user--info">
+                <dt class="visually-hidden">
+                  Nome e Cognome
+                </dt>
+                <dd>
+                  <ng-container *ngIf="(user$ | async) as user">
+                    {{user.firstName}} {{user.lastName}}
+                  </ng-container>
+                </dd>
+               <!--<dt class="visually-hidden">
+                  Codice fiscale
+                </dt>
+                <dd>
+                  VLNFNS80A01H501U 
+                </dd>-->
+                <dt class="visually-hidden">
+                  Ruolo
+                </dt>
+              </dl>
+            </li>
+            <li>
+              <button mat-button class="btn w-100 text-start" attr.aria-label="{{'button.aria_label.exit' | translate}}">
+                <mat-icon> logout</mat-icon>
+                {{"button.exit" | translate}}
+              </button>
+            </li>
+          </ul>
+      </mat-menu>
+
+      
+    </div>
+  </mat-toolbar-row>
+</mat-toolbar>

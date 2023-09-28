@@ -1,0 +1,118 @@
+<!--  
+ Copyright Regione Piemonte - 2023
+ SPDX-License-Identifier: EUPL-1.2-or-later
+ -->
+ <div class="split-layout-content--height">
+  
+  <as-split direction="horizontal" *ngIf="validazioneLayout$">
+    <as-split-area [size]="65">
+      <as-split direction="vertical">
+        <as-split-area>
+          <app-validazione-grafico
+          class="validazione-grafico"
+          [changeValueInput]='changeValueDataOutput$.asObservable()'
+          [dataset]="dataset$.asObservable()"
+          [visibilityNotValidDataSeries]="visibilityNotValidDataSeries$.asObservable()"
+          [visibilitySeries]="visibilitySeries$.asObservable()"
+          [deleteSeries]="deleteSeries$.asObservable()"
+          [changeColorSeries]="changeColorSeries$.asObservable()" >
+        </app-validazione-grafico>
+        </as-split-area>
+      </as-split>
+    </as-split-area>
+    <as-split-area [size]="35">
+      <as-split direction="vertical">
+        <as-split-area [size]="25">
+          <app-validazione-parametri
+          [dataInput]="parameters$.asObservable()"
+          (paramsOutput)="getParams($event)"
+          (rowSelected)="getRow($event)"
+          (visibilityNotValidDataSeries)="getVisibilityNotValid($event)"
+          (visibilitySeries)="getVisibility($event)"
+          (deleteSeries)="deleteSeries($event)"
+          (changeColorSeries)="changeColorSeries($event)">
+        </app-validazione-parametri>
+        </as-split-area>
+        <as-split-area [size]="75">
+          <app-validazione-dettaglio
+          [dataInput]="datasetDettaglio$.asObservable()"
+          (valueDataOutput)="changeValueDataOutput($event)">
+        </app-validazione-dettaglio>
+        </as-split-area>
+      </as-split>
+    </as-split-area>
+  </as-split>
+  <as-split direction="horizontal" *ngIf="validazioneLayout$">
+    <as-split-area [size]="33">
+          <app-validazione-grafico
+          class="validazione-grafico"
+          [changeValueInput]='changeValueDataOutput$.asObservable()'
+          [dataset]="dataset$.asObservable()"
+          [visibilityNotValidDataSeries]="visibilityNotValidDataSeries$.asObservable()"
+          [visibilitySeries]="visibilitySeries$.asObservable()"
+          [deleteSeries]="deleteSeries$.asObservable()"
+          [changeColorSeries]="changeColorSeries$.asObservable()" >
+        </app-validazione-grafico>
+    </as-split-area>
+
+    <as-split-area [size]="33">
+          <app-validazione-parametri
+          [dataInput]="parameters$.asObservable()"
+          (paramsOutput)="getParams($event)"
+          (rowSelected)="getRow($event)"
+          (visibilityNotValidDataSeries)="getVisibilityNotValid($event)"
+          (visibilitySeries)="getVisibility($event)"
+          (deleteSeries)="deleteSeries($event)"
+          (changeColorSeries)="changeColorSeries($event)">
+        </app-validazione-parametri>
+    </as-split-area>
+
+    <as-split-area [size]="33">
+        <app-validazione-dettaglio
+          [dataInput]="datasetDettaglio$.asObservable()"
+          (valueDataOutput)="changeValueDataOutput($event)">
+        </app-validazione-dettaglio>
+    </as-split-area>
+  </as-split>
+  <as-split direction="horizontal" *ngIf="validazioneLayout$">
+    <as-split-area [size]="35">
+      <as-split direction="vertical">
+        <as-split-area [size]="75">
+          <app-validazione-dettaglio
+          [dataInput]="datasetDettaglio$.asObservable()"
+          (valueDataOutput)="changeValueDataOutput($event)">
+        </app-validazione-dettaglio>
+        </as-split-area>
+        <as-split-area [size]="25">
+          <app-validazione-parametri
+          [dataInput]="parameters$.asObservable()"
+          (paramsOutput)="getParams($event)"
+          (rowSelected)="getRow($event)"
+          (visibilityNotValidDataSeries)="getVisibilityNotValid($event)"
+          (visibilitySeries)="getVisibility($event)"
+          (deleteSeries)="deleteSeries($event)"
+          (changeColorSeries)="changeColorSeries($event)">
+        </app-validazione-parametri>
+        </as-split-area>
+      </as-split>
+    </as-split-area>
+    <as-split-area [size]="65">
+      <as-split direction="vertical">
+        <as-split-area>
+          <app-validazione-grafico
+          class="validazione-grafico"
+          [changeValueInput]='changeValueDataOutput$.asObservable()'
+          [dataset]="dataset$.asObservable()"
+          [visibilityNotValidDataSeries]="visibilityNotValidDataSeries$.asObservable()"
+          [visibilitySeries]="visibilitySeries$.asObservable()"
+          [deleteSeries]="deleteSeries$.asObservable()"
+          [changeColorSeries]="changeColorSeries$.asObservable()" >
+        </app-validazione-grafico>
+        </as-split-area>
+      </as-split>
+    </as-split-area>
+  </as-split>
+</div>
+
+
+

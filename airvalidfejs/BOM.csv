@@ -1,0 +1,15 @@
+module name,licenses,repository
+@iplab/ngx-color-picker@13.0.2,MIT,https://www.npmjs.com/package/@iplab/ngx-color-picker
+@ngx-translate@14.0.0/core,MIT,https://github.com/ngx-translate/core
+@ngx-translate@7.0.0/http-loader,MIT,https://github.com/ngx-translate/http-loader
+angular-split@13.2.0,Apache License 2.0,https://github.com/angular-split/angular-split
+bootstrap@5.2.3,MIT,https://github.com/twbs/bootstrap
+date-fns@2.30.0,MIT,https://github.com/date-fns/date-fns
+echarts@5.4.2,Apache License 2.0,https://github.com/apache/echarts
+echarts-for-angular@0.4.0,Apache License 2.0,https://github.com/alixdehghani/echarts-for-angular
+flag-icons@6.7.0,MIT,https://github.com/lipis/flag-icons
+lodash@4.17.21,MIT,https://github.com/lodash/lodash
+moment@2.29.4,MIT,https://github.com/moment/moment
+moment-timezone@0.5.43,MIT,https://www.npmjs.com/package/moment-timezone
+ngx-spinner@13.1.0,MIT,https://www.npmjs.com/package/ngx-spinner
+rfs@9.0.6,MIT,https://github.com/twbs/rfs

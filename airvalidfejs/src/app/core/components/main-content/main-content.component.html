@@ -1,0 +1,17 @@
+<!--  
+ Copyright Regione Piemonte - 2023
+ SPDX-License-Identifier: EUPL-1.2-or-later
+ -->
+<!-- Inserire lo spinner qui-->
+<mat-sidenav-content>
+    <main class="container-fluid split-layout p-0">
+        <div class="app-main--row" [ngClass]="openClose ? 'main-menu--' + openClose : 'main-menu--' + openClose">
+            <div class="app-main--col">
+                <router-outlet></router-outlet>
+            </div>
+            <div class="app-main--col">
+                <app-side-bar (cssRefresh)="openCloseMenu($event)" #sidenav></app-side-bar>
+            </div>
+        </div>
+    </main>
+</mat-sidenav-content>

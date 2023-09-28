@@ -1,0 +1,30 @@
+@import 'ngx-spinner/animations/ball-clip-rotate.css';
+
+// font
+@import 'assets/fonts/titilium-web/v1/css/titilliumweb.css';
+
+//variabili custm
+@import 'assets/scss/base/variables';
+
+// librerie
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+@import 'bootstrap/scss/bootstrap';
+@import 'flag-icons/css/flag-icons.min.css';
+
+
+@import 'assets/scss/base/typography';
+@import 'assets/scss/base/mixins';
+
+@import 'assets/scss/element/button';
+@import 'assets/scss/element/card';
+@import 'assets/scss/element/expansion';
+@import 'assets/scss/element/form';
+@import 'assets/scss/element/modal';
+@import 'assets/scss/element/sidebar';
+@import 'assets/scss/element/table';
+
+@import 'assets/scss/layout/header';
+@import 'assets/scss/layout/font-resize';
+@import 'assets/scss/layout/footer';
+@import 'assets/scss/layout/layout';
+

@@ -1,0 +1,163 @@
+<!--  
+ Copyright Regione Piemonte - 2023
+ SPDX-License-Identifier: EUPL-1.2-or-later
+ -->
+ <div mat-dialog-title class="dialog-title">
+  <h2 mat-dialog-title>Seleziona i parametri</h2>
+  <button
+    class="mat-elevation-z0 btn-dialog--close"
+    mat-icon-button
+    aria-label="Chiudi la modale"
+    mat-dialog-close
+  >
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+<div>
+  <mat-slide-toggle [(ngModel)]="presetCheck" (change)="changePreset()"
+    >Utilizza i preset</mat-slide-toggle
+  >
+</div>
+
+<mat-dialog-content>
+  <div
+    *ngIf="!presetCheck; then selectionParams; else presetCheckTemplate"
+  ></div>
+  <ng-template #selectionParams>
+    <form [formGroup]="form">
+      <p>
+        Seleziona i parametri che vuoi validare o mettere a confronto <br />
+        Puoi partire a scelta nel selezionare un parametro e successivamente le
+        stazioni di riferimento
+      </p>
+      <div class="parameterSettings">
+        <mat-form-field
+          appearance="fill"
+          *ngIf="listaAreeTerritoriali$ | async as listaAreeTerritoriali"
+        >
+          <mat-label>Rete</mat-label>
+          <mat-select
+            formControlName="areeTerritoriali"
+            multiple
+            (closed)="closedSelect($event)"
+          >
+            <mat-option
+              *ngFor="let element of listaAreeTerritoriali"
+              [value]="element"
+              >{{ element.name }}</mat-option
+            >
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field
+          appearance="fill"
+          *ngIf="listStazioni$ | async as listaStazioni"
+        >
+          <mat-label>Stazioni</mat-label>
+          <mat-select formControlName="stazioni" multiple>
+            <mat-option
+              *ngFor="let element of listaStazioni"
+              [value]="element"
+              >{{ element.name }}</mat-option
+            >
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field
+          appearance="fill"
+          *ngIf="listParametri$ | async as listaParametri"
+        >
+          <mat-label>Parametri</mat-label>
+          <mat-select formControlName="parametri" multiple>
+            <mat-option
+              *ngFor="let element of listaParametri"
+              [value]="element"
+              >{{ element.name }}</mat-option
+            >
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </form>
+    <mat-accordion
+      *ngIf="
+        form.value.areeTerritoriali &&
+        form.value.stazioni &&
+        form.value.parametri
+      "
+    >
+      <mat-expansion-panel
+        (opened)="savePresetExpansion = true"
+        (closed)="savePresetExpansion = false"
+      >
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <h3 class="text-info">Salva la configurazione</h3>
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <p>Inserisci un nome per salvare la configurazione</p>
+        <form [formGroup]="formConfPreset">
+          <mat-form-field class="me-4" appearance="fill">
+            <mat-label>Inserisci il nome</mat-label>
+            <input matInput formControlName="nameConfPreset" value="" />
+          </mat-form-field>
+          <div class="d-flex justify-content-end">
+            <button
+              mat-button
+              class="mat-raised-button mat-primary"
+              (click)="saveConfig()"
+              [disabled]="!formConfPreset.valid"
+              aria-label="Salva questa configurazione con i parametri selezionati"
+            >
+              Salva
+            </button>
+          </div>
+        </form>
+        <div>
+          {{result}}
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </ng-template>
+
+  <ng-template #presetCheckTemplate>
+    <p>
+      Seleziona i parametri che vuoi validare o mettere a confronto. <br />
+      Puoi partire a scelta nel selezionare un parametro e successivamente le
+      stazioni di riferimento
+    </p>
+    <form [formGroup]="formPreset">
+      <mat-form-field appearance="fill" style="width: 100%">
+        <mat-label>Scegli tra i preset salvati</mat-label>
+        <mat-select formControlName="presetParams">
+          <mat-option *ngFor="let element of selectPreset" [value]="element">{{
+            element
+          }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </form>
+    <dl *ngIf="listSensori"></dl>
+  </ng-template>
+</mat-dialog-content>
+
+<mat-dialog-actions class="btn-action-modal px-lg-2 justify-content-between">
+  <button
+    mat-button
+    class="mat-raised-button"
+    (click)="close()"
+    aria-label="Chiudi la modale"
+  >
+
+    {{'button.annulla' | translate}}
+  </button>
+  <button
+    mat-button
+    class="mat-raised-button mat-primary"
+    (click)="save()"
+
+    [disabled]="!form.valid"
+    aria-label="Salva i parametri"
+  >
+
+    {{'button.prosegui' | translate}}
+  </button>
+</mat-dialog-actions>

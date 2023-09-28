@@ -1,0 +1,381 @@
+{
+  "button": {
+    "conferma": "Confirm",
+    "annulla": "Cancel",
+    "prosegui": "Next",
+    "settings": "Settings menu",
+    "chiudi": "Close",
+    "exit": "Logout",
+    "group": {
+      "scelta_servizio": [
+        {
+          "name": "Validation",
+          "value": "validazione"
+        },
+        {
+          "name": "Report",
+          "value": "reportistica"
+        },
+        {
+          "name": "Processing",
+          "value": "elaborazione"
+        }
+      ],
+      "scelta_scala": [
+        {
+          "name": "Absolute",
+          "value": "assoluta"
+        },
+        {
+          "name": "Relative",
+          "value": "relativa"
+        },
+        {
+          "name": "Manual",
+          "value": "manuale"
+        }
+      ],
+      "scelta_periodo": [
+        {
+          "name": "Previous",
+          "value": "prec",
+          "tooltip": "Go to previous day",
+          "icon": true
+        },
+        {
+          "name": "1 day",
+          "value": "1",
+          "tooltip": "Select 1 day"
+        },
+        {
+          "name": "3 days",
+          "value": "3",
+          "tooltip": "Select 3 days"
+        },
+        {
+          "name": "1 week",
+          "value": "7",
+          "tooltip": "Select one week"
+        },
+        {
+          "name": "1 month",
+          "value": "30",
+          "tooltip": "Select one month"
+        },
+        {
+          "name": "Full period",
+          "value": "full",
+          "tooltip": "Select full period"
+        },
+        {
+          "name": "Personalized",
+          "value": "personalized",
+          "tooltip": "Select a personalized period"
+        },
+        {
+          "name": "Next",
+          "value": "succ",
+          "tooltip": "Go to next day",
+          "icon": true
+        }
+      ],
+      "scelta_periodo_parametri": {
+        "label":"Select period",
+        "toggle_group": [
+          {
+            "name": "Daily",
+            "value": "giornaliera"
+          },
+          {
+            "name": "Monthly",
+            "value": "mensile" 
+          },
+          {
+            "name":"Annual",
+            "value":"annuale"
+          }
+        ]
+      },
+      "tooltip": {
+        "no_selection": "Select one parameter at least",
+        "prev_day":"Select previous day",
+        "next_day": "Select next day",
+        "custom_range": "Select a custom period",
+        "one_day": "Select 1 day",
+        "three_day": "Select 3 days",
+        "one_week": "Select one week",
+        "one_month": "Select one month",
+        "reset_range": "Reset full period"
+      }
+      
+    },
+    "refresh": "Refresh data table",
+    "refresh_page": "Refresh page",
+    "save": "Save data",
+    "valid": "Valid all data",
+    "open_menu": "open menu",
+    "close_menu": "close menu",
+    "certifica": "Certify all data",
+    "decertifica": "Decertify all data",
+    "add_params": "Add parameter",
+    "export":"Export data",
+    "save_settings": "Save settings",
+    "aria_label": {
+      "conferma" : "Confirm and continue",
+      "annulla": "Cancel and close modal",
+      "prosegui": "Continue to next step",
+      "chiudi": "Close modal",
+      "delete": "Delete element: ",
+      "exit": "Logout from application",
+      "add_params": "Add parameter to validation's chart",
+      "export_paramas": "Export parameters",
+      "show_station": "Show station ",
+      "hide_station": "Hide station ",
+      "user_lock":"User lock ",
+      "writing": "Scrittura",
+      "read_only": "Read only",
+      "go_to_page": {
+        "validation": "go to the page validation",
+        "report": "go to the page reports",
+        "processing": "go to the page processing"
+      }
+    },
+    "tooltip": {
+      "show_data": "Original data displayed",
+      "not_show_data": "Original data not displayed",
+      "valid_data": "Invalid data displayed",
+      "not_valid_data": "Invalid data not displayed",
+      "toggle_decimal": "Visualizza i dati in decimale",
+      "toggle_decimal_original": "Visualizza i dati originali"
+    }
+  },
+  "contex_menu": {
+    "parameters": {
+      "delete_list_par": "Delete from list/paragraph",
+      "show_original_data": "Show original data",
+      "hide_original_data": "Hide original data",
+      "compare_time": "Compare over time",
+      "show_graphic_1": "Show on graph 1",
+      "show_graphic_2": "Show on graph 2",
+      "show_not_valid_data": "Show not valid data",
+      "hide_not_valid_data": "Hide not valid data",
+      "change_color": "Change color",
+      "parameters_compare": "Compare parameters",
+      "request_calibration": "Calibration request"
+    }
+  },
+  "table": {
+    "body": {
+      "header": {
+        "parameter": "Parameter",
+        "station": "Station",
+        "action": "Actions"
+      },
+      "dettaglio": [
+        "Select all",
+        "Day",
+        "Hour",
+        "Misure",
+        "Validate",
+        "Code",
+        "Auto",
+        "Validity",
+        "State",
+        "Verification"
+      ],
+      "preset": [
+        "Id",
+        "Name",
+        "Network",
+        "Stations",
+        "Parameters",
+        "Actions"
+      ]
+    },
+    "pagination": {
+      "per_page": "Items per page",
+      "of": "of",
+      "next_page": "Next page",
+      "previous_page": "Previous page",
+      "first_page": "First page",
+      "last_page": "Last page"
+    }
+  },
+  "input": {
+    "required": "All fields with * are required",
+    "lang": {
+      "label": "Select language",
+      "disabledLabel" : "Languages",
+      "option": [{
+        "value": "it",
+        "name": "Italiano" 
+      },
+      {
+        "value": "gb",
+        "name": "English"
+      }
+      ]
+    },
+    "theme": {
+      "label":"Select theme",
+      "light": "Light theme",
+      "dark": "Dark theme"
+    },
+    "font": {
+      "label":"Select font",
+      "option": [
+        {
+          "value": "small",
+          "name": "Font small"
+        },
+        {
+          "value": "regular", 
+          "name": "Font medium"
+        },
+        {
+          "value": "big",
+          "name": "Font large"
+        }
+      ]
+    },
+    "layout": {
+      "label": "Select layout",
+      "option": [{
+          "value": "default",
+          "name": "Default layout"
+        },
+        {
+          "value": "col",
+          "name": "Column layout"
+        },
+        {
+          "value": "reverse",
+          "name": "Default reverse layout"
+        }
+      ]
+    },
+    "toggle_preset":"Use presets",
+    "label_toggle_preset": "Scegli tra i preset salvati",
+    "toggle_decimal": "Decimal",
+    "toggle_original": "Original",
+    "label_select_choice_render": "Data view",
+    "select_choice_render": [
+      {
+        "value": "notvalid",
+        "name": "Not valid"
+      },
+      { 
+        "value": "notvalidate",
+        "name": "Not validate"
+      },
+      {
+        "value": "notcertified",
+        "name": "Not certified"
+      },
+      {
+        "value": "missing",
+        "name": "Missing"
+      }
+    ]
+  },
+  "main_menu": {
+    "validazione": "Validation",
+    "reportistica": "Report",
+    "elaborazione": "Processing",
+    "impostazioni": "Settings"
+  },
+  "dialog_init_config": {
+    "step_1": {
+      "title": "Select parameters",
+      "paragraph": "Select the work's type that you want to perform",
+      "from": "From",
+      "to": "To"
+    },
+    "step_2": {
+      "title": "Select parameters",
+      "paragraph": "Select the work's type that you want to perform"
+    },
+    "step_3": {
+      "title": "Select parameters",
+      "paragraph": "Select the work's type that you want to perform",
+      "preset": {},
+      "no_preset": {}
+    }
+  },
+  "dialog_linear_correction": {
+    "title": "Manual scale",
+    "subtitle": "Enter the slope and offset values for the correction"
+  },
+  "dialog_min_max": {
+    "title": "Linear correction",
+    "subtitle": "Enter min and max scale's value"
+  },
+  "dialog_anno": {
+    "title": "Select year",
+    "subtitle": "Choose the year"
+  },
+  "dialog_export_csv": {
+    "title": "CSV Export",
+    "subtitle": "Select parameters"
+  },
+  "dialog_parameters": {
+    "title": "Select parameters",
+    "subtitle_1": "Select the parameters you want to validate or compare",
+    "subtitle_2":"You can start by selecting a parameter and then the reference stations."
+  },
+  "dialog_data_not_valid": {
+    "title": "Attention",
+    "body": "Not valid data. <br/>Enter decimal values using the . as a separator"
+  },
+  "page": {
+    "validazione": {
+      "split_grafico": {
+        "title_1": "CHART 1 - VALIDATION DATA",
+        "subtitle_1": "Reference period",
+        "title_2": "CHART 2",
+        "subtitle_2": "Full reference period",
+        "from": "from",
+        "to":"to",
+        "aria_label": {
+          "grafici": "Grafici per la validazione",
+          "scala":"Scegli la scala",
+          "periodo": "Seleziona il periodo",
+          "inizio_periodo": "Partenza del periodo di riferimento",
+          "fine_periodo": "Fine del periodo di riferimento"
+        }
+      },
+      "split_parametro": {
+        "title": "Parameters"
+      },
+      "split_dettaglio": {
+        "title": "Details",
+        "parametro": "Parmeter",
+        "stazione": "Station",
+        "menu_contx_dx": {
+          "correzione_lineare": "Change selected data",
+          "valida": "Validate selected row",
+          "invalida": "Invalidate selected row",
+          "certifica": "Certify selected row",
+          "decertifica": "Decertify selected row"
+        }
+      },
+      "modali": {
+        "correzione_lineare": {
+          "title": "Linear correction",
+          "subtitle": "Enter the offset and slope values"
+        }
+      }
+    },
+    "impostazioni": {
+      "title": "User settings",
+      "paragraph": "In this section you can change the settings for choosing the language, theme, layout, text size and parameter presets.",
+      "title_sec": {
+        "lang": "Select language",
+        "theme": "Select theme",
+        "layout": "Select layout",
+        "font": "Select font",
+        "preset": "Summary preset's table"
+      }
+    }
+  }
+}

@@ -1,0 +1,7 @@
+#app-ariaweb {
+  .footer-ariaweb {
+    @extend .d-flex;
+    height: 35px;
+    background-color: $blue-900;
+  }
+}

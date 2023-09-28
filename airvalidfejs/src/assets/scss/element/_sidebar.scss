@@ -1,0 +1,108 @@
+#app-ariaweb {
+  .side-bar-content {
+    @extend .pb-4;
+    @extend .d-flex;
+    flex-direction: column; 
+    @extend .justify-content-between;
+    @extend .h-100;
+    background-color: $blue;
+    .router-link {
+      @extend .pt-0;
+      .mat-list-item {
+        height: 80px;
+        background-color: $grey-300;
+        border: 3px solid $grey-900;
+        &:not(:last-child) {
+          border-bottom: none;
+        }
+        &:hover, &:focus {
+          background-color: $blue-400;
+          border-radius: 0px;
+          border: 3px solid $grey-500;
+          .mat-list-item-content {
+            color: $white;
+            .mat-icon {
+              color: $white;
+            }
+          }
+        }
+
+        &.list-item-active {
+          background-color: $blue-700;
+          .mat-list-item-content {
+            color: $white;
+            .mat-icon {
+              color: $white;
+            }
+          }
+        }
+        &[disabled="true"] {
+          background-color: $grey-200;
+          cursor: no-drop;
+          a {
+            cursor: no-drop;
+          }
+          &:hover {
+            .mat-list-item-content {
+              color: $grey-400;
+              .mat-icon {
+                color: $grey-400;
+              }
+            }
+          }
+          .mat-list-item-content {
+            color: $grey-500;
+            .mat-icon {
+              color: $grey-500;
+            }
+          }
+
+        }
+        
+        .mat-list-item-content {
+          flex-direction: column;
+          color: $grey-900;
+          justify-content: center;
+          @include font-size(12px);
+        }
+      }
+    }
+    .mat-list-item-content {
+      color: $white;
+      justify-content: center;
+      align-items: center;
+      @extend .p-0;
+    }
+
+  }
+  .main-menu{
+    &--true {
+      .side-bar-content {
+        .router-link {
+          .mat-list-item-content {
+            @extend .p-0;
+            a {
+              @extend .d-flex;
+              flex-direction: column;
+              align-items: center;
+              .titlePage {
+                @include media-breakpoint-down(special-breakpoint) {
+                  display: none;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .btn-flat {
+    &--icon {
+      padding: 0px;
+      min-width: 100%;
+      border: none!important;
+      min-height: 100%;
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "lang": "it",
+  "theme": "light",
+  "font": "regular",
+  "layout": {
+    "set": "default",
+    "default": {
+      "slide_a": 62,
+      "slide_b": 38,
+      "slide_c": 25,
+      "slide_d": 75
+    },
+    "reverse": {
+      "slide_a": 75,
+      "slide_b": 25,
+      "slide_c": 38,
+      "slide_d": 62
+    },
+    "col": {
+      "slide_a": 30,
+      "slide_b": 31,
+      "slide_c": 38
+    }
+  }
+}
+

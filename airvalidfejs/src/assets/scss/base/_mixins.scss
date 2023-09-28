@@ -1,0 +1,523 @@
+/* regola di accessibilità per i paragrafi */
+p {
+  max-width: 768px;
+}
+
+/* BOX SHADOW*/
+// @include box-shadow-my(0, 0, 10px, 0, rgba(155,162,166, 0.5, true));
+
+@mixin box-shadow-my($top, $left, $blur, $blur-dis, $color, $inset: false) {
+  @if $inset {
+    -webkit-box-shadow: inset $top $left $blur $blur-dis $color !important;
+    -moz-box-shadow: inset $top $left $blur $blur-dis $color !important;
+    box-shadow: inset $top $left $blur $blur-dis $color !important;
+  }
+
+  @else {
+    -webkit-box-shadow: $top $left $blur $blur-dis $color !important;
+    -moz-box-shadow: $top $left $blur $blur-dis $color !important;
+    box-shadow: $top $left $blur $blur-dis $color !important;
+  }
+}
+
+%box-shadow-focus {
+  // usage @extend %box-shadow-focus
+
+  @include box-shadow-my(0, 0, 0, 3px, $grey-400, true);
+
+}
+
+// regola per oscurare visibilmente elementi ma per renderli sempre leggibili
+// per screen reader
+// per incorporarlo nel file scss => @extend %sr-only
+
+@mixin sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+@mixin list($type) {
+  @if $type==inline {
+    ul {
+      padding: 0px;
+      display: flex;
+      flex-direction: column;
+
+      @media all and (min-width: $lms-breakpoint-lg) {
+        flex-direction: row;
+
+        li {
+          &:not(:last-child) {
+            margin-right: 15px;
+          }
+        }
+      }
+
+      li {
+        &::before {
+          display: none;
+        }
+      }
+    }
+  }
+}
+
+
+.text {
+  &--error {
+    color: $red;
+    font-weight: bold;
+  }
+
+  &--info {
+    color: $blue-700;
+    font-weight: bold;
+  }
+
+  &--success {
+    color: $green-600;
+    font-weight: bold;
+  }
+
+  &--warning {
+    color: $orange;
+    font-weight: bold;
+  }
+}
+
+
+@mixin colorState($type) {
+  font-weight: bolder;
+
+  @if $type==blueColor {
+    color: $blue-700;
+  }
+
+  @if $type==redColor {
+    color: $red;
+  }
+
+  @if $type==orangeColor {
+    color: $orange;
+  }
+
+  @if $type==greenColor {
+    color: $green-600;
+  }
+}
+
+@mixin cardType($type) {
+  border-left: 8px solid;
+
+  @if $type==blueColor {
+    border-color: $blue-700;
+  }
+
+  @if $type==redColor {
+    border-color: $red;
+  }
+
+  @if $type==orangeColor {
+    border-color: $orange;
+  }
+
+  @if $type==greenColor {
+    border-color: $green-600;
+  }
+}
+
+.content-align {
+  &--center {
+    align-items: center;
+  }
+}
+
+
+.wrap-text {
+  word-break: break-all;
+}
+
+a {
+  @extend .wrap-text;
+}
+
+
+@mixin title-page($type) {
+  @if $type==split-area {
+    @extend .text-uppercase;
+    @include font-size(14px);
+    @extend .fw-bold;
+  }
+}
+
+.select-event {
+  cursor: pointer;
+}
+
+%transition-menu {
+  transition: width 1s;
+}
+
+%triangle-state {
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 10px solid;
+}
+
+%square-state {
+  width: 10px;
+  height: 10px;
+}
+
+%circle-state {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+
+// mixin per il resize del font generale sul sito gestito dalla funzione
+// changeSize() presennte nel file header.component.html
+// viene richiamata nel file _font-resize.scss e vengono passati 3 valori in base alla dimensione prescelta
+
+@mixin font-resize($size) {
+  @if $size=='sm' {
+    font-size: 75%;
+  }
+
+  @if $size=='md' {
+    font-size: 100%;
+  }
+
+  @if $size=='lg' {
+    font-size: 125%;
+  }
+
+  // layout generale
+  //as-split-area {
+    as-split {
+      .as-split-area {
+        h2 {
+          line-height: 1;
+          @if $size=='sm' {
+            @include font-size(12px);
+          }
+
+          @if $size=='md' {
+            @include font-size(14px);
+          }
+
+          @if $size=='lg' {
+            @include font-size(16px);
+          }
+        }
+
+        h3 {
+          @if $size=='sm' {
+            @include font-size(10px);
+          }
+
+          @if $size=='md' {
+            @include font-size(12px);
+          }
+
+          @if $size=='lg' {
+            @include font-size(18px);
+          }
+        }
+        .title-reference-period {
+          margin: 0px;
+          @if $size=='sm' {
+            @include font-size(10px);
+          }
+
+          @if $size=='md' {
+            @include font-size(12px);
+          }
+
+          @if $size=='lg' {
+            @include font-size(18px);
+          }
+        }
+        dl {
+          dd,dt {
+            @if $size=='sm' {
+              @include font-size(10px);
+            }
+
+            @if $size=='md' {
+              @include font-size(12px);
+            }
+
+            @if $size=='lg' {
+              @include font-size(18px);
+            }
+          }
+        }
+
+        .mat-header-cell,
+        .mat-cell {
+          @if $size=='sm' {
+            @include font-size(10px);
+          }
+
+          @if $size=='md' {
+            @include font-size(12px);
+          }
+
+          @if $size=='lg' {
+            @include font-size(16px);
+          }
+
+          &.mat-column-validato {
+            input {
+              @extend .text-end;
+
+              @if $size=='sm' {
+                width: 40px;
+                height: 15px;
+              }
+
+              @if $size=='md' {
+                width: 50px;
+                height: 15px;
+              }
+
+              @if $size=='lg' {
+                width: 70px;
+                height: 30px;
+              }
+
+
+            }
+          }
+
+          .material-icons {
+            @if $size=='sm' {
+              @include font-size(14px);
+            }
+
+            @if $size=='md' {
+              @include font-size(18px);
+            }
+
+            @if $size=='lg' {
+              @include font-size(20px);
+            }
+          }
+
+        }
+
+        tr {
+          &.mat-row {
+            @if $size=='lg' {
+              height: 40px
+            }
+
+          }
+        }
+
+        // mat button con icona
+        .mat-button {
+
+          i {
+            @if $size=='sm' {
+              @include font-size(12px);
+            }
+
+            @if $size=='md' {
+              @include font-size(16px);
+            }
+
+            @if $size=='lg' {
+              @include font-size(18px);
+            }
+
+          }
+        }
+      }
+      .toggle {
+        &--decimal {
+          .mat-slide-toggle-content {
+            @if $size=='sm' {
+              @include font-size(8px);
+            }
+
+            @if $size=='md' {
+              @include font-size(12px);
+            }
+
+            @if $size=='lg' {
+              @include font-size(16px);
+            }
+          }
+        }
+      }
+    }
+  //}
+
+
+  // menu laterale dx aperto
+  .main-menu--true {
+    .side-bar-content {
+      .router-link {
+        .mat-list-item-content {
+          a {
+            .titlePage {
+              @if $size=='sm' {
+                @include font-size(8px);
+              }
+
+              @if $size=='md' {
+                @include font-size(12px);
+              }
+
+              @if $size=='lg' {
+                @include font-size(16px);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // button
+  .mat-button-wrapper {
+    @if $size=='sm' {
+      @include font-size(10px);
+    }
+
+    @if $size=='md' {
+      @include font-size(12px);
+    }
+
+    @if $size=='lg' {
+      @include font-size(16px);
+    }
+  }
+
+
+  // modal
+  .mat-dialog-container {
+    h2, h3 {
+      @if $size=='sm' {
+        @include font-size(14px);
+      }
+
+      @if $size=='md' {
+        @include font-size(18px);
+      }
+
+      @if $size=='lg' {
+        @include font-size(22px);
+      }
+    }
+    p {
+      @if $size=='sm' {
+        @include font-size(12px);
+      }
+
+      @if $size=='md' {
+        @include font-size(16px);
+      }
+
+      @if $size=='lg' {
+        @include font-size(20px);
+      }
+    }
+  }
+
+}
+
+@mixin box-alert($type) {
+  border-left: 8px solid;
+  @extend .px-5;
+  @extend .py-3;
+
+  @if $type==error {
+    border-left-color: $red;
+    background-color: $red-400;
+  }
+
+  @if $type==success {
+    border-left-color: $green;
+    background-color: $green-400;
+  }
+
+  @if $type==info {
+    border-left-color: $blue;
+    background-color: $yellow-300;
+  }
+
+  @if $type==warning {
+    border-left-color: $yellow;
+    background-color: $yellow-400;
+  }
+
+}
+
+@mixin text-color($type) {
+  @extend .fw-bold;
+  @if $type == error {
+    color: $red;
+  }
+  @if $type == info {
+    color: $primary-color;
+  }
+  @if $type == success {
+    color: $green-600;
+  }
+  @if $type == warning {
+    color: $yellow;
+  }
+}
+
+
+#app-ariaweb {
+  @each $type in $types {
+    .text-#{$type} {
+      @include text-color($type);
+    } 
+  }
+}
+
+
+// mixin per ottenere il box-shadow - inset=false(outset) per averlo all'esterno / inset=true per averlo all'interno
+@mixin box-shadow($offset-x, $offset-y, $blur-radius, $spread-radius, $color, $inset: false) {
+  @if $inset {
+    -webkit-box-shadow: inset $offset-x $offset-y $blur-radius $spread-radius $color !important;
+    -moz-box-shadow: inset $offset-x $offset-y $blur-radius $spread-radius $color !important;
+    box-shadow: inset $offset-x $offset-y $blur-radius $spread-radius $color !important;
+  }
+
+  @else {
+    -webkit-box-shadow: $offset-x $offset-y $blur-radius $spread-radius $color !important;
+    -moz-box-shadow: $offset-x $offset-y $blur-radius $spread-radius $color !important;
+    box-shadow: $offset-x $offset-y $blur-radius $spread-radius $color !important;
+  }
+}
+
+// mixin per ottenere l'outline
+@mixin outline($spread, $shape, $color, $offset: null) {
+  outline: $spread $shape $color;
+
+  @if $offset !=null {
+    outline-offset: $offset;
+  }
+
+}
+
+%focus-elements {
+  @include outline(2px, solid, transparent, 4px);
+  @include box-shadow(0px, 0px, 0px, 3px, $orange, $inset: false);
+}

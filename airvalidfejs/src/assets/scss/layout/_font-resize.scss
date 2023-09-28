@@ -1,0 +1,13 @@
+#app-ariaweb {
+  &.font-size {
+    &--small {
+      @include font-resize(sm);
+    }
+    &--regular {
+      @include font-resize(md);
+    }
+    &--big {
+      @include font-resize(lg);
+    }
+  }
+}

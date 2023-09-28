@@ -1,0 +1,55 @@
+#app-ariaweb {
+  .theme {
+    &--light {
+      .main-navigation {
+        &.mat-toolbar {
+          background-color: $primary-color;
+          color: $white;
+        }
+      }
+    }
+    &--dark {
+      .main-navigation {
+        &.mat-toolbar {
+          background-color: $blue-1000;
+          color: $yellow;
+        }
+      }
+    }
+  }
+  .main-navigation {
+    &.mat-toolbar-multiple-rows {
+      min-height: 40px;
+    }
+
+    .mat-toolbar-row{
+      &--first {
+        height: 40px;
+        @extend .justify-content-between;
+        .mat-button {
+          .mat-button-wrapper {
+            color: $white;
+          }
+        }
+      }
+      &--second {
+        background-color: $blue-400;
+        height: 35px;
+        .title {
+          @include font-size(16px);
+          @extend .fw-bold;
+        }
+      }
+    } 
+    
+
+  }
+  .menu-user {
+    .user {
+      &--info {
+        @extend .text-uppercase;
+      }
+    }   
+  }
+}
+

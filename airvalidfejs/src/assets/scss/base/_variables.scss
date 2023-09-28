@@ -1,0 +1,121 @@
+@use '@angular/material' as mat;
+
+@include mat.core();
+
+$white: #FFFFFF;
+$black: #000000;
+
+$blue: #006CB4; //barra blu alert info || primary color
+$blue-50: #e0f3fd;
+$blue-100: #b1e1fa;
+$blue-200: #E8F3FF;
+$blue-300: #DBEEF7; //sfondo blu alert info
+$blue-400: #178CD6;
+$blue-500: #3381D6;
+$blue-600:#008fdc;
+$blue-700: #005CA9;
+$blue-800:#024c92;
+$blue-900: #213366;
+$blue-1000: #100C2A;
+
+$yellow: #F8E60D; //barra gialla alert warning
+$yellow-400: #FDF9E5; //sfondo giallo alert warning
+
+$orange: #bf5a0c;
+$orange-400: #F17F04;
+
+$red: #AD0000; //barra rosso alert error
+$red-400: #f1dddd; //sfondo rosso alert error
+
+$green: #61B87A; //barra verde alert success
+$green-400: #DFF0D9; //sfondo verde alert success
+$green-500: #40D61A;
+$green-600: #007E2C;
+
+
+
+$grey: #D3D3D3;
+$grey-200: #F7F7F7;
+$grey-300: #f0f3f8;
+$grey-400: #EAEAEA;
+$grey-500: #939393;
+$grey-900: #707070;
+
+
+$primary-color: $blue;
+$secondary-color: $orange;
+
+$success: $green;
+$info: $blue;
+$warning: $yellow;
+$danger: $red;
+$light: $white;
+$dark: $black;
+
+$types: info, warning, error, success;
+
+$theme-colors: (
+  "primary":    $primary-color,
+  "secondary":  $secondary-color,
+  "success":    $success,
+  "info":       $info,
+  "warning":    $warning,
+  "danger":     $danger,
+  "light":      $light,
+  "dark":       $dark
+)!default;
+
+$grid-breakpoints: (
+  // Extra small screen / phone
+  xs: 0,
+  // Small screen / phone
+  sm: 576px,
+  // Medium screen / tablet
+  md: 768px,
+  // Large screen / desktop
+  lg: 992px,
+  // Extra large screen / wide desktop
+  xl: 1200px,
+  // misura straordinaria per gestire casi speciali di viewport
+  special-breakpoint: 1331px,
+  //HD screen
+  xxl: 1600px  
+)!default;
+
+
+$primary-palette: (
+ 50: $blue-50,
+ 100: $blue-100,
+ 200: $blue-200,
+ 300: $blue-300,
+ 400: $blue-400,
+ 500: $blue,
+ 600: $blue-600,
+ 700: $blue-700,
+ 800: $blue-800,
+ 900: $blue-900,
+ contrast: (
+   50: rgba($black, 0.87),
+   100: rgba($black, 0.87),
+   200: rgba($black, 0.87),
+   300: $white,
+   400: rgba($black, 0.87),
+   500: rgba($black, 0.87),
+   600: rgba($black, 0.87),
+   700: rgba($black, 0.87),
+   800: rgba($black, 0.87),
+   900: rgba($black, 0.87),
+ )
+);
+
+$airvalid-palette: mat.define-palette($primary-palette, 500);
+$airvalid-palette-accent: mat.define-palette(mat.$lime-palette, A200, A100, A400);
+
+$airvalid-theme: mat.define-light-theme((
+ color: (
+   primary: $airvalid-palette,
+   accent: $airvalid-palette-accent,
+ )
+));
+
+@include mat.all-component-themes($airvalid-theme);

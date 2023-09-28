@@ -1,0 +1,390 @@
+{
+  "button": {
+    "conferma": "conferma",
+    "annulla": "annulla",
+    "prosegui": "prosegui",
+    "chiudi": "chiudi",
+    "settings": "Menu impostazioni",
+    "exit":"esci",
+    "group": {
+      "scelta_servizio": [
+        {
+          "name": "Validazione",
+          "value": "validazione"
+        },
+        {
+          "name": "Reportistica",
+          "value": "reportistica"
+        },
+        {
+          "name": "Elaborazione",
+          "value": "elaborazione"
+        }
+      ],
+      "scelta_scala": [
+        {
+          "name": "Assoluta",
+          "value": "assoluta"
+        },
+        {
+          "name": "Relativa",
+          "value": "relativa"
+        },
+        {
+          "name": "Manuale",
+          "value": "manuale"
+        }
+      ],
+      "scelta_periodo": [
+        {
+          "name": "Precedente",
+          "value": "prec",
+          "tooltip": "Vai al giorno precedente",
+          "icon": true
+        },
+        {
+          "name": "1g",
+          "value": "1",
+          "tooltip": "Seleziona 1 giorno"
+        },
+        {
+          "name": "3gg",
+          "value": "3",
+          "tooltip": "Seleziona 3 giorni"
+        },
+        {
+          "name": "7gg",
+          "value": "7",
+          "tooltip": "Seleziona una settimana"
+        },
+        {
+          "name": "1m",
+          "value": "30",
+          "tooltip": "Seleziona un mese"
+        },
+        {
+          "name": "Intero periodo",
+          "value": "full",
+          "tooltip": "Seleziona l'intero periodo"
+        },
+        {
+          "name": "Personalizza",
+          "value": "personalized",
+          "tooltip": "Seleziona un periodo personalizzato"
+        },
+        {
+          "name": "Successivo",
+          "value": "succ",
+          "tooltip": "Vai al giorno successivo",
+          "icon": true
+        }
+      ],
+      "scelta_periodo_parametri": {
+        "label": "Seleziona il periodo",
+        "toggle_group": [
+          {
+            "name": "Giornaliera",
+            "value": "giornaliera"
+          },
+          {
+            "name": "Mensile",
+            "value": "mensile"
+          },
+          {
+            "name": "Annuale",
+            "value": "annuale"
+          }
+        ]
+      },
+      "tooltip": {
+        "no_selection": "Selezionare almeno un parametro",
+        "prev_day":"Selezionare la giornata precedente",
+        "next_day": "Selezionare la giornata successiva",
+        "custom_range": "Seleziona un periodo personalizzato",
+        "one_day": "Seleziona 1 giorno",
+        "three_day": "Seleziona 3 giorni",
+        "one_week": "Seleziona una settimana",
+        "one_month": "Seleziona un mese",
+        "reset_range": "Ripristina l'intero periodo"
+      }
+    },
+    "refresh": "ricarica la tabella",
+    "refresh_page": "ricarica la pagina",
+    "save": "salva i dati",
+    "open_menu": "espandi il menù",
+    "close_menu": "chiudi il menù",
+    "valid": "valida tutto",
+    "certifica": "certifica tutto",
+    "decertifica": "decertifica tutto",
+    "add_params": "aggiungi parametro",
+    "export": "esporta i dati",
+    "save_settings": "Salva le impostazioni",
+    "aria_label": {
+      "conferma": "Conferma e procedi",
+      "annulla": "Annulla e chiudi la modale",
+      "prosegui": "Prosegui al prossimo step",
+      "chiudi": "Chiudi la modale",
+      "exit": "Esci dall'applicativo",
+      "delete": "Rimuovi l'elemento: ",
+      "add_params": "Aggiungi parametro al grafico di validazione",
+      "export_paramas": "Esporta i parametri",
+      "show_station": "Mostra la stazione ",
+      "hide_station": "Nascondi la stazione ",
+      "user_lock": "Bloccato dall'utente ",
+      "writing": "Scrittura",
+      "read_only": "Sola lettura",
+      "go_to_page": {
+        "reportistica": "vai alla pagina di reportistica",
+        "validazione": "vai alla pagina di validazione",
+        "elaborazione": "vai alla pagina di elaborazione"
+      }
+    },
+    "tooltip": {
+      "show_data": "Dati originali visualizzati",
+      "not_show_data": "Dati originali non visualizzati",
+      "valid_data": "Dati non validi visualizzati",
+      "not_valid_data": "Dati non validi non visualizzati",
+      "toggle_decimal": "Visualizza i dati in decimale",
+      "toggle_decimal_original": "Visualizza i dati originali"
+    }
+  },
+  "contex_menu": {
+    "parameters": {
+      "delete_list_par": "Elimina da lista/paragrafo",
+      "show_original_data": "Mostra dati originali",
+      "hide_original_data": "Nascondi dati originali",
+      "compare_time": "Confronta nel tempo",
+      "show_graphic_1": "Visualizza sul grafico 1",
+      "show_graphic_2": "Visualizza sul grafico 2",
+      "show_not_valid_data": "Mostra dati non validi",
+      "hide_not_valid_data": "Nascondi dati non validi",
+      "change_color": "Assegna colore",
+      "parameters_compare": "Parametri di confronto",
+      "request_calibration": "Richiesta di taratura"
+    }
+  },
+  "table": {
+    "body": {
+      "header": {
+        "parameter": "Parametro",
+        "station": "Stazione",
+        "action": "Azioni"
+      },
+      "dettaglio": [
+        "Seleziona tutti",
+        "Giorno",
+        "Ora",
+        "Misurato",
+        "Validato",
+        "Codice",
+        "Auto",
+        "Validity",
+        "State",
+        "Verification"
+      ],
+      "preset": ["Id", "Nome", "Rete", "Stazioni", "Parametri", "Azioni"]
+    },
+    "pagination": {
+      "per_page": "elementi per pagina",
+      "of": "di",
+      "next_page": "Prossima pagina",
+      "previous_page": "Pagina precedente",
+      "first_page": "Prima pagina",
+      "last_page": "Ultima pagina"
+    }
+  },
+  "input": {
+    "required":"Tutti i campi con * sono obbligatori",
+    "lang": {
+      "label": "Scelta della lingua",
+      "disabledLabel": "Lingue",
+      "option": [
+        {
+          "value": "it",
+          "name": "Italiano"
+        },
+        {
+          "value": "en",
+          "name": "English"
+        }
+      ]
+    },
+    "theme": {
+      "label": "Scelta del tema",
+      "light": "Tema chiaro",
+      "dark": "Tema scuro"
+    },
+    "font": {
+      "label": "Seleziona il font",
+      "option": [
+        {
+          "value": "small",
+          "name": "Font piccolo"
+        },
+        {
+          "value": "regular",
+          "name": "Font medio"
+        },
+        {
+          "value": "big",
+          "name": "Font grande"
+        }
+      ]
+    },
+    "layout": {
+      "label": "Seleziona il layout",
+      "option": [
+        {
+          "value": "default",
+          "name": "Default layout"
+        },
+        {
+          "value": "col",
+          "name": "Layout a colonne"
+        },
+        {
+          "value": "reverse",
+          "name": "Layout default inverso"
+        }
+      ]
+    },
+    "toggle_preset":"Utilizza i preset",
+    "label_toggle_preset": "Scegli tra i preset salvati",
+    "toggle_decimal": "Decimale",
+    "toggle_original": "Arrotondamento",
+    "label_select_choice_render": "Visualizzazione dei dati",
+    "select_choice_render": [
+      {
+        "value": "notvalid",
+        "name": "Non validi"
+      },
+      {
+        "value": "notvalidate",
+        "name": "Non validati"
+      },
+      {
+        "value": "notcertified",
+        "name": "Non certificati"
+      },
+      {
+        "value": "missing",
+        "name": "Mancanti"
+      }
+    ]
+  },
+  "main_menu": {
+    "validazione": "Validazione",
+    "reportistica": "Reportistica",
+    "elaborazione": "Elaborazione",
+    "impostazioni": "Impostazioni"
+  },
+  "dialog_init_config": {
+    "step_1": {
+      "title": "Seleziona attività",
+      "paragraph": "Seleziona la tipologia di lavoro che vuoi eseguire",
+      "from": "Da",
+      "to": "A"
+    },
+    "step_2": {
+      "title": "Seleziona il periodo",
+      "paragraph": "Seleziona la tipologia di validazione o certificazione che vuoi effettuare"
+    },
+    "step_3": {
+      "title": "Seleziona i parametri",
+      "paragraph": "Seleziona la tipologia di lavoro che vuoi eseguire",
+      "preset": {},
+      "no_preset": {}
+    }
+  },
+  "dialog_linear_correction": {
+    "title": "Correzione lineare",
+    "subtitle": "Inserisci i valori di slope e offset per la correzione",
+    "input_min": "Min Fondo Scala",
+    "input_max": "Max Fondo Scala"
+  },
+  "dialog_manual_correction": {
+    "title": "Scala manuale",
+    "subtitle": "Inserisci i valori di fondo scala",
+    "input_min": "Min Fondo Scala",
+    "input_max": "Max Fondo Scala"
+  },
+  "dialog_date": {
+    "title": "Scelta data da personalizzare",
+    "subtitle": "Seleziona la data",
+    "text_info": "Periodo di riferimento",
+    "input_start": "Data inizio",
+    "input_end": "Data fine"
+  },
+  "dialog_min_max": {
+    "title": "Scala manuale",
+    "subtitle": "Inserisci i valori di max scala e min scala"
+  },
+  "dialog_anno": {
+    "title": "Scelta anno",
+    "subtitle": "Selezionare l'anno"
+  },
+  "dialog_export_csv": {
+    "title": "Esportazione in CSV",
+    "subtitle": "Seleziona i parametri"
+  },
+  "dialog_parameters": {
+    "title": "Seleziona i parametri",
+    "subtitle_1": "Seleziona i parametri che vuoi validare o mettere a confronto",
+    "subtitle_2": "Puoi partire a scelta nel selezionare un parametro e successivamente le stazioni di riferimento"
+  },
+  "dialog_data_not_valid": {
+    "title": "Attenzione",
+    "body": "Valore non valido. <br/>Inserire i valori decimali utilizzando il . come separatore"
+  },
+  "page": {
+    "validazione": {
+      "split_grafico": {
+        "title_1": "GRAFICO 1 - DATI PER LA VALIDAZIONE",
+        "subtitle_1": "Periodo di riferimento",
+        "title_2": "GRAFICO 2",
+        "subtitle_2": "Intero periodo di riferimento",
+        "from": "da",
+        "to": "a",
+        "aria_label": {
+          "grafici": "Grafici per la validazione",
+          "scala": "Scegli la scala",
+          "periodo": "Seleziona il periodo",
+          "inizio_periodo": "Partenza del periodo di riferimento",
+          "fine_periodo": "Fine del periodo di riferimento"
+        }
+      },
+      "split_parametro": {
+        "title": "Parametri"
+      },
+      "split_dettaglio": {
+        "title": "Dettaglio",
+        "parametro": "Parametro",
+        "stazione": "Stazione",
+        "menu_contx_dx": {
+          "correzione_lineare": "Modifica dati selezionati",
+          "valida": "Valida righe selezionate",
+          "invalida": "Invalida righe selezionate",
+          "certifica": "Certifica righe selezionate",
+          "decertifica": "Decertifica righe selezionate"
+        }
+      },
+      "modali": {
+        "correzione_lineare": {
+          "title": "Correzione lineare",
+          "subtitle": "Inserisci i valori di offset e slope"
+        }
+      }
+    },
+    "impostazioni": {
+      "title": "Impostazioni utente",
+      "paragraph": "In questa sezione potrai modificare le impostizioni per la scelta della lingua, del tema, del layout, della dimensione del testo e dei preset di parametri.",
+      "title_sec": {
+        "lang": "Seleziona la lingua",
+        "theme": "Seleziona il tema",
+        "layout": "Seleziona il layout",
+        "font": "Seleziona il font",
+        "preset": "Tabella di riepilogo dei preset"
+      }
+    }
+  }
+}
