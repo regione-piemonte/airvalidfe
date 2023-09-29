@@ -55,11 +55,11 @@ description:
        - esportazione delle misure
        - visualizzazione grafica delle misure
     screenshots:
-       - screenshoots/1_login.png
-       - screenshoots/2_schermata_principale.png
-       - screenshoots/3_opzioni_misure.png
-       - screenshoots/4_opzioni_parametro.png
-       - screenshoots/5_opzioni_grafico.png
+       - screenshots/1_login.png
+       - screenshots/2_schermata_principale.png
+       - screenshots/3_opzioni_misure.png
+       - screenshots/4_opzioni_parametro.png
+       - screenshots/5_opzioni_grafico.png
 legal:
   license: EUPL-1.2
   mainCopyrightOwner: Regione Piemonte
