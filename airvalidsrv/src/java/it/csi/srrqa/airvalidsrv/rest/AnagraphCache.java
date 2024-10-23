@@ -6,9 +6,11 @@ package it.csi.srrqa.airvalidsrv.rest;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -46,9 +48,14 @@ public class AnagraphCache {
 	private CacheItem<Map<String, String>> mapParameterNames;
 	private CacheItem<Map<String, Parameter>> mapParameters;
 	private CacheItem<List<NameWithKey>> parameterNames;
-	private CacheItem<List<NameWithKey>> measureUnitNames;
+	private CacheItem<List<NameWithKey>> stationTypeNames;
+	private CacheItem<List<NameWithKey>> zoneTypeNames;
+	private CacheItem<Map<String, NameWithKey>> mapMeasureUnitNames;
 	private CacheItem<List<ValidationCode>> validationCodes;
 	private CacheItem<Map<String, Network>> mapNetworks;
+	private CacheItem<Map<String, String>> mapStationClassificationNames;
+	private CacheItem<Map<String, String>> mapAreaClassificationNames;
+	private CacheItem<Map<String, NameWithKey>> mapCityNames;
 	private Map<String, CacheItem<List<Station>>> stationsByNetworkMap;
 	private Map<String, CacheItem<List<Sensor>>> sensorsByStationMap;
 	private Map<String, CacheItem<Set<String>>> srrqaNetworkStationsMap;
@@ -62,6 +69,18 @@ public class AnagraphCache {
 			@Override
 			protected List<NameWithKey> loadItem() {
 				return clientProvider.getAirDbServiceClient(_dbId).getParameterNames(null);
+			}
+		};
+		stationTypeNames = new CacheItem<List<NameWithKey>>(EXPIRY_TIME_LONG_MIN) {
+			@Override
+			protected List<NameWithKey> loadItem() {
+				return clientProvider.getAirDbServiceClient(_dbId).getStationTypeNames();
+			}
+		};
+		zoneTypeNames = new CacheItem<List<NameWithKey>>(EXPIRY_TIME_LONG_MIN) {
+			@Override
+			protected List<NameWithKey> loadItem() {
+				return clientProvider.getAirDbServiceClient(_dbId).getCarattZonaNames();
 			}
 		};
 		mapParameterNames = new CacheItem<Map<String, String>>(EXPIRY_TIME_SHORT_MIN) {
@@ -82,10 +101,13 @@ public class AnagraphCache {
 				return map;
 			}
 		};
-		measureUnitNames = new CacheItem<List<NameWithKey>>(EXPIRY_TIME_SHORT_MIN) {
+		mapMeasureUnitNames = new CacheItem<Map<String, NameWithKey>>(EXPIRY_TIME_SHORT_MIN) {
 			@Override
-			protected List<NameWithKey> loadItem() {
-				return clientProvider.getAirDbServiceClient(_dbId).getMeasureUnitNames(null);
+			protected Map<String, NameWithKey> loadItem() {
+				Map<String, NameWithKey> map = new LinkedHashMap<String, NameWithKey>();
+				for (NameWithKey nwk : clientProvider.getAirDbServiceClient(_dbId).getMeasureUnitNames(null))
+					map.put(nwk.getKey(), nwk);
+				return map;
 			}
 		};
 		validationCodes = new CacheItem<List<ValidationCode>>(EXPIRY_TIME_LONG_MIN) {
@@ -103,6 +125,33 @@ public class AnagraphCache {
 				return map;
 			}
 		};
+		mapStationClassificationNames = new CacheItem<Map<String, String>>(EXPIRY_TIME_LONG_MIN) {
+			@Override
+			protected Map<String, String> loadItem() {
+				Map<String, String> map = new HashMap<String, String>();
+				for (NameWithKey nwk : clientProvider.getAirDbServiceClient(_dbId).getStationClassificationNames())
+					map.put(nwk.getKey(), nwk.getName());
+				return map;
+			}
+		};
+		mapAreaClassificationNames = new CacheItem<Map<String, String>>(EXPIRY_TIME_LONG_MIN) {
+			@Override
+			protected Map<String, String> loadItem() {
+				Map<String, String> map = new HashMap<String, String>();
+				for (NameWithKey nwk : clientProvider.getAirDbServiceClient(_dbId).getAreaClassificationNames())
+					map.put(nwk.getKey(), nwk.getName());
+				return map;
+			}
+		};
+		mapCityNames = new CacheItem<Map<String, NameWithKey>>(EXPIRY_TIME_LONG_MIN) {
+			@Override
+			protected Map<String, NameWithKey> loadItem() {
+				Map<String, NameWithKey> map = new HashMap<String, NameWithKey>();
+				for (NameWithKey nwk : clientProvider.getAirDbServiceClient(_dbId).getCityNames())
+					map.put(nwk.getKey(), nwk);
+				return map;
+			}
+		};
 		stationsByNetworkMap = new HashMap<String, CacheItem<List<Station>>>();
 		sensorsByStationMap = new HashMap<String, CacheItem<List<Sensor>>>();
 		srrqaNetworkStationsMap = new HashMap<String, CacheItem<Set<String>>>();
@@ -113,7 +162,12 @@ public class AnagraphCache {
 		mapParameterNames.invalidate();
 		mapParameters.invalidate();
 		parameterNames.invalidate();
-		measureUnitNames.invalidate();
+		stationTypeNames.invalidate();
+		zoneTypeNames.invalidate();
+		mapMeasureUnitNames.invalidate();
+		mapStationClassificationNames.invalidate();
+		mapAreaClassificationNames.invalidate();
+		mapCityNames.invalidate();
 		validationCodes.invalidate();
 		mapNetworks.invalidate();
 		for (CacheItem<List<Station>> ci : stationsByNetworkMap.values())
@@ -134,6 +188,14 @@ public class AnagraphCache {
 		return parameterNames.getItem();
 	}
 
+	public List<NameWithKey> getStationTypeNames() {
+		return stationTypeNames.getItem();
+	}
+
+	public List<NameWithKey> getZoneTypeNames() {
+		return zoneTypeNames.getItem();
+	}
+
 	public List<NameWithKey> getParameterNames(String nameFilter) {
 		if (nameFilter == null || nameFilter.isEmpty())
 			return getParameterNames();
@@ -148,6 +210,10 @@ public class AnagraphCache {
 		return mapParameters.getItem().values();
 	}
 
+	public Parameter getParameter(String parameterId) {
+		return mapParameters.getItem().get(parameterId);
+	}
+
 	public String getMeasureUnitId(String parameterId) {
 		Parameter param = mapParameters.getItem().get(parameterId);
 		return param == null ? null : param.getId_unita_misura();
@@ -158,8 +224,36 @@ public class AnagraphCache {
 		return param == null ? null : DBConstants.YES_STR.equals(param.getFlag_virtuale());
 	}
 
-	public List<NameWithKey> getMeasureUnitNames() {
-		return measureUnitNames.getItem();
+	public Collection<NameWithKey> getMeasureUnitNames() {
+		return mapMeasureUnitNames.getItem().values();
+	}
+
+	public NameWithKey getMeasureUnit(String measureUnitId) {
+		return mapMeasureUnitNames.getItem().get(measureUnitId);
+	}
+
+	public Map<String, String> getStationClassificationNamesMap() {
+		return mapStationClassificationNames.getItem();
+	}
+
+	public String getStationClassificationName(String id_tp_stazione) {
+		return mapStationClassificationNames.getItem().get(id_tp_stazione);
+	}
+
+	public Map<String, String> getAreaClassificationNamesMap() {
+		return mapAreaClassificationNames.getItem();
+	}
+
+	public String getAreaClassificationName(String id_tp_zona) {
+		return mapAreaClassificationNames.getItem().get(id_tp_zona);
+	}
+
+	public Map<String, NameWithKey> getCityNamesMap() {
+		return mapCityNames.getItem();
+	}
+
+	public NameWithKey getCityName(String codice_istat_comune) {
+		return mapCityNames.getItem().get(codice_istat_comune);
 	}
 
 	public List<ValidationCode> getValidationCodes() {
@@ -188,6 +282,7 @@ public class AnagraphCache {
 							netBeginDate != null && netEndDate == null, authInfo, flags, netBeginDate, netEndDate));
 			}
 		}
+		Collections.sort(listNames);
 		return listNames;
 	}
 
@@ -260,12 +355,22 @@ public class AnagraphCache {
 					if (listRecords.get(0).getId_tipologia_staz() == 4) // Tipo Magazzino esclusi da validatore
 						continue;
 				}
-				listNames.add(new NameWithKeyAndPeriod(station.nameToString(), networkId + "." + station.key(),
+				listNames.add(new NameWithKeyAndPeriod(getStationName(station), networkId + "." + station.key(),
 						stationBeginDate != null && stationEndDate == null, authInfo, null, stationBeginDate,
 						stationEndDate));
 			}
 		}
+		Collections.sort(listNames);
 		return listNames;
+	}
+
+	private String getStationName(Station station) {
+		if (station.getRecords().size() > 0) {
+			String pubName = station.getRecords().get(0).getNome_pubblico();
+			if (pubName != null && !pubName.isEmpty())
+				return pubName;
+		}
+		return station.nameToString();
 	}
 
 	private List<Station> getStationsForNetwork(final String networkId) {
@@ -333,7 +438,8 @@ public class AnagraphCache {
 		List<SensorNameWithKeyAndPeriod> listNames = new ArrayList<SensorNameWithKeyAndPeriod>();
 		String networkId = Utils.extractNetId(stationId);
 		for (Sensor sensor : listSensors) {
-			boolean forceReadOnly = Boolean.TRUE.equals(isVirtual(sensor.getId_parametro()));
+			Boolean virtual = isVirtual(sensor.getId_parametro());
+			boolean forceReadOnly = Boolean.TRUE.equals(virtual);
 			String authInfo = getItemAuthInfo(Utils.makeSensorId(networkId, sensor), MatchType.SENSOR, userCache,
 					authCache, forceReadOnly);
 			if (authInfo != null) {
@@ -352,7 +458,7 @@ public class AnagraphCache {
 				listNames.add(new SensorNameWithKeyAndPeriod(getParameterName(paramId),
 						Utils.makeSensorId(networkId, sensor), sensorBeginDate != null && sensorEndDate == null,
 						authInfo, null, sensorBeginDate, sensorEndDate, getMeasureUnitId(paramId), regTime, numDec,
-						corrector.isSupported(paramId)));
+						virtual, corrector.isSupported(paramId)));
 			}
 		}
 		return listNames;
@@ -521,7 +627,8 @@ public class AnagraphCache {
 		Sensor sensor = getSensor(sensorId, null, null);
 		if (sensor == null)
 			return null;
-		boolean forceReadOnly = Boolean.TRUE.equals(isVirtual(sensor.getId_parametro()));
+		Boolean virtual = isVirtual(sensor.getId_parametro());
+		boolean forceReadOnly = Boolean.TRUE.equals(virtual);
 		authInfo = getItemAuthInfo(sensorId, MatchType.SENSOR, userCache, authCache, forceReadOnly);
 		if (authInfo == null)
 			return null;
@@ -539,12 +646,12 @@ public class AnagraphCache {
 		String paramId = sensor.getId_parametro();
 		info.setSensorName(new SensorNameWithKeyAndPeriod(getParameterName(paramId), sensorId,
 				sensorBeginDate != null && sensorEndDate == null, authInfo, null, sensorBeginDate, sensorEndDate,
-				getMeasureUnitId(paramId), regTime, numDec, corrector.isSupported(paramId)));
+				getMeasureUnitId(paramId), regTime, numDec, virtual, corrector.isSupported(paramId)));
 
 		return info;
 	}
 
-	private String getItemAuthInfo(String itemId, MatchType itemType, UserCache userCache, AuthCache authCache,
+	public String getItemAuthInfo(String itemId, MatchType itemType, UserCache userCache, AuthCache authCache,
 			boolean forceReadOnly) throws AuthException {
 		Map<Integer, FunctionFlags> mapDF = userCache.getSrrqaDomainFlagsMap();
 		for (Integer domain : mapDF.keySet()) {

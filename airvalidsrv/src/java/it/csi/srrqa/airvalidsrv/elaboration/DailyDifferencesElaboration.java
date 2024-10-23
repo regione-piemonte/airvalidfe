@@ -46,7 +46,7 @@ public class DailyDifferencesElaboration extends DailyElaboration {
 				resultValues[i - 1] = new DailyValue(dayMeans[i].getTimestamp(), round(diff, numDecimals),
 						round(error, numDecimalsForError));
 			} else
-				resultValues[i - 1] = dayMeans[i];
+				resultValues[i - 1] = new DailyValue(dayMeans[i].getTimestamp(), null, null);
 		}
 
 		return resultValues;

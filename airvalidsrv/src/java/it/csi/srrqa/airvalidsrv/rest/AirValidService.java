@@ -8,14 +8,18 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -24,6 +28,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
+
+import org.apache.log4j.Logger;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -36,8 +42,10 @@ import it.csi.srrqa.airdb.model.DataUtils;
 import it.csi.srrqa.airdb.model.Measure;
 import it.csi.srrqa.airdb.model.MeasureKey;
 import it.csi.srrqa.airdb.model.MeasureValue;
+import it.csi.srrqa.airdb.model.NameWithKey;
 import it.csi.srrqa.airdb.model.Preference;
 import it.csi.srrqa.airdb.model.Sensor;
+import it.csi.srrqa.airdb.model.SensorKey;
 import it.csi.srrqa.airvalidsrv.elaboration.AbsMaximumElaboration;
 import it.csi.srrqa.airvalidsrv.elaboration.AbsMinimumElaboration;
 import it.csi.srrqa.airvalidsrv.elaboration.DailyDifferencesElaboration;
@@ -75,6 +83,22 @@ import it.csi.srrqa.airvalidsrv.elaboration.WorkingHolidayReductionElaboration;
 import it.csi.srrqa.airvalidsrv.elaboration.WorkingSatMaxDailyReductionElaboration;
 import it.csi.srrqa.airvalidsrv.elaboration.WorkingSatReductionElaboration;
 import it.csi.srrqa.airvalidsrv.elaboration.WorkingTimelyMeanElaboration;
+import it.csi.srrqa.airvalidsrv.rest.SensorId.MatchType;
+import it.csi.srrqa.airvalidsrv.solr.ParametersStatsFields;
+import it.csi.srrqa.airvalidsrv.solr.ResponseHolder;
+import it.csi.srrqa.airvalidsrv.solr.Solr;
+import it.csi.srrqa.airvalidsrv.solr.SolrAnagraphItem;
+import it.csi.srrqa.airvalidsrv.solr.SolrSensorEvent;
+import it.csi.srrqa.airvalidsrv.solr.StationsStatsFields;
+import it.csi.srrqa.airvalidsrv.solr.Stats;
+import it.csi.srrqa.airvalidsrv.specreport.ReportAnagraph;
+import it.csi.srrqa.airvalidsrv.specreport.ReportAnagraph.ItemType;
+import it.csi.srrqa.airvalidsrv.specreport.ReportFactory;
+import it.csi.srrqa.airvalidsrv.specreport.SpecReport;
+import it.csi.srrqa.reportisticalib.report.RangeValues;
+import it.csi.srrqa.reportisticalib.report.ReportUtils;
+import it.csi.srrqa.reportisticalib.report.ThresholdObject;
+import it.csi.srrqa.reportisticalib.table.ReportResult;
 
 @Path("/")
 public class AirValidService extends RestService {
@@ -82,33 +106,45 @@ public class AirValidService extends RestService {
 	private static final String BASIC_AUTH_HEADER = "Authorization";
 	private static final String SHIB_AUTH_ID = "Shib-Identita-CodiceFiscale";
 	private static final String PERIOD_MINUTES = "Period [minutes]";
-	private static final String PERIOD_M_EQ = "period_m=";
-	private static final String YEAR = "anno";
+	private static final String PERIOD_M_EQ = ", period_m=";
+	private static final String BEGIN_YEAR = "Begin year";
+	private static final String YEAR = "Year";
+	private static final String YEAR_EQ = ", year=";
+	private static final String DATE = "Date";
+	private static final String END_YEAR = "End year";
 	private static final String END_DATE = "End date";
 	private static final String BEGIN_DATE = "Begin date";
 	private static final String BEGINDATE_EQ = ", beginDate=";
 	private static final String ENDDATE_EQ = ", endDate=";
 	private static final String VERIFICATION_LEVEL = "Verification level";
-	private static final String VERIFICATIONLEVEL_EQ = "verificationLevel=";
-	private static final String DECIMAL_DIGITS = "Cifre decimali";
-	private static final String DECIMAL_DIGITS_EQ = "decimalDigits=";
+	private static final String VERIFICATIONLEVEL_EQ = ", verificationLevel=";
+	private static final String VALIDATED_DATA_ONLY_EQ = ", validatedDataOnly=";
+	private static final String DECIMAL_DIGITS = "Decimal digits";
+	private static final String DECIMAL_DIGITS_EQ = ", decimalDigits=";
+	private static final String SENSOR_IDS_EQ = ", sensorIds=";
+	private static final String LANGUAGE_EQ = ", language=";
+	private static final String ITEM_TYPE_EQ = ", itemType=";
+	private static final String ITEM_IDS_EQ = ", itemIds=";
 	private static final String GET_PREFERENCES = "GET /preferences/";
 	private static final String DELETE_PREFERENCES = "DELETE /preferences/";
 	private static final String FN_VALIDAZIONE = UserCache.FUNCTION_VALIDAZIONE;
+	private static final String FN_APP_ADMIN = UserCache.FUNCTION_APP_ADMIN;
 	private static final Integer APPLICATION_ID = 3;
 	private static final String DATASET_CFG_GROUP = "dataset_config";
+	private static Logger lg = Logger
+			.getLogger(AirValidApp.LOGGER_BASENAME + "." + AirValidService.class.getSimpleName());
 	private MeasureCorrector corrector;
 	private DataCache dataCache;
 
 	public AirValidService(ServiceConfig airDbServiceCfg, ServiceConfig copDbServiceCfg, ServiceConfig authServiceCfg,
-			boolean enableShibbolet, int measureLockTimeout_m, boolean disableTrustManager, MeasureCorrector corrector,
-			DataCache dataCache) {
-		super(airDbServiceCfg, copDbServiceCfg, authServiceCfg, enableShibbolet, measureLockTimeout_m,
-				disableTrustManager);
+			ServiceConfig solrServiceCfg, boolean enableShibbolet, int measureLockTimeout_m,
+			boolean disableTrustManager, MeasureCorrector corrector, List<ThresholdObject> listThresholds,
+			List<RangeValues> listRangeValues, DataCache dataCache) {
+		super(airDbServiceCfg, copDbServiceCfg, authServiceCfg, solrServiceCfg, enableShibbolet, measureLockTimeout_m,
+				disableTrustManager, listThresholds, listRangeValues);
 		this.corrector = corrector;
 		dataCache.setClientProvider(this);
 		this.dataCache = dataCache;
-
 	}
 
 	// Le funzioni che restituiscono elenchi di nomi di oggetti dell'anagrafica,
@@ -142,6 +178,44 @@ public class AirValidService extends RestService {
 			public Object execute() throws AuthException {
 				checkAuthorization(basic, auth, FN_VALIDAZIONE, false, false);
 				return getAnagraphCache(dbId).getParameterNames();
+			}
+		});
+	}
+
+	// Restituisce l'elenco delle possibili tipologie di stazione
+	// {dbId}: identificatore del data base reg=regionale Nota: cop non supportato
+	// Esempio:
+	// https://<server_name>/ariaweb/airvalidsrv/stationtypenames/reg
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/stationtypenames/{dbId}")
+	public void getStationTypeNames(final @Suspended AsyncResponse asyncResponse,
+			@HeaderParam(BASIC_AUTH_HEADER) final String basic, @HeaderParam(SHIB_AUTH_ID) final String auth,
+			@PathParam("dbId") final String dbId) {
+		runTask(new ServiceTask("GET /stationtypenames/" + dbId, asyncResponse) {
+			@Override
+			public Object execute() throws AuthException {
+				checkAuthorization(basic, auth, FN_VALIDAZIONE, false, false);
+				return getAnagraphCache(dbId).getStationTypeNames();
+			}
+		});
+	}
+
+	// Restituisce l'elenco delle possibili tipologie di zona in cui si trovano le stazioni
+	// {dbId}: identificatore del data base reg=regionale cop=Arpa per validazione
+	// Esempio:
+	// https://<server_name>/ariaweb/airvalidsrv/zonetypenames/reg
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/zonetypenames/{dbId}")
+	public void getZoneTypeNames(final @Suspended AsyncResponse asyncResponse,
+			@HeaderParam(BASIC_AUTH_HEADER) final String basic, @HeaderParam(SHIB_AUTH_ID) final String auth,
+			@PathParam("dbId") final String dbId) {
+		runTask(new ServiceTask("GET /stationtypenames/" + dbId, asyncResponse) {
+			@Override
+			public Object execute() throws AuthException {
+				checkAuthorization(basic, auth, FN_VALIDAZIONE, false, false);
+				return getAnagraphCache(dbId).getZoneTypeNames();
 			}
 		});
 	}
@@ -276,6 +350,7 @@ public class AirValidService extends RestService {
 	// dei nomi delle stazioni)
 	// "beginDate": data di inizio del periodo di ricerca delle informazioni
 	// "endDate": data di fine del periodo di ricerca delle informazioni
+	// "ipaFilter": se vale true restituisce solo i parametri per i controlli IPA
 	// L'elenco dei nomi è completato dalle seguenti informazioni specifiche:
 	// "measureUnitId": identificatore dell'unità di misura
 	// "measurementPeriod": periodo di aggregazione del dato (tipicmante 60 minuti o
@@ -291,15 +366,25 @@ public class AirValidService extends RestService {
 	public void getSensorNamesForStation(final @Suspended AsyncResponse asyncResponse,
 			@HeaderParam(BASIC_AUTH_HEADER) final String basic, @HeaderParam(SHIB_AUTH_ID) final String auth,
 			@PathParam("dbId") final String dbId, @PathParam("stationId") final String stationId,
-			@QueryParam("beginDate") final String beginDate, @QueryParam("endDate") final String endDate) {
+			@QueryParam("beginDate") final String beginDate, @QueryParam("endDate") final String endDate,
+			@QueryParam("ipaFilter") final String ipaFilter) {
 		runTask(new ServiceTask("GET /stations/" + dbId + "/" + stationId + "/sensornames" + BEGINDATE_EQ + beginDate
 				+ ENDDATE_EQ + endDate, asyncResponse) {
 			@Override
 			public Object execute() throws AuthException {
 				checkAuthorization(basic, auth, FN_VALIDAZIONE, false, false);
 				checkStationAllowed(basic, auth, stationId, false, false);
-				return getAnagraphCache(dbId).getSensorNamesForStation(stationId, param2DateObj(beginDate, BEGIN_DATE),
-						param2DateObj(endDate, END_DATE), getUserCache(basic, auth), getAuthCache());
+				List<SensorNameWithKeyAndPeriod> listSensors = getAnagraphCache(dbId).getSensorNamesForStation(
+						stationId, param2DateObj(beginDate, BEGIN_DATE), param2DateObj(endDate, END_DATE),
+						getUserCache(basic, auth), getAuthCache());
+				if (!"true".equalsIgnoreCase(ipaFilter))
+					return listSensors;
+				List<SensorNameWithKeyAndPeriod> filteredList = new ArrayList<>();
+				for (SensorNameWithKeyAndPeriod item : listSensors) {
+					if (Utils.isDailyDustSensor(item))
+						filteredList.add(item);
+				}
+				return filteredList;
 			}
 		});
 	}
@@ -408,60 +493,72 @@ public class AirValidService extends RestService {
 	// specificato. Solo se l'utente è il proprietario dell'oggetto di lock sarà
 	// possibile effettuare l'operazione di scrittura dati da parte dell'utente
 	// stesso. La presenza o meno di un oggetto di lock per i dati di un sensore non
-	// ha implicazioni sulla possibilitàdi leggere tali dati.
+	// ha implicazioni sulla possibilità di leggere tali dati.
 	// L'oggetto di lock restituito dalle varie funzioni ha i seguenti campi:
 	// - sensorId: identifica in modo univoco il sensore a cui si riferisce il lock
-	// - year: identifica l'anno a cui si riferisce il lock
+	// - beginYear: identifica l'anno di inizio a cui si riferisce il lock
+	// - endYear: identifica l'anno di fine a cui si riferisce il lock (può
+	// coincidere con quello di inizio)
 	// - userId: identifica l'utente che possiede il lock, vale null se non c'è il
 	// lock
+	// - contextId: identifica il contesto applicativo che possiede il lock, vale
+	// null se non c'è il lock
 	// - date: la data in cui è stato fatto il lock, espressa in millisicondi
 	// - locked: vale 'true' se la risorsa è in stato locked, 'false' altrimenti
-	// - myLock: vale 'true' se il lock appartiene all'utente che ha fatto la
-	// richiesta, 'false' altrimenti
+	// - myLock: vale 'true' se il lock appartiene all'utente e al contesto
+	// applicativo che ha fatto la richiesta, 'false' altrimenti
 
 	// Restituisce lo stato del lock per un dato sensore
 	// {dbId}: identificatore del data base reg=regionale cop=Arpa per validazione
+	// {contextId}: identificatore contesto applicativo
 	// {sensorId}: identificatore dell'oggetto sensore
 	// {year}: anno
 	// Esempio:
-	// https://<server_name>/ariaweb/airvalidsrv/datalock/cop/13.001272.803.21/2022
+	// https://<server_name>/ariaweb/airvalidsrv/datalock/cop/xyz123/13.001272.803.21/2022
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	@Path("/datalock/{dbId}/{sensorId}/{year}")
+	@Path("/datalock/{dbId}/{contextId}/{sensorId}/{year}")
 	public void getDataLock(final @Suspended AsyncResponse asyncResponse,
 			@HeaderParam(BASIC_AUTH_HEADER) final String basic, @HeaderParam(SHIB_AUTH_ID) final String auth,
-			@PathParam("dbId") final String dbId, @PathParam("sensorId") final String sensorId,
-			@PathParam("year") final String year) {
-		runTask(new ServiceTask("GET /datalock/" + dbId + "/" + sensorId + "/" + year, asyncResponse) {
+			@PathParam("dbId") final String dbId, @PathParam("contextId") final String contextId,
+			@PathParam("sensorId") final String sensorId, @PathParam("year") final String year) {
+		runTask(new ServiceTask("GET /datalock/" + dbId + "/" + contextId + "/" + sensorId + "/" + year,
+				asyncResponse) {
 			@Override
 			public Object execute() throws AuthException {
 				checkAuthorization(basic, auth, FN_VALIDAZIONE, false, true);
-				return readLock(basic, auth, dbId, sensorId, param2int(year, YEAR));
+				return readLock(basic, auth, dbId, contextId, sensorId, param2int(year, YEAR));
 			}
 		});
 	}
 
 	// Cerca di ottenere il lock per un dato sensore
 	// {dbId}: identificatore del data base reg=regionale cop=Arpa per validazione
+	// {contextId}: identificatore contesto applicativo
 	// {sensorId}: identificatore dell'oggetto sensore
-	// {year}: anno
+	// {beginYear}: anno di inizio
+	// {endYear}: anno di fine
 	// Esempio:
-	// https://<server_name>/ariaweb/airvalidsrv/datalock/cop/13.001272.803.21/2022
+	// https://<server_name>/ariaweb/airvalidsrv/datalock/cop/xyz123/13.001272.803.21/2022/2022
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	@Path("/datalock/{dbId}/{sensorId}/{year}")
+	@Path("/datalock/{dbId}/{contextId}/{sensorId}/{beginYear}/{endYear}")
 	public void setDataLock(final @Suspended AsyncResponse asyncResponse,
 			@HeaderParam(BASIC_AUTH_HEADER) final String basic, @HeaderParam(SHIB_AUTH_ID) final String auth,
-			@PathParam("dbId") final String dbId, @PathParam("sensorId") final String sensorId,
-			@PathParam("year") final String year) {
-		runTask(new ServiceTask("PUT /datalock/" + dbId + "/" + sensorId + "/" + year, asyncResponse) {
+			@PathParam("dbId") final String dbId, @PathParam("contextId") final String contextId,
+			@PathParam("sensorId") final String sensorId, @PathParam("beginYear") final String beginYear,
+			@PathParam("endYear") final String endYear) {
+		runTask(new ServiceTask(
+				"PUT /datalock/" + dbId + "/" + contextId + "/" + sensorId + "/" + beginYear + "/" + endYear,
+				asyncResponse) {
 			@Override
 			public Object execute() throws AuthException {
 				checkAuthorizationAdvancedOrWrite(basic, auth, FN_VALIDAZIONE);
 				checkSensorAllowedAdvancedOrWrite(basic, auth, sensorId);
-				return setLock(basic, auth, dbId, sensorId, param2int(year, YEAR));
+				return setLock(basic, auth, dbId, contextId, sensorId, param2int(beginYear, BEGIN_YEAR),
+						param2int(endYear, END_YEAR));
 			}
 		});
 	}
@@ -485,25 +582,52 @@ public class AirValidService extends RestService {
 		});
 	}
 
-	// Rilascia il lock per un dato sensore e anno
+	// Rilascia i lock appartenenti all'utente relativi ad una data
+	// applicazione/pagina
 	// {dbId}: identificatore del data base reg=regionale cop=Arpa per validazione
-	// {sensorId}: identificatore dell'oggetto sensore
-	// {year}: anno
-	// Esempio:
-	// https://<server_name>/ariaweb/airvalidsrv/datalock/cop/13.001272.803.21/2022
+	// {contextId}: identificatore contesto applicativo
+	// Esempio: https://<server_name>/ariaweb/airvalidsrv/datalock/cop/xyz123
 	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	@Path("/datalock/{dbId}/{sensorId}/{year}")
+	@Path("/datalock/{dbId}/{contextId}")
 	public void deleteDataLock(final @Suspended AsyncResponse asyncResponse,
 			@HeaderParam(BASIC_AUTH_HEADER) final String basic, @HeaderParam(SHIB_AUTH_ID) final String auth,
-			@PathParam("dbId") final String dbId, @PathParam("sensorId") final String sensorId,
-			@PathParam("year") final String year) {
-		runTask(new ServiceTask("DELETE /datalock/" + dbId + "/" + sensorId + "/" + year, asyncResponse) {
+			@PathParam("dbId") final String dbId, @PathParam("contextId") final String contextId) {
+		runTask(new ServiceTask("DELETE /datalock/" + dbId + "/" + contextId, asyncResponse) {
 			@Override
 			public Object execute() throws AuthException {
 				checkAuthorizationAdvancedOrWrite(basic, auth, FN_VALIDAZIONE);
-				return clearLock(basic, auth, dbId, sensorId, param2int(year, YEAR));
+				return clearLocks(basic, auth, dbId, contextId);
+			}
+		});
+	}
+
+	// Rilascia il lock per applicazione/pagina, sensore e anno
+	// {dbId}: identificatore del data base reg=regionale cop=Arpa per validazione
+	// {contextId}: identificatore contesto applicativo
+	// {sensorId}: identificatore dell'oggetto sensore
+	// {beginYear}: anno di inizio
+	// {endYear}: anno di fine
+	// Esempio:
+	// https://<server_name>/ariaweb/airvalidsrv/datalock/cop/xyz123/13.001272.803.21/2022/2022
+	@DELETE
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Path("/datalock/{dbId}/{contextId}/{sensorId}/{beginYear}/{endYear}")
+	public void deleteDataLock(final @Suspended AsyncResponse asyncResponse,
+			@HeaderParam(BASIC_AUTH_HEADER) final String basic, @HeaderParam(SHIB_AUTH_ID) final String auth,
+			@PathParam("dbId") final String dbId, @PathParam("contextId") final String contextId,
+			@PathParam("sensorId") final String sensorId, @PathParam("beginYear") final String beginYear,
+			@PathParam("endYear") final String endYear) {
+		runTask(new ServiceTask(
+				"DELETE /datalock/" + dbId + "/" + contextId + "/" + sensorId + "/" + beginYear + "/" + endYear,
+				asyncResponse) {
+			@Override
+			public Object execute() throws AuthException {
+				checkAuthorizationAdvancedOrWrite(basic, auth, FN_VALIDAZIONE);
+				return clearLock(basic, auth, dbId, contextId, sensorId, param2int(beginYear, BEGIN_YEAR),
+						param2int(endYear, END_YEAR));
 			}
 		});
 	}
@@ -550,8 +674,9 @@ public class AirValidService extends RestService {
 			@PathParam("dbId") final String dbId, @PathParam("sensorId") final String sensorId,
 			@PathParam("beginDate") final String beginDate, @QueryParam("endDate") final String endDate,
 			@QueryParam("period_m") final String period_m) {
-		runTask(new ServiceTask("GET /data/" + dbId + "/" + sensorId + "/" + beginDate + ENDDATE_EQ + endDate + ", "
-				+ PERIOD_M_EQ + period_m, asyncResponse) {
+		runTask(new ServiceTask(
+				"GET /data/" + dbId + "/" + sensorId + "/" + beginDate + ENDDATE_EQ + endDate + PERIOD_M_EQ + period_m,
+				asyncResponse) {
 			@Override
 			public Object execute() throws AuthException {
 				checkAuthorization(basic, auth, FN_VALIDAZIONE, false, false);
@@ -698,7 +823,7 @@ public class AirValidService extends RestService {
 			@QueryParam("period_m") final String period_m,
 			@QueryParam("verificationLevel") final String verificationLevel) {
 		runTask(new ServiceTask("GET /validdata/" + dbId + "/" + sensorId + "/" + beginDate + ENDDATE_EQ + endDate
-				+ ", " + PERIOD_M_EQ + period_m + ", " + VERIFICATIONLEVEL_EQ + verificationLevel, asyncResponse) {
+				+ PERIOD_M_EQ + period_m + VERIFICATIONLEVEL_EQ + verificationLevel, asyncResponse) {
 			@Override
 			public Object execute() throws AuthException {
 				checkAuthorization(basic, auth, FN_VALIDAZIONE, false, false);
@@ -706,6 +831,94 @@ public class AirValidService extends RestService {
 				return getAirDbServiceClient(dbId).getValidData(sensorId, param2LongObj(beginDate, BEGIN_DATE),
 						param2LongObj(endDate, END_DATE), param2IntegerObj(period_m, PERIOD_MINUTES),
 						param2ShortObj(verificationLevel, VERIFICATION_LEVEL));
+			}
+		});
+	}
+
+	// Restituisce le misure presenti nel database per il sensore e il periodo
+	// specificati, utilizzando un oggetto con numero minimo di campi (timestamp e
+	// valore_validato), suddivise per giorni
+	// Le misure restituite avranno almeno il livello di 'verifica' richiesto
+	// {dbId}: identificatore del data base reg=regionale cop=Arpa per validazione
+	// {sensorId}: identificatore dell'oggetto sensore
+	// {beginDate}: data di inizio del periodo di ricerca delle misure, allineata
+	// alle 00:00
+	// {endDate}": data di fine del periodo di ricerca delle misure, allineata alle
+	// 00:00
+	// "period_m": periodo di aggregazione delle misure (es. 60 minuti, ozionale)
+	// "verificationLevel": livello minimo di verifica richiesto (opzionale, il
+	// livello di default è quello massimo)
+	// Se le date di inizio e fine non sono allineate alle 00:00 verranno allineate
+	// automaticamente
+	// Esempio:
+	// https://<server_name>/ariaweb/airvalidsrv/validdata/daysplitted/cop/13.001272.803.21/1669762800000/1669849200000?period_m=60
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/validdata/daysplitted/{dbId}/{sensorId}/{beginDate}/{endDate}")
+	public void getValidDataDaySplitted(final @Suspended AsyncResponse asyncResponse,
+			@HeaderParam(BASIC_AUTH_HEADER) final String basic, @HeaderParam(SHIB_AUTH_ID) final String auth,
+			@PathParam("dbId") final String dbId, @PathParam("sensorId") final String sensorId,
+			@PathParam("beginDate") final String beginDate, @PathParam("endDate") final String endDate,
+			@QueryParam("period_m") final String period_m,
+			@QueryParam("verificationLevel") final String verificationLevel) {
+		runTask(new ServiceTask("GET /validdata/daysplitted/" + dbId + "/" + sensorId + "/" + beginDate + "/" + endDate
+				+ PERIOD_M_EQ + period_m + VERIFICATIONLEVEL_EQ + verificationLevel, asyncResponse) {
+			@Override
+			public Object execute() throws AuthException {
+				checkAuthorization(basic, auth, FN_VALIDAZIONE, false, false);
+				checkSensorAllowed(basic, auth, sensorId, false, false);
+				Date begin = param2DateObj(beginDate, BEGIN_DATE);
+				begin = DataUtils.thisDay(begin);
+				Date end = param2DateObj(endDate, END_DATE);
+				end = DataUtils.isMidnight(end) ? end : DataUtils.nextDay(end);
+				List<MeasureValue> data = getAirDbServiceClient(dbId).getValidData(sensorId, begin.getTime(),
+						end.getTime(), param2IntegerObj(period_m, PERIOD_MINUTES),
+						param2ShortObj(verificationLevel, VERIFICATION_LEVEL));
+
+				List<DayDataHolder> listHolder = splitByDay(data);
+				return listHolder;
+			}
+		});
+	}
+
+	// Restituisce le misure presenti nel database per i sensori e il periodo
+	// specificati, utilizzando un oggetto con numero minimo di campi (timestamp e
+	// valore_validato).
+	// Le misure restituite avranno almeno il livello di 'verifica' richiesto
+	// {dbId}: identificatore del data base reg=regionale cop=Arpa per validazione
+	// {beginDate}: data di inizio del periodo di ricerca delle misure
+	// {endDate}: data di fine del periodo di ricerca delle misure
+	// "sensorId": identificatori degli oggetti sensore, specificarne uno o più
+	// "period_m": periodo di aggregazione delle misure (es. 60 minuti, ozionale)
+	// "verificationLevel": livello minimo di verifica richiesto (opzionale, il
+	// livello di default è quello massimo)
+	// Esempio
+	// https://<server_name>/ariaweb/airvalidsrv/validdata/multisensor/cop/1669762800000/1669849200000?period_m=60&sensorId=13.001272.803.21&sensorId=13.001272.803.04
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/validdata/multisensor/{dbId}/{beginDate}/{endDate}")
+	public void getValidDataMultisensor(final @Suspended AsyncResponse asyncResponse,
+			@HeaderParam(BASIC_AUTH_HEADER) final String basic, @HeaderParam(SHIB_AUTH_ID) final String auth,
+			@PathParam("dbId") final String dbId, @PathParam("beginDate") final String beginDate,
+			@PathParam("endDate") final String endDate, @QueryParam("sensorId") final List<String> sensorIds,
+			@QueryParam("period_m") final String period_m,
+			@QueryParam("verificationLevel") final String verificationLevel) {
+		runTask(new ServiceTask("GET /validdata/multisensor/" + dbId + "/" + beginDate + "/" + endDate + ", "
+				+ "sensorIds=" + sensorIds + PERIOD_M_EQ + period_m + VERIFICATIONLEVEL_EQ + verificationLevel,
+				asyncResponse) {
+			@Override
+			public Object execute() throws AuthException {
+				checkAuthorization(basic, auth, FN_VALIDAZIONE, false, false);
+				List<MultiSensorDataHolder> listHolder = new ArrayList<MultiSensorDataHolder>();
+				for (String sensorId : sensorIds) {
+					checkSensorAllowed(basic, auth, sensorId, false, false);
+					List<MeasureValue> data = getAirDbServiceClient(dbId).getValidData(sensorId,
+							param2LongObj(beginDate, BEGIN_DATE), param2LongObj(endDate, END_DATE),
+							param2IntegerObj(period_m, PERIOD_MINUTES),
+							param2ShortObj(verificationLevel, VERIFICATION_LEVEL));
+					listHolder.add(new MultiSensorDataHolder(sensorId, data));
+				}
+				return listHolder;
 			}
 		});
 	}
@@ -726,7 +939,7 @@ public class AirValidService extends RestService {
 			@PathParam("dbId") final String dbId, @PathParam("sensorId") final String sensorId,
 			@PathParam("beginDate") final String beginDate, @PathParam("endDate") final String endDate) {
 		runTask(new ServiceTask(
-				"GET /timestamps/notcertified/" + dbId + "/" + sensorId + "/" + beginDate + "/" + endDate,
+				"GET /datatimestamps/notcertified/" + dbId + "/" + sensorId + "/" + beginDate + "/" + endDate,
 				asyncResponse) {
 			@Override
 			public Object execute() throws AuthException {
@@ -754,7 +967,8 @@ public class AirValidService extends RestService {
 			@HeaderParam(BASIC_AUTH_HEADER) final String basic, @HeaderParam(SHIB_AUTH_ID) final String auth,
 			@PathParam("dbId") final String dbId, @PathParam("sensorId") final String sensorId,
 			@PathParam("beginDate") final String beginDate, @PathParam("endDate") final String endDate) {
-		runTask(new ServiceTask("GET /timestamps/toreview/" + dbId + "/" + sensorId + "/" + beginDate + "/" + endDate,
+		runTask(new ServiceTask(
+				"GET /datatimestamps/toreview/" + dbId + "/" + sensorId + "/" + beginDate + "/" + endDate,
 				asyncResponse) {
 			@Override
 			public Object execute() throws AuthException {
@@ -782,7 +996,7 @@ public class AirValidService extends RestService {
 			@PathParam("dbId") final String dbId, @PathParam("sensorId") final String sensorId,
 			@PathParam("beginDate") final String beginDate, @PathParam("endDate") final String endDate) {
 		runTask(new ServiceTask(
-				"GET /timestamps/notvalidated/" + dbId + "/" + sensorId + "/" + beginDate + "/" + endDate,
+				"GET /datatimestamps/notvalidated/" + dbId + "/" + sensorId + "/" + beginDate + "/" + endDate,
 				asyncResponse) {
 			@Override
 			public Object execute() throws AuthException {
@@ -811,7 +1025,7 @@ public class AirValidService extends RestService {
 			@PathParam("dbId") final String dbId, @PathParam("sensorId") final String sensorId,
 			@PathParam("beginDate") final String beginDate, @PathParam("endDate") final String endDate) {
 		runTask(new ServiceTask(
-				"GET /timestamps/validnovalue/" + dbId + "/" + sensorId + "/" + beginDate + "/" + endDate,
+				"GET /datatimestamps/validnovalue/" + dbId + "/" + sensorId + "/" + beginDate + "/" + endDate,
 				asyncResponse) {
 			@Override
 			public Object execute() throws AuthException {
@@ -841,7 +1055,7 @@ public class AirValidService extends RestService {
 			@PathParam("dbId") final String dbId, @PathParam("sensorId") final String sensorId,
 			@PathParam("beginDate") final String beginDate, @PathParam("endDate") final String endDate,
 			@PathParam("period_m") final String period_m) {
-		runTask(new ServiceTask("GET /timestamps/notcompleted/" + dbId + "/" + sensorId + "/" + beginDate + "/"
+		runTask(new ServiceTask("GET /datatimestamps/notcompleted/" + dbId + "/" + sensorId + "/" + beginDate + "/"
 				+ endDate + "/" + period_m, asyncResponse) {
 			@Override
 			public Object execute() throws AuthException {
@@ -850,6 +1064,37 @@ public class AirValidService extends RestService {
 				return getAirDbServiceClient(dbId).getNotCompletedDataTimestamps(sensorId,
 						param2LongObj(beginDate, BEGIN_DATE), param2LongObj(endDate, END_DATE),
 						param2IntegerObj(period_m, PERIOD_MINUTES));
+			}
+		});
+	}
+
+	// Esegue il controllo dei dati di IPA per verificare che:
+	// - per ciascun timestamp sia presente il dato di polveri quando sono presenti i dati di IPA
+	// - per ciascun timestamp se il dato di polveri non è valido i dati di IPA siano non validi o
+	// non ancora validati
+	// {dbId}: identificatore del data base reg=regionale cop=Arpa per validazione
+	// {sensorId}: identificatore dell'oggetto sensore che corrisponde al filtro da cui sono analizzati
+	// gli IPA in laboratorio
+	// {beginDate}: data di inizio del periodo di ricerca delle misure
+	// {endDate}: data di fine del periodo di ricerca delle misure
+	// Esempio:
+	// https://<server_name>/ariaweb/airvalidsrv/datatimestamps/ipacheck/reg/13.001272.803.PM10_GBV/1667257200000/1672441200000
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/datatimestamps/ipacheck/{dbId}/{sensorId}/{beginDate}/{endDate}")
+	public void getIpaCheckDataTimestamps(final @Suspended AsyncResponse asyncResponse,
+			@HeaderParam(BASIC_AUTH_HEADER) final String basic, @HeaderParam(SHIB_AUTH_ID) final String auth,
+			@PathParam("dbId") final String dbId, @PathParam("sensorId") final String sensorId,
+			@PathParam("beginDate") final String beginDate, @PathParam("endDate") final String endDate) {
+		runTask(new ServiceTask(
+				"GET /datatimestamps/ipacheck/" + dbId + "/" + sensorId + "/" + beginDate + "/" + endDate,
+				asyncResponse) {
+			@Override
+			public Object execute() throws AuthException {
+				checkAuthorization(basic, auth, FN_VALIDAZIONE, false, false);
+				checkSensorAllowed(basic, auth, sensorId, false, false);
+				return getAirDbServiceClient(dbId).getIpaCheckDataTimestamps(sensorId,
+						param2LongObj(beginDate, BEGIN_DATE), param2LongObj(endDate, END_DATE));
 			}
 		});
 	}
@@ -918,7 +1163,8 @@ public class AirValidService extends RestService {
 	// {sensorId}: identificatore dell'oggetto sensore
 	// {beginDate}: data di inizio del periodo di correzione
 	// {endDate}: data di fine del periodo di correzione
-	// NOTA: le date di inizo e fine devono essere nello stesso giorno di due
+	// "mode": modalità correzione 'constant' (default) o 'progressive'
+	// NOTA: le date di inizio e fine devono essere nello stesso giorno di due
 	// calibrazioni distinte e non
 	// vi devono essere altre calibrazioni all'interno del periodo specificato
 	// Esempio:
@@ -929,16 +1175,23 @@ public class AirValidService extends RestService {
 	public void doMeasureCorrection(final @Suspended AsyncResponse asyncResponse,
 			@HeaderParam(BASIC_AUTH_HEADER) final String basic, @HeaderParam(SHIB_AUTH_ID) final String auth,
 			@PathParam("dbId") final String dbId, @PathParam("sensorId") final String sensorId,
-			@PathParam("beginDate") final String beginDate, @PathParam("endDate") final String endDate) {
-		runTask(new ServiceTask(
-				"GET /calibrations/measurecorrection/" + dbId + "/" + sensorId + "/" + beginDate + "/" + endDate,
-				asyncResponse) {
+			@PathParam("beginDate") final String beginDate, @PathParam("endDate") final String endDate,
+			@QueryParam("mode") final String mode) {
+		runTask(new ServiceTask("GET /calibrations/measurecorrection/" + dbId + "/" + sensorId + "/" + beginDate + "/"
+				+ endDate + " mode=" + mode, asyncResponse) {
 			@Override
 			public Object execute() throws AppException {
 				checkAuthorization(basic, auth, FN_VALIDAZIONE, false, false);
 				checkSensorAllowed(basic, auth, sensorId, false, false);
 				Date begin = param2DateObj(beginDate, BEGIN_DATE);
 				Date end = param2DateObj(endDate, END_DATE);
+				MeasureCorrector.Mode correctorMode;
+				if (mode == null || mode.isEmpty() || mode.equalsIgnoreCase("constant"))
+					correctorMode = MeasureCorrector.Mode.CONSTANT;
+				else if (mode.equalsIgnoreCase("progressive"))
+					correctorMode = MeasureCorrector.Mode.PROGRESSIVE;
+				else
+					throw new IllegalArgumentException("Unsupported correction mode '" + mode + "'");
 				Calibration calEnd = getEndCalibration(sensorId, begin, end);
 				Sensor sensor = getAnagraphCache(dbId).getSensor(sensorId, begin, end);
 				Integer regTime_m = sensor.getRecords().get(0).getTempo_registrazione();
@@ -955,16 +1208,17 @@ public class AirValidService extends RestService {
 							end.getTime(), regTime_m);
 					if (listMeasure.size() != listMeasureNO.size())
 						throw new AppException("NO and NO2 measure list size mismatch");
-					Iterator<Measure> itNO2 = listMeasure.iterator();
-					Iterator<Measure> itNO = listMeasureNO.iterator();
-					while (itNO2.hasNext() && itNO.hasNext()) {
-						Measure no2 = itNO2.next();
-						Measure no = itNO.next();
-						listCorrectedValues.add(corrector.applyCorrectionNO2(no2, no, calEnd, calEndNO));
+					for (int i = 0; i < listMeasure.size(); i++) {
+						Measure no2 = listMeasure.get(i);
+						Measure no = listMeasureNO.get(i);
+						listCorrectedValues.add(corrector.applyCorrectionNO2(correctorMode, no2, no, calEnd, calEndNO,
+								i, listMeasure.size() - 1));
 					}
 				} else {
-					for (Measure m : listMeasure)
-						listCorrectedValues.add(corrector.applyCorrection(sensor.getId_parametro(), m, calEnd));
+					for (int i = 0; i < listMeasure.size(); i++) {
+						listCorrectedValues.add(corrector.applyCorrection(correctorMode, sensor.getId_parametro(),
+								listMeasure.get(i), calEnd, i, listMeasure.size() - 1));
+					}
 				}
 				return listCorrectedValues;
 			}
@@ -976,13 +1230,27 @@ public class AirValidService extends RestService {
 		String target = "'" + sensorId + " [" + sdf.format(begin) + " - " + sdf.format(end) + "]'";
 		List<Calibration> listCalibrations = getAirDbServiceClient("reg").getCalibrations(Utils.removeNetId(sensorId),
 				DataUtils.thisDay(begin).getTime(), end.getTime());
+		ListIterator<Calibration> itCalibs = listCalibrations.listIterator();
+		while (itCalibs.hasNext()) {
+			Calibration cal = itCalibs.next();
+			if (!Boolean.TRUE.equals(cal.getCalibrationApplied()))
+				itCalibs.remove();
+		}
 		if (listCalibrations.isEmpty())
-			throw new AppException("No calibrations found for the specified sensor and period " + target);
+			throw new AppException("No applied calibrations found for the specified sensor and period " + target);
 		if (listCalibrations.size() == 1)
-			throw new AppException("Only one calibration found for the specified sensor and period " + target);
+			throw new AppException("Only one applied calibration found for the specified sensor and period " + target);
 		if (listCalibrations.size() > 2)
-			throw new AppException("More than two calibrations found for the specified sensor and period " + target);
+			throw new AppException(
+					"More than two applied calibrations found for the specified sensor and period " + target);
+		Calibration calBegin = listCalibrations.get(0);
+		if (!DataUtils.thisDay(calBegin.getEndDate()).equals(DataUtils.thisDay(begin)))
+			throw new AppException("End day '" + calBegin.getEndDate()
+					+ "' of first calibration does not match with correction begin day '" + begin + "'");
 		Calibration calEnd = listCalibrations.get(1);
+		if (!DataUtils.thisDay(calEnd.getBeginDate()).equals(DataUtils.thisDay(end)))
+			throw new AppException("Begin day '" + calEnd.getBeginDate()
+					+ "' of second calibration does not match with correction end day '" + end + "'");
 		if (calEnd.getZero() == null)
 			throw new AppException("Calibration information has no zero value " + target);
 		if (calEnd.getSpan() == null)
@@ -1023,8 +1291,8 @@ public class AirValidService extends RestService {
 			@QueryParam("verificationLevel") final String verificationLevel,
 			@QueryParam("decimalDigits") final String decimalDigits) {
 		runTask(new ServiceTask("GET /elaboration/" + type + "/" + dbId + "/" + sensorId + "/" + beginDate + ENDDATE_EQ
-				+ endDate + ", " + PERIOD_M_EQ + period_m + ", " + VERIFICATIONLEVEL_EQ + verificationLevel
-				+ DECIMAL_DIGITS_EQ + decimalDigits, asyncResponse) {
+				+ endDate + PERIOD_M_EQ + period_m + VERIFICATIONLEVEL_EQ + verificationLevel + DECIMAL_DIGITS_EQ
+				+ decimalDigits, asyncResponse) {
 			@Override
 			public Object execute() throws AuthException, ElaborationException {
 				checkAuthorization(basic, auth, FN_VALIDAZIONE, false, false);
@@ -1419,7 +1687,7 @@ public class AirValidService extends RestService {
 	// - ____ per le date in formato relativo usare numeri negativi per andare nel
 	// ______ passato, es: beginTime=-3, endTime=-1 per selezionare il periodo che
 	// ______ va da 3 giorni prima di oggi a ieri
-	// - "beginTime": (opzionale) inizo dell'intervallo temporale
+	// - "beginTime": (opzionale) inizio dell'intervallo temporale
 	// - "endTime": (opzionale) fine dell'intervallo temporale
 	// - "activityType": (opzionale) tipo di attività es: validazione, export...
 	// - "activityOptions": (opzionale) opzioni del tipo di attività
@@ -1538,6 +1806,861 @@ public class AirValidService extends RestService {
 			public Object execute() throws AuthException {
 				checkAuthorization(basic, auth, FN_VALIDAZIONE, false, false);
 				return getCurrentUserInfo(basic, auth);
+			}
+		});
+	}
+
+	// Funzioni basate su SOLR
+
+	// Restituisce l'elenco dei parametri attivi tra due date
+	// {dbId}: identificatore del data base reg=regionale cop=Arpa per validazione
+	// {beginDate}: data di inizio del periodo di ricerca
+	// {endDate}: data di fine del periodo di ricerca
+	// Esempio:
+	// https://<server_name>/ariaweb/airvalidsrv/parameternames/reg/1698793200000/1699959851899
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/parameternames/{dbId}/{beginDate}/{endDate}")
+	public void getParameters(final @Suspended AsyncResponse asyncResponse,
+			@HeaderParam(BASIC_AUTH_HEADER) final String basic, @HeaderParam(SHIB_AUTH_ID) final String auth,
+			@PathParam("dbId") final String dbId, @PathParam("beginDate") final String beginDate,
+			@PathParam("endDate") final String endDate) {
+		runTask(new ServiceTask("GET /parameternames/" + dbId + "/" + beginDate + "/" + endDate, asyncResponse) {
+			@Override
+			public Object execute() throws AuthException, LockException {
+				checkAuthorization(basic, auth, FN_VALIDAZIONE, false, false);
+				Date begin = param2DateObj(beginDate, BEGIN_DATE);
+				Date end = param2DateObj(endDate, END_DATE);
+				String q = "*" + Solr.addSensorBeginDateConstraint(begin) + Solr.addSensorEndDateConstraint(end);
+				ResponseHolder<Object, ParametersStatsFields> paramHolder;
+				if (isCop(dbId))
+					paramHolder = getSolrServiceClient().getAirnetCopSelectParameters("AND", q, 0, null, "on",
+							"sensore_id_parametro", true);
+				else
+					paramHolder = getSolrServiceClient().getAirnetSelectParameters("AND", q, 0, null, "on",
+							"sensore_id_parametro", true);
+				List<NameWithKey> listNwk = new ArrayList<NameWithKey>();
+				Stats<ParametersStatsFields> stats = paramHolder.getStats();
+				if (stats != null) {
+					ParametersStatsFields psf = stats.getStatsFields();
+					if (psf != null) {
+						listNwk = makeParameterNames(dbId, psf);
+					}
+				}
+				return listNwk;
+			}
+		});
+	}
+
+	// Restituisce l'elenco delle stazioni che misurano o hanno misurato il
+	// parametro
+	// specificato nel periodo compreso tra due date
+	// {dbId}: identificatore del data base reg=regionale cop=Arpa per validazione
+	// {parameter}: identificatore del parametro
+	// {beginDate}: data di inizio del periodo di ricerca
+	// {endDate}: data di fine del periodo di ricerca
+	// Esempio:
+	// https://<server_name>/ariaweb/airvalidsrv/stationnames/reg/05_prova/1645311600000/1682892000000
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/stationnames/{dbId}/{parameter}/{beginDate}/{endDate}")
+	public void getStationNamesWithParameter(final @Suspended AsyncResponse asyncResponse,
+			@HeaderParam(BASIC_AUTH_HEADER) final String basic, @HeaderParam(SHIB_AUTH_ID) final String auth,
+			@PathParam("dbId") final String dbId, @PathParam("parameter") final String parameter,
+			@PathParam("beginDate") final String beginDate, @PathParam("endDate") final String endDate) {
+		runTask(new ServiceTask("GET /stationnames/" + dbId + "/" + parameter + "/" + beginDate + "/" + endDate,
+				asyncResponse) {
+			@Override
+			public Object execute() throws AuthException, LockException {
+				checkAuthorization(basic, auth, FN_VALIDAZIONE, false, false);
+				Date begin = param2DateObj(beginDate, BEGIN_DATE);
+				Date end = param2DateObj(endDate, END_DATE);
+				String q = parameter + Solr.addSensorBeginDateConstraint(begin) + Solr.addSensorEndDateConstraint(end);
+				ResponseHolder<Object, StationsStatsFields> stationHolder;
+				if (isCop(dbId))
+					stationHolder = getSolrServiceClient().getAirnetCopSelectStations("AND", q, 0,
+							"sensore_id_parametro", "on", "campo_concat_rete_stazione", true);
+				else
+					stationHolder = getSolrServiceClient().getAirnetSelectStations("AND", q, 0, "sensore_id_parametro",
+							"on", "campo_concat_rete_stazione", true);
+				List<NameWithKey> listNwk = new ArrayList<NameWithKey>();
+				Stats<StationsStatsFields> stats = stationHolder.getStats();
+				if (stats != null) {
+					StationsStatsFields psf = stats.getStatsFields();
+					if (psf != null) {
+						listNwk = makeStationNames(getUserCache(basic, auth), dbId, parameter, psf, begin, end);
+					}
+				}
+				return listNwk;
+			}
+		});
+	}
+
+	// Restituisce l'elenco degli eventi relativi ad un dato sensore nel periodo
+	// specificato
+	// {dbId}: identificatore del data base reg=regionale
+	// {sensorId}: identificatore del sensore
+	// {beginDate}: data di inizio del periodo di ricerca
+	// {endDate}": data di fine del periodo di ricerca
+	// Nota: la funzione restituisce al massimo 1024 eventi
+	// Gli oggetti dell'elenco restituito hanno i seguenti campi:
+	// "origin": fonte dell'evento, es: ticket, note
+	// "type": eventuale tipologia dell'evento (vale null se l'informazione non c'è)
+	// "beginDate": timestamp di inizio dell'evento, in millisecondi
+	// "endDate": timestamp di fine dell'evento, in millisecondi
+	// "notes": elenco di stringhe con le note dell'intervento (può essere vuoto)
+	// Esempio:
+	// https://<server_name>/ariaweb/airvalidsrv/sensorevents/reg/22.004078.800.05/1662933600000/1664575200000
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/sensorevents/{dbId}/{sensorId}/{beginDate}/{endDate}")
+	public void getSensorEvents(final @Suspended AsyncResponse asyncResponse,
+			@HeaderParam(BASIC_AUTH_HEADER) final String basic, @HeaderParam(SHIB_AUTH_ID) final String auth,
+			@PathParam("dbId") final String dbId, @PathParam("sensorId") final String sensorId,
+			@PathParam("beginDate") final String beginDate, @PathParam("endDate") final String endDate) {
+		runTask(new ServiceTask("GET /sensorevents/" + dbId + "/" + sensorId + "/" + beginDate + "/" + endDate,
+				asyncResponse) {
+			@Override
+			public Object execute() throws AuthException, LockException, AppException {
+				checkAuthorizationAdvancedOrWrite(basic, auth, FN_VALIDAZIONE);
+				checkSensorAllowedAdvancedOrWrite(basic, auth, sensorId);
+				Date begin = param2DateObj(beginDate, BEGIN_DATE);
+				Date end = param2DateObj(endDate, END_DATE);
+				SensorKey sk = SensorKey.valueOf(Utils.removeNetId(sensorId));
+				String q = Solr.addBeginDateConstraint(begin) + Solr.addEndDateConstraint(end, true)
+						+ " parametro_id_parametro:\"" + sk.getId_parametro() + "\" codice_istat_comune:\""
+						+ sk.getCodice_istat_comune() + "\" progr_punto_com:" + sk.getProgr_punto_com();
+				lg.debug("q -> " + q);
+				ResponseHolder<SolrSensorEvent, Object> eventHolder = getSolrServiceClient()
+						.getAirgestSensorEvents("AND", q, 1024, "data_inizio desc");
+				List<Event> listResult = new ArrayList<Event>();
+				for (SolrSensorEvent event : eventHolder.getResponse().getDocs())
+					listResult.add(new Event(event));
+				return listResult;
+			}
+		});
+	}
+
+	// Restituisce l'elenco delle stazioni il cui nome o una parola del nome inizia
+	// con la sequenza di caratteri specificata, nel periodo compreso tra due date
+	// {dbId}: identificatore del data base reg=regionale cop=Arpa per validazione
+	// {userinput}: sequenza di caratteri da usare per la ricerca
+	// i parametri seguenti sono opzionali:
+	// "beginDate": data di inizio del periodo di ricerca
+	// "endDate": data di fine del periodo di ricerca
+	// "pIds": identificatori parametri misurati, uno o più ripetendo pIds
+	// "publicView": true=stazioni visibili a tutti, false=stazioni riservate, se omesso tutte
+	// "publicOwner": true=stazioni di proprietà pubblica, false=stazioni di proprietà privata, se
+	// omesso tutte
+	// "publicManagement": true=stazioni gestite da Arpa, false=stazioni gestite da privati, se omesso
+	// tutte
+	// "national": true=stazioni con sensori di interesse nazionale, false=... di interesse locale, se
+	// omesso tutte
+	// "mobile": true=stazioni mobili, false=stazioni fisse
+	// "stationTypeIds": identificatori tipo stazione, uno o più ripetendo stationTypeIds
+	// "zoneTypeIds": identificatori tipo zona, uno o più ripetendo zoneTypeIds
+	// Esempio:
+	// https://<server_name>/ariaweb/airvalidsrv/suggest/stationnames/reg/re*?beginDate=1640991600000&endDate=1643583600000&arpa=true
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/suggest/stationnames/{dbId}/{userinput}")
+	public void getSuggestStationNames(final @Suspended AsyncResponse asyncResponse,
+			@HeaderParam(BASIC_AUTH_HEADER) final String basic, @HeaderParam(SHIB_AUTH_ID) final String auth,
+			@PathParam("dbId") final String dbId, @PathParam("userinput") final String userinput,
+			@QueryParam("beginDate") final String beginDate, @QueryParam("endDate") final String endDate,
+			@QueryParam("pIds") final List<String> listParameterId, @QueryParam("publicView") final Boolean publicView,
+			@QueryParam("publicOwner") final Boolean publicOwner,
+			@QueryParam("publicManagement") final Boolean publicManagement,
+			@QueryParam("national") final Boolean national, @QueryParam("mobile") final Boolean mobile,
+			@QueryParam("stationTypeIds") final List<String> listStationTypeId,
+			@QueryParam("zoneTypeIds") final List<String> listZoneTypeId) {
+		runTask(new ServiceTask("GET /suggest/stationnames/" + dbId + "/" + userinput + BEGINDATE_EQ + beginDate
+				+ ENDDATE_EQ + endDate + ", pIds=" + listParameterId + printCommonParams(publicView, publicOwner,
+						publicManagement, national, mobile, listStationTypeId, listZoneTypeId),
+				asyncResponse) {
+			@Override
+			public Object execute() throws AuthException, LockException {
+				checkAuthorization(basic, auth, FN_VALIDAZIONE, false, false);
+				Date begin = param2DateObj(beginDate, BEGIN_DATE);
+				Date end = param2DateObj(endDate, END_DATE);
+				Set<String> setParamId = new HashSet<>();
+				StringBuilder q = new StringBuilder();
+				q.append(userinput);
+				q.append(Solr.addSensorBeginDateConstraint(begin));
+				q.append(Solr.addSensorEndDateConstraint(end));
+				if (listParameterId != null && !listParameterId.isEmpty()) {
+					setParamId.addAll(listParameterId);
+					q.append(" (");
+					boolean first = true;
+					for (String paramId : listParameterId) {
+						q.append((first ? "" : " OR ") + "sensore_id_parametro:" + paramId);
+						first = false;
+					}
+					q.append(")");
+				}
+				ResponseHolder<Object, StationsStatsFields> stationHolder;
+				if (isCop(dbId)) {
+					addCommonParamsCop(q, publicOwner, publicManagement);
+					lg.debug("Solr-airnetcop q=" + q);
+					stationHolder = getSolrServiceClient().getAirnetCopSelectStations("AND", q.toString(), 0,
+							"campo_suggest_stazione", "on", "campo_concat_rete_stazione", true);
+				} else {
+					addCommonParams(q, publicView, publicOwner, publicManagement, national, mobile, listStationTypeId,
+							listZoneTypeId);
+					lg.debug("Solr-airnet q=" + q);
+					stationHolder = getSolrServiceClient().getAirnetSelectStations("AND", q.toString(), 0,
+							"campo_suggest_stazione", "on", "campo_concat_rete_stazione", true);
+				}
+				List<NameWithKey> listNwk = new ArrayList<>();
+				Stats<StationsStatsFields> stats = stationHolder.getStats();
+				if (stats != null) {
+					StationsStatsFields psf = stats.getStatsFields();
+					if (psf != null)
+						listNwk = makeStationNames(getUserCache(basic, auth), dbId, null, psf, begin, end);
+				}
+				if (!setParamId.isEmpty()) {
+					ListIterator<NameWithKey> itStationNames = listNwk.listIterator();
+					while (itStationNames.hasNext()) {
+						NameWithKey nwk = itStationNames.next();
+						List<SensorNameWithKeyAndPeriod> listSensorNames = getAnagraphCache(dbId)
+								.getSensorNamesForStation(nwk.getKey(), begin, end, getUserCache(basic, auth),
+										getAuthCache());
+						Set<String> setSensorKeys = new HashSet<>();
+						for (SensorNameWithKeyAndPeriod sensor : listSensorNames)
+							setSensorKeys.add(Utils.extractParameterId(sensor.getKey()));
+						if (!setSensorKeys.containsAll(setParamId))
+							itStationNames.remove();
+					}
+				}
+				return NameKey.convert(listNwk);
+			}
+		});
+	}
+
+	// Restituisce l'elenco dei parametri il cui nome o una parola del nome inizia
+	// con la sequenza di caratteri specificata, nel periodo compreso tra due date
+	// {dbId}: identificatore del data base reg=regionale cop=Arpa per validazione
+	// {userinput}: sequenza di caratteri da usare per la ricerca
+	// i parametri seguenti sono opzionali:
+	// "beginDate": data di inizio del periodo di ricerca
+	// "endDate": data di fine del periodo di ricerca
+	// "sIds": identificatori stazioni di appartenenza, uno o più ripetendo sIds
+	// "publicView": true=parametri visibili a tutti, false=parametri riservati, se omesso tutte
+	// "publicOwner": true=parametri misurati da stazioni di proprietà pubblica, false=... privata, se
+	// omesso tutti
+	// "publicManagement": true=parametri misurati da stazioni gestite da Arpa, false=... da privati, se
+	// omesso tutti
+	// "national": true=parametri relativi a sensori di interesse nazionale, false=... di interesse
+	// locale, se omesso tutti
+	// "mobile": true=misurati da stazioni mobili, false=misurati da stazioni fisse
+	// "stationTypeIds": identificatori tipo stazione (che misura i parametri restituiti), uno o più
+	// ripetendo stationTypeIds
+	// "zoneTypeIds": identificatori tipo zona, uno o più ripetendo zoneTypeIds
+	// Esempio:
+	// https://<server_name>/ariaweb/airvalidsrv/suggest/parameternames/reg/bi*?beginDate=1640991600000&endDate=1643583600000
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/suggest/parameternames/{dbId}/{userinput}")
+	public void getSuggestParameterNames(final @Suspended AsyncResponse asyncResponse,
+			@HeaderParam(BASIC_AUTH_HEADER) final String basic, @HeaderParam(SHIB_AUTH_ID) final String auth,
+			@PathParam("dbId") final String dbId, @PathParam("userinput") final String userinput,
+			@QueryParam("beginDate") final String beginDate, @QueryParam("endDate") final String endDate,
+			@QueryParam("sIds") final List<String> listStationId, @QueryParam("publicView") final Boolean publicView,
+			@QueryParam("publicOwner") final Boolean publicOwner,
+			@QueryParam("publicManagement") final Boolean publicManagement,
+			@QueryParam("national") final Boolean national, @QueryParam("mobile") final Boolean mobile,
+			@QueryParam("stationTypeIds") final List<String> listStationTypeId,
+			@QueryParam("zoneTypeIds") final List<String> listZoneTypeId) {
+		runTask(new ServiceTask("GET /suggest/parameternames/" + dbId + "/" + userinput + BEGINDATE_EQ + beginDate
+				+ ENDDATE_EQ + endDate + ", stationIds=" + listStationId + printCommonParams(publicView, publicOwner,
+						publicManagement, national, mobile, listStationTypeId, listZoneTypeId),
+				asyncResponse) {
+			@Override
+			public Object execute() throws AuthException, LockException {
+				checkAuthorization(basic, auth, FN_VALIDAZIONE, false, false);
+				Date begin = param2DateObj(beginDate, BEGIN_DATE);
+				Date end = param2DateObj(endDate, END_DATE);
+				Set<String> setSensorId = null;
+				StringBuilder q = new StringBuilder();
+				q.append(userinput);
+				q.append(Solr.addSensorBeginDateConstraint(begin));
+				q.append(Solr.addSensorEndDateConstraint(end));
+				if (listStationId != null && !listStationId.isEmpty()) {
+					setSensorId = new HashSet<>();
+					q.append(" (");
+					boolean first = true;
+					for (String stationId : listStationId) {
+						q.append((first ? "" : " OR ") + "campo_concat_rete_stazione:" + stationId);
+						first = false;
+						List<SensorNameWithKeyAndPeriod> listSensorNames = getAnagraphCache(dbId)
+								.getSensorNamesForStation(stationId, begin, end, getUserCache(basic, auth),
+										getAuthCache());
+						for (SensorNameWithKeyAndPeriod sensor : listSensorNames)
+							setSensorId.add(sensor.getKey());
+					}
+					q.append(")");
+				}
+				ResponseHolder<Object, ParametersStatsFields> stationHolder;
+				if (isCop(dbId)) {
+					addCommonParamsCop(q, publicOwner, publicManagement);
+					lg.debug("Solr-airnetcop q=" + q);
+					stationHolder = getSolrServiceClient().getAirnetCopSelectParameters("AND", q.toString(), 0,
+							"campo_suggest_parametro", "on", "sensore_id_parametro", true);
+				} else {
+					addCommonParams(q, publicView, publicOwner, publicManagement, national, mobile, listStationTypeId,
+							listZoneTypeId);
+					lg.debug("Solr-airnet q=" + q);
+					stationHolder = getSolrServiceClient().getAirnetSelectParameters("AND", q.toString(), 0,
+							"campo_suggest_parametro", "on", "sensore_id_parametro", true);
+				}
+				List<NameWithKey> listNwk = new ArrayList<NameWithKey>();
+				Stats<ParametersStatsFields> stats = stationHolder.getStats();
+				if (stats != null) {
+					ParametersStatsFields psf = stats.getStatsFields();
+					if (psf != null) {
+						listNwk = makeParameterNames(dbId, psf);
+					}
+				}
+				if (setSensorId != null) {
+					ListIterator<NameWithKey> itParamNames = listNwk.listIterator();
+					while (itParamNames.hasNext()) {
+						NameWithKey nwk = itParamNames.next();
+						Set<String> setParamSensorId = new HashSet<>();
+						for (String stationId : listStationId)
+							setParamSensorId.add(Utils.makeSensorId(stationId, nwk.getKey()));
+						if (!setSensorId.containsAll(setParamSensorId))
+							itParamNames.remove();
+					}
+				}
+				return NameKey.convert(listNwk);
+			}
+		});
+	}
+
+	// Restituisce l'elenco degli eventi nelle cui note è presente il testo di
+	// ricerca specificato
+	// {dbId}: identificatore del data base reg=regionale
+	// {userinput}: testo da cercare nelle note
+	// "count": paginazione, numero massimo di risultati da restituire, se omesso il
+	// valore usato è 1024
+	// "begin": paginazione, posizione del primo risultato da restituire, se omesso
+	// il valore usato è 0
+	// "beginDate": data di inizio del periodo di ricerca (opzionale)
+	// "endDate": data di fine del periodo di ricerca (opzionale)
+	// "origin": filtra la ricerca in base alla fonte dell'evento (opzionale)
+	// "networkName": filtra la ricerca per nome rete (opzionale)
+	// "stationName": filtra la ricerca per nome stazione (opzionale)
+	// "sensorName": filtra la ricerca per nome parametro (opzionale)
+	// Gli eventi sono restituiti con lo stesso ordine con cui sono stati organizzati da Solr
+	// Gli eventi dell'elenco restituito hanno i seguenti campi:
+	// "origin": fonte dell'evento, es: ticket, note
+	// "type": eventuale tipologia dell'evento (vale null se l'informazione non c'è)
+	// "beginDate": timestamp di inizio dell'evento, in millisecondi
+	// "endDate": timestamp di fine dell'evento, in millisecondi
+	// "notes": elenco di stringhe con le note dell'intervento (può essere vuoto)
+	// È possibile filtrare gli eventi usando i filtri sopra descritti, assegnando un solo valore ad
+	// uno o più filtri.
+	// I filtri sono restituiti nel campo "filters", per ciascuno si ha un identificatore "id" e
+	// l'elenco "items" dei possibili valori, Ciascun valore ha il nome "name" e la quantità di
+	// occorrenze negli eventi "count"
+	// Esempio:
+	// https://<server_name>/ariaweb/airvalidsrv/events/reg/spento?count=5&begin=7
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/events/{dbId}/{userinput}")
+	public void getEvents(final @Suspended AsyncResponse asyncResponse,
+			@HeaderParam(BASIC_AUTH_HEADER) final String basic, @HeaderParam(SHIB_AUTH_ID) final String auth,
+			@PathParam("dbId") final String dbId, @PathParam("userinput") final String userinput,
+			@QueryParam("begin") final String beginStr, @QueryParam("count") final String countStr,
+			@QueryParam("beginDate") final String beginDateStr, @QueryParam("endDate") final String endDateStr,
+			@QueryParam("origin") final String origin, @QueryParam("networkName") final String networkName,
+			@QueryParam("stationName") final String stationName, @QueryParam("sensorName") final String sensorName) {
+		runTask(new ServiceTask("GET /events/" + dbId + "/" + userinput + BEGINDATE_EQ + beginDateStr + ENDDATE_EQ
+				+ endDateStr + ", begin=" + beginStr + ", count=" + countStr + ", origin=" + origin + ", networkName="
+				+ networkName + ", stationName=" + stationName + ", sensorName=" + sensorName, asyncResponse) {
+			@Override
+			public Object execute() throws LockException, AppException {
+				checkAuthorizationAdvancedOrWrite(basic, auth, FN_VALIDAZIONE);
+				String userKey = getUserKey(basic, auth);
+				Set<String> netIds = getAllowedNetworkIds(userKey, false, true);
+				netIds.addAll(getAllowedNetworkIds(userKey, true, false));
+				if (netIds.isEmpty())
+					throw new AuthException("User '" + userKey + "' is not authorized for any network");
+				Integer begin = param2int(beginStr, "Pagination begin", 0);
+				Integer count = param2int(countStr, "Pagination count", 1024);
+				Date beginDate = param2DateObj(beginDateStr, BEGIN_DATE);
+				Date endDate = param2DateObj(endDateStr, END_DATE);
+				String q = "(" + userinput + ")";
+				if (!netIds.contains(SensorId.WILDCARD)) {
+					StringBuilder sb = new StringBuilder();
+					sb.append(" AND (");
+					String sep = "";
+					for (String id : netIds) {
+						sb.append(sep + "rete_id_rete_monit:" + id);
+						sep = " OR ";
+					}
+					sb.append(")");
+					q = q + sb;
+				}
+				if (origin != null && !origin.isEmpty())
+					q = q + " AND fonte:" + origin;
+				if (networkName != null && !networkName.isEmpty())
+					q = q + " AND rete_denominazione:\"" + networkName + "\"";
+				if (stationName != null && !stationName.isEmpty())
+					q = q + " AND stazione_nome_pubblico:\"" + stationName + "\"";
+				if (sensorName != null && !sensorName.isEmpty())
+					q = q + " AND parametro_denominazione:\"" + sensorName + "\"";
+				q += Solr.addBeginDateConstraint(beginDate);
+				q += Solr.addEndDateConstraint(endDate, true);
+				String[] ff = { "rete_denominazione", "stazione_nome_pubblico", "parametro_denominazione", "fonte" };
+				lg.debug("getEvents with q='" + q + "'");
+				ResponseHolder<SolrSensorEvent, Object> eventHolder = getSolrServiceClient().getAirgestSelectFacet(q,
+						count, begin, "on", 1, ff);
+				return makeEventsReply(eventHolder);
+			}
+		});
+	}
+
+	// Restituisce l'elenco delle informazioni anagrafiche in cui è presente il testo di ricerca
+	// specificato
+	// {dbId}: identificatore del data base reg=regionale cop=Arpa per validazione
+	// {userinput}: testo da cercare nell'anagrafica
+	// "count": paginazione, numero massimo di risultati da restituire, se omesso il
+	// valore usato è 1024
+	// "begin": paginazione, posizione del primo risultato da restituire, se omesso
+	// il valore usato è 0
+	// "beginDate": data di inizio del periodo di ricerca (opzionale)
+	// "endDate": data di fine del periodo di ricerca (opzionale)
+	// "stationName": filtra la ricerca per nome stazione (opzionale)
+	// "sensorName": filtra la ricerca per nome parametro (opzionale)
+	// Le informazioni sono restituite con lo stesso ordine con cui sono state organizzate da Solr
+	// Le informazioni dell'elenco restituito hanno i seguenti campi:
+	// "title": rete + stazione + parametro
+	// "beginDate": anno inizio funzionamento sensore, formato YYYY-MM-DD
+	// "endDate": anno fine funzionamento sensore, formato YYYY-MM-DD, null se ancora in funzione
+	// "address": indirizzo stazione
+	// "mapsUrl": URL con posizione su Google Maps
+	// "altitude": quota stazione
+	// "stationType": tipologia stazione
+	// "stationUrl": URL anagrafica stazione su server Arpa
+	// "national": sensore di interesse nazionale (true | false | null)
+	// "publicOwned": stazione di proprietà pubblica (true | false | null)
+	// "publicManaged": stazione gestita da ente pubblico (true | false | null)
+	// È possibile filtrare gli eventi usando i filtri sopra descritti, assegnando un solo valore ad
+	// uno o più filtri.
+	// I filtri sono restituiti nel campo "filters", per ciascuno si ha un identificatore "id" e
+	// l'elenco "items" dei possibili valori, Ciascun valore ha il nome "name" e la quantità di
+	// occorrenze negli eventi "count"
+	// Esempio:
+	// https://<server_name>/ariaweb/airvalidsrv/anagraph/reg/ozono?count=10&begin=0
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/anagraph/{dbId}/{userinput}")
+	public void getAnagraph(final @Suspended AsyncResponse asyncResponse,
+			@HeaderParam(BASIC_AUTH_HEADER) final String basic, @HeaderParam(SHIB_AUTH_ID) final String auth,
+			@PathParam("dbId") final String dbId, @PathParam("userinput") final String userinput,
+			@QueryParam("begin") final String beginStr, @QueryParam("count") final String countStr,
+			@QueryParam("beginDate") final String beginDateStr, @QueryParam("endDate") final String endDateStr,
+			@QueryParam("stationName") final String stationName, @QueryParam("sensorName") final String sensorName) {
+		runTask(new ServiceTask("GET /anagraph/" + dbId + "/" + userinput + BEGINDATE_EQ + beginDateStr + ENDDATE_EQ
+				+ endDateStr + ", begin=" + beginStr + ", count=" + countStr + ", stationName=" + stationName
+				+ ", sensorName=" + sensorName, asyncResponse) {
+			@Override
+			public Object execute() throws LockException, AppException {
+				checkAuthorization(basic, auth, FN_VALIDAZIONE, false, false);
+				Integer begin = param2int(beginStr, "Pagination begin", 0);
+				Integer count = param2int(countStr, "Pagination count", 1024);
+				Date beginDate = param2DateObj(beginDateStr, BEGIN_DATE);
+				Date endDate = param2DateObj(endDateStr, END_DATE);
+				String q = "(" + userinput + ")";
+				if (stationName != null && !stationName.isEmpty())
+					q = q + " AND stazione_nome_pubblico:\"" + stationName + "\"";
+				if (sensorName != null && !sensorName.isEmpty())
+					q = q + " AND sensore_parametro_denominazione:\"" + sensorName + "\"";
+				q += Solr.addSensorBeginDateConstraint(beginDate);
+				q += Solr.addSensorEndDateConstraint(endDate);
+				String[] ff = { "stazione_nome_pubblico", "sensore_parametro_denominazione" };
+				lg.debug("getAnagraph with q='" + q + "'");
+				ResponseHolder<SolrAnagraphItem, Object> eventHolder;
+				if (isCop(dbId))
+					eventHolder = getSolrServiceClient().getAirnetCopSelectFacet(q, count, begin, "on", 1, ff);
+				else
+					eventHolder = getSolrServiceClient().getAirnetSelectFacet(q, count, begin, "on", 1, ff);
+				return makeAnagraphReply(eventHolder);
+			}
+		});
+	}
+
+	// Funzione di cancellazione delle cache dell'anagrafica
+	// {dbId}: identificatore del data base reg=regionale cop=Arpa per validazione
+	// Esempio:
+	// https://<server_name>/ariaweb/airvalidsrv/cache/anagraph/cop
+	@GET
+	@Produces(MediaType.TEXT_PLAIN)
+	@Path("/cache/anagraph/{dbId}")
+	public void deleteAnagraphCache(final @Suspended AsyncResponse asyncResponse,
+			@HeaderParam(BASIC_AUTH_HEADER) final String basic, @HeaderParam(SHIB_AUTH_ID) final String auth,
+			@PathParam("dbId") final String dbId) {
+		runTask(new ServiceTask("GET /cache/anagraph/" + dbId, asyncResponse) {
+			@Override
+			public Object execute() throws AuthException {
+				checkAuthorization(basic, auth, FN_APP_ADMIN, false, false);
+				getAnagraphCache(dbId).invalidate();
+				return "OK";
+			}
+		});
+	}
+
+	// Funzione di cancellazione delle cache del data base di gestione
+	// dell'autenticazione
+	// Esempio:
+	// https://<server_name>/ariaweb/airvalidsrv/cache/auth
+	@GET
+	@Produces(MediaType.TEXT_PLAIN)
+	@Path("/cache/auth")
+	public void deleteAuthCache(final @Suspended AsyncResponse asyncResponse,
+			@HeaderParam(BASIC_AUTH_HEADER) final String basic, @HeaderParam(SHIB_AUTH_ID) final String auth,
+			@PathParam("cacheId") final String cacheId) {
+		runTask(new ServiceTask("GET /cache/" + cacheId, asyncResponse) {
+			@Override
+			public Object execute() throws AuthException {
+				checkAuthorization(basic, auth, FN_APP_ADMIN, false, false);
+				getAuthCache().invalidate();
+				invalidateUserCaches();
+				return "OK";
+			}
+		});
+	}
+
+	// Effettua la reportistica del tipo richiesto e restituisce il risultato in
+	// formato Json
+	// {type}: tipo di reportistica daily=giornaliera variable=periodo variabile yearly=annuale
+	// {dbId}: identificatore del data base reg=regionale cop=Arpa per validazione
+	// "date": data del giorno su cui effettuare la reportistica (solo per type=daily)
+	// "beginDate": data di inizio (solo per type=variable)
+	// "endDate": data di fine (solo per type=variable)
+	// "year": anno su cui effettuare la reportistica (solo per type=yearly)
+	// "validatedDataOnly": utilizza solo dati validati (default: true)
+	// "displayColors": attiva la generazione dei colori di evidenziazione (deafult: false)
+	// "displayNetNames": attiva la visualizzazione dei nomi delle reti (default: true)
+	// "anagraphInfoByRows": visualizza le informazioni anagrafiche nelle righe (deafult: false)
+	// "tableIds": identificatori delle tabelle da generare (default: tutte),
+	// dipendono dal tipo di reportistica:
+	// - identificatori tabelle per reportistica "periodo variabile"
+	// __- SYNTHETIC_TABLE=0 ______Tabella di sistesi
+	// __- MEDIUM_PER_HOURS=1 _____Tabella del giorno medio
+	// __- MEDIUM_PER_DAYS=2 ______Tabella con statistiche giornaliere
+	// __- CHART=3 ________________Matrice oraria
+	// - identificatori tabelle per reportistica "annuale"
+	// __- SYNTHETIC_TABLE=0 _____ Tabella di sistesi
+	// __- MEDIUM_PER_MONTHS=4 ___ Tabella con statistiche mensili
+	// __- MEDIUM_PER_HOURS=1 ____ Tabella del giorno medio
+	// __- MEDIUM_PER_DAYSWEEK=5 _ Tabella con statistiche per giorni della settimana
+	// __- PERCENTILES=6 _________ Tabella dei percentili
+	// "language": specifica il linguaggio da utilizzare IT o EN (deafult: IT)
+	// Dati della POST: lista identificatori dei sensori su cui effettuare la reportistica, in formato
+	// JSON
+	// es: ["13.001272.806.PM10_B","13.001270.801.05"]
+
+	// POST
+	// https://<server_name>/ariaweb/airvalidsrv/report/daily/reg?date=1696114800000&verificationLevel=3
+	// Dati POST: ["13.001270.801.05"]
+	// POST
+	// https://<server_name>/ariaweb/airvalidsrv/report/variable/reg?beginDate=1696114800000&endDate=1698706800000&verificationLevel=3
+	// Dati POST: ["13.001270.801.05"]
+	// POST https://<server_name>/ariaweb/airvalidsrv/report/yearly/reg?year=2023&verificationLevel=3
+	// Dati POST: ["13.001270.801.05"]
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/report/{type}/{dbId}")
+	public void doReport(final @Suspended AsyncResponse asyncResponse,
+			@HeaderParam(BASIC_AUTH_HEADER) final String basic, @HeaderParam(SHIB_AUTH_ID) final String auth,
+			@PathParam("type") final String type, @PathParam("dbId") final String dbId,
+			@QueryParam("date") final String date, @QueryParam("beginDate") final String beginDate,
+			@QueryParam("endDate") final String endDate, @QueryParam("year") final String year,
+			@QueryParam("validatedDataOnly") final Boolean validatedDataOnly,
+			@QueryParam("displayColors") final Boolean displayColors,
+			@QueryParam("displayNetNames") final Boolean displayNetNames,
+			@QueryParam("anagraphInfoByRows") final Boolean anagraphInfoByRows,
+			@QueryParam("tableIds") final List<Integer> tableIds, @QueryParam("language") final String language,
+			final List<String> listSensorId) {
+		runTask(new ServiceTask(
+				"POST /report/" + type + "/" + dbId + BEGINDATE_EQ + beginDate + ENDDATE_EQ + endDate + YEAR_EQ + year
+						+ VALIDATED_DATA_ONLY_EQ + validatedDataOnly + ", displayColors=" + displayColors
+						+ ", displayNetNames=" + displayNetNames + ", anagraphInfoByRows=" + anagraphInfoByRows
+						+ LANGUAGE_EQ + language + SENSOR_IDS_EQ + listSensorId + ", tableIds=" + tableIds,
+				asyncResponse) {
+			@Override
+			public Object execute() throws AuthException, ElaborationException {
+				checkAuthorization(basic, auth, FN_VALIDAZIONE, false, false);
+				for (String sensorId : listSensorId)
+					checkSensorAllowed(basic, auth, sensorId, false, false);
+				boolean useValidateData = !Boolean.FALSE.equals(validatedDataOnly);
+				lg.debug("Use validated data = " + useValidateData);
+				boolean _displayNetNames = displayNetNames == null ? true : displayNetNames;
+				lg.debug("Display net names = " + _displayNetNames);
+				return doReport(dbId, type, useValidateData, Boolean.TRUE.equals(displayColors), _displayNetNames,
+						Boolean.TRUE.equals(anagraphInfoByRows), tableIds, listSensorId, param2DateObj(date, DATE),
+						param2DateObj(beginDate, BEGIN_DATE), param2DateObj(endDate, END_DATE),
+						param2IntegerObj(year, YEAR), language);
+			}
+		});
+	}
+
+	// Effettua la reportistica del tipo richiesto e restituisce il risultato in
+	// formato Html
+	// {type}: tipo di reportistica daily=giornaliera variable=periodo variabile yearly=annuale
+	// {dbId}: identificatore del data base reg=regionale cop=Arpa per validazione
+	// "date": data del giorno su cui effettuare la reportistica (solo per type=daily)
+	// "beginDate": data di inizio (solo per type=variable)
+	// "endDate": data di fine (solo per type=variable)
+	// "year": anno su cui effettuare la reportistica (solo per type=yearly)
+	// "validatedDataOnly": utilizza solo dati validati (default: true)
+	// "displayColors": attiva la generazione dei colori di evidenziazione (deafult: false)
+	// "displayNetNames": attiva la visualizzazione dei nomi delle reti (default: true)
+	// "anagraphInfoByRows": visualizza le informazioni anagrafiche nelle righe (deafult: false)
+	// "simpleStyle": utilizza stile semplice per l'html (deafult: true)
+	// "tableIds": identificatori delle tabelle da generare (default: tutte),
+	// dipendono dal tipo di reportistica:
+	// - identificatori tabelle per reportistica "periodo variabile"
+	// __- SYNTHETIC_TABLE=0 ______Tabella di sistesi
+	// __- MEDIUM_PER_HOURS=1 _____Tabella del giorno medio
+	// __- MEDIUM_PER_DAYS=2 ______Tabella con statistiche giornaliere
+	// __- CHART=3 ________________Matrice oraria
+	// - identificatori tabelle per reportistica "annuale"
+	// __- SYNTHETIC_TABLE=0 _____ Tabella di sistesi
+	// __- MEDIUM_PER_MONTHS=4 ___ Tabella con statistiche mensili
+	// __- MEDIUM_PER_HOURS=1 ____ Tabella del giorno medio
+	// __- MEDIUM_PER_DAYSWEEK=5 _ Tabella con statistiche per giorni della settimana
+	// __- PERCENTILES=6 _________ Tabella dei percentili
+	// "language": specifica il linguaggio da utilizzare IT o EN (deafult: IT)
+	// Dati della POST: lista identificatori dei sensori su cui effettuare la reportistica, in formato
+	// JSON
+	// es: ["13.001272.806.PM10_B","13.001270.801.05"]
+
+	// POST
+	// https://<server_name>/ariaweb/airvalidsrv/htmlreport/daily/reg?date=1696114800000&verificationLevel=3
+	// Dati POST: ["13.001270.801.05"]
+	// POST
+	// https://<server_name>/ariaweb/airvalidsrv/htmlreport/variable/reg?beginDate=1696114800000&endDate=1698706800000&verificationLevel=3
+	// Dati POST: ["13.001270.801.05"]
+	// POST
+	// https://<server_name>/ariaweb/airvalidsrv/htmlreport/yearly/reg?year=2023&verificationLevel=3
+	// Dati POST: ["13.001270.801.05"]
+	@POST
+	@Produces(MediaType.TEXT_HTML)
+	@Path("/htmlreport/{type}/{dbId}")
+	public void doHtmlReport(final @Suspended AsyncResponse asyncResponse,
+			@HeaderParam(BASIC_AUTH_HEADER) final String basic, @HeaderParam(SHIB_AUTH_ID) final String auth,
+			@PathParam("type") final String type, @PathParam("dbId") final String dbId,
+			@QueryParam("date") final String date, @QueryParam("beginDate") final String beginDate,
+			@QueryParam("endDate") final String endDate, @QueryParam("year") final String year,
+			@QueryParam("validatedDataOnly") final Boolean validatedDataOnly,
+			@QueryParam("displayColors") final Boolean displayColors,
+			@QueryParam("displayNetNames") final Boolean displayNetNames,
+			@QueryParam("anagraphInfoByRows") final Boolean anagraphInfoByRows,
+			@QueryParam("simpleStyle") final Boolean simpleStyle, @QueryParam("tableIds") final List<Integer> tableIds,
+			@QueryParam("language") final String language, final List<String> listSensorId) {
+		runTask(new ServiceTask("POST /htmlreport/" + type + "/" + dbId + BEGINDATE_EQ + beginDate + ENDDATE_EQ
+				+ endDate + YEAR_EQ + year + VALIDATED_DATA_ONLY_EQ + validatedDataOnly + ", displayColors="
+				+ displayColors + ", displayNetNames=" + displayNetNames + ", anagraphInfoByRows=" + anagraphInfoByRows
+				+ ", simpleStyle=" + simpleStyle + LANGUAGE_EQ + language + SENSOR_IDS_EQ + listSensorId + ", tableIds="
+				+ tableIds, asyncResponse) {
+			@Override
+			public Object execute() throws AuthException, ElaborationException {
+				checkAuthorization(basic, auth, FN_VALIDAZIONE, false, false);
+				for (String sensorId : listSensorId)
+					checkSensorAllowed(basic, auth, sensorId, false, false);
+				boolean useValidateData = !Boolean.FALSE.equals(validatedDataOnly);
+				lg.debug("Use validated data = " + useValidateData);
+				boolean _displayNetNames = displayNetNames == null ? true : displayNetNames;
+				boolean _simpleStyle = simpleStyle == null ? true : simpleStyle;
+				lg.debug("Display net names = " + _displayNetNames);
+				ReportResult reportResult = doReport(dbId, type, useValidateData, Boolean.TRUE.equals(displayColors),
+						_displayNetNames, Boolean.TRUE.equals(anagraphInfoByRows), tableIds, listSensorId,
+						param2DateObj(date, DATE), param2DateObj(beginDate, BEGIN_DATE),
+						param2DateObj(endDate, END_DATE), param2IntegerObj(year, YEAR), language);
+				return renderReportToHtml(reportResult, _simpleStyle);
+			}
+		});
+	}
+
+	@GET
+	@Produces(MediaType.TEXT_PLAIN)
+	@Path("/report/version")
+	public void getReportlibVersion(final @Suspended AsyncResponse asyncResponse,
+			@HeaderParam(BASIC_AUTH_HEADER) final String basic, @HeaderParam(SHIB_AUTH_ID) final String auth) {
+		runTask(new ServiceTask("GET /report/version", asyncResponse) {
+			@Override
+			public Object execute() throws AuthException, ElaborationException {
+				checkAuthorization(basic, auth, FN_VALIDAZIONE, false, false);
+				return ReportUtils.VER;
+			}
+		});
+	}
+
+	// Restituisce l'elenco dei report specialistici supportati
+	// "language": specifica il linguaggio da utilizzare IT o EN (deafult: IT)
+	// https://<server_name>/ariaweb/airvalidsrv/specreports?language=IT
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/specreports")
+	public void getSpecReportNames(final @Suspended AsyncResponse asyncResponse,
+			@HeaderParam(BASIC_AUTH_HEADER) final String basic, @HeaderParam(SHIB_AUTH_ID) final String auth,
+			@QueryParam("language") final String language) {
+		runTask(new ServiceTask("GET /specreports " + LANGUAGE_EQ + language, asyncResponse) {
+			@Override
+			public Object execute() throws AuthException, ElaborationException {
+				checkAuthorization(basic, auth, FN_VALIDAZIONE, false, false);
+				ReportFactory rf = ReportFactory.getInstance(Utils.getMessages(language));
+				return rf.listReports();
+			}
+		});
+	}
+
+	// Restituisce le informazioni relative al report specialistico specificato
+	// {reportId}: identificatore del report specialistico
+	// "language": specifica il linguaggio da utilizzare IT o EN (deafult: IT)
+	// https://<server_name>/ariaweb/airvalidsrv/specreports/persistence_analysis?language=IT
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/specreports/{reportId}")
+	public void getSpecReport(final @Suspended AsyncResponse asyncResponse,
+			@HeaderParam(BASIC_AUTH_HEADER) final String basic, @HeaderParam(SHIB_AUTH_ID) final String auth,
+			@PathParam("reportId") final String reportId, @QueryParam("language") final String language) {
+		runTask(new ServiceTask("GET /specreports " + LANGUAGE_EQ + language, asyncResponse) {
+			@Override
+			public Object execute() throws AuthException, ElaborationException {
+				checkAuthorization(basic, auth, FN_VALIDAZIONE, false, false);
+				ReportFactory rf = ReportFactory.getInstance(Utils.getMessages(language));
+				return rf.getReportDetail(reportId);
+			}
+		});
+	}
+
+	// Restituisce l'anagrafica da selezionare relativa al report specialistico specificato
+	// {reportId}: identificatore del report specialistico
+	// {dbId}: identificatore del data base reg=regionale cop=Arpa per validazione
+	// {beginTime}: inizio dell'intervallo temporale
+	// {endTime}: fine dell'intervallo temporale
+	// "itemType": tipo di oggetto di anagrafica (NETWORK, STATION, PARAMETER, SENSOR)
+	// "itemIds": elenco di chiavi del tipo specificato (&itemIds=22.004003.800&itemIds=....)
+	// "language": specifica il linguaggio da utilizzare IT o EN (deafult: IT)
+	// https://<server_name>/ariaweb/airvalidsrv/specreports/persistence_analysis/anagraph/reg/1704063600000/1706742000000?language=IT
+	// https://<server_name>/ariaweb/airvalidsrv/specreports/persistence_analysis/anagraph/reg/1704063600000/1706742000000?itemType=network&itemIds=22&itemIds=50
+	// https://<server_name>/ariaweb/airvalidsrv/specreports/persistence_analysis/anagraph/reg/1704063600000/1706742000000?itemType=station&itemIds=22.004003.800&itemIds=50.005120.800
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/specreports/{reportId}/anagraph/{dbId}/{beginTime}/{endTime}")
+	public void getSpecReportOptions(final @Suspended AsyncResponse asyncResponse,
+			@HeaderParam(BASIC_AUTH_HEADER) final String basic, @HeaderParam(SHIB_AUTH_ID) final String auth,
+			@PathParam("reportId") final String reportId, @PathParam("dbId") final String dbId,
+			@PathParam("beginTime") final Long beginTime, @PathParam("endTime") final Long endTime,
+			@QueryParam("itemType") final String itemType, @QueryParam("itemIds") final List<String> listAnagraphIds,
+			@QueryParam("language") final String language) {
+		runTask(new ServiceTask("GET /specreports/" + reportId + "/anagraph/" + dbId + "/" + beginTime + "/" + endTime
+				+ ITEM_TYPE_EQ + itemType + ITEM_IDS_EQ + listAnagraphIds + LANGUAGE_EQ + language, asyncResponse) {
+			@Override
+			public Object execute() throws AuthException, ElaborationException {
+				checkAuthorization(basic, auth, FN_VALIDAZIONE, false, false);
+				ReportFactory rf = ReportFactory.getInstance(Utils.getMessages(language));
+				SpecReport report = rf.newReport(reportId, beginTime, endTime);
+				return report.getAnagraph(getAnagraphCache(dbId), getUserCache(basic, auth), getAuthCache(), itemType,
+						listAnagraphIds);
+			}
+		});
+	}
+
+	// Esegue in background il report specialistico specificato, restituisce UUID per recupero stato e
+	// risultato
+	// {reportId}: identificatore del report specialistico
+	// {dbId}: identificatore del data base reg=regionale cop=Arpa per validazione
+	// {beginTime}: inizio dell'intervallo temporale
+	// {endTime}: fine dell'intervallo temporale
+	// "itemType": tipo di oggetto di anagrafica (NETWORK, STATION, PARAMETER, SENSOR)
+	// "verificationLevel": livello minimo di verifica richiesto (opzionale, default=2 'preliminary')
+	// "language": specifica il linguaggio da utilizzare IT o EN (deafult: IT)
+	// Dati della POST: lista di chiavi del tipo specificato su cui effettuare il report, in formato
+	// JSON
+	// es: ["22.004003.800.04","50.005120.800.04"]
+	// POST
+	// https://<server_name>/ariaweb/airvalidsrv/specreports/persistence_analysis/execute/reg/1672527600000/1704063600000?itemType=sensor&verificationLevel=2
+	// Dati POST: ["22.004003.800.04","50.005120.800.04"]
+	// POST
+	// https://<server_name>/ariaweb/airvalidsrv/specreports/no2_nox_ratio/execute/reg/1704063600000/1706742000000?itemType=station
+	// Dati POST: ["22.004003.800","22.004029.801"]
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/specreports/{reportId}/execute/{dbId}/{beginTime}/{endTime}")
+	public void executeSpecReport(final @Suspended AsyncResponse asyncResponse,
+			@HeaderParam(BASIC_AUTH_HEADER) final String basic, @HeaderParam(SHIB_AUTH_ID) final String auth,
+			@PathParam("reportId") final String reportId, @PathParam("dbId") final String dbId,
+			@PathParam("beginTime") final Long beginTime, @PathParam("endTime") final Long endTime,
+			@QueryParam("itemType") final String itemType,
+			@QueryParam("verificationLevel") final String verificationLevel,
+			@QueryParam("language") final String language, final List<String> listAnagraphIds) {
+		runDeferredTask(
+				new ServiceTask(
+						"GET /specreports/" + reportId + "/execute/" + dbId + "/" + beginTime + "/" + endTime
+								+ ITEM_TYPE_EQ + itemType + ITEM_IDS_EQ + listAnagraphIds + LANGUAGE_EQ + language,
+						asyncResponse) {
+					@Override
+					public Object execute() throws AuthException, ElaborationException, DeferredTaskException {
+						checkAuthorization(basic, auth, FN_VALIDAZIONE, false, false);
+						Short verifLevel = param2ShortObj(verificationLevel, VERIFICATION_LEVEL);
+						if (verifLevel == null)
+							verifLevel = DBConstants.VERIFICATION_PRELIMINARY;
+						ReportFactory rf = ReportFactory.getInstance(Utils.getMessages(language));
+						SpecReport report = rf.newReport(reportId, beginTime, endTime);
+						String _itemType = report.getExecutionType(itemType);
+						MatchType mt = null;
+						if (ReportAnagraph.isItemType(ItemType.NETWORK, _itemType))
+							mt = MatchType.NET;
+						else if (ReportAnagraph.isItemType(ItemType.STATION, _itemType))
+							mt = MatchType.STATION;
+						else if (ReportAnagraph.isItemType(ItemType.SENSOR, _itemType))
+							mt = MatchType.SENSOR;
+						// Qualora si dovessero implementare dei report che lavorano per parametro, bisognerà gestire
+						// il controllo delle autorizzazioni dopo aver determinato i sensori da utilizzare
+						if (listAnagraphIds != null && mt != null)
+							for (String itemId : listAnagraphIds)
+								checkItemAllowed(basic, auth, mt, itemId, false, false);
+						return report.execute(this, getAnagraphCache(dbId), getUserCache(basic, auth), getAuthCache(),
+								getAirDbServiceClient(dbId), _itemType, listAnagraphIds, verifLevel);
+					}
+				});
+	}
+
+	// Recupera stato e risultato di un'operazione eseguita in background
+	// {uuid} identificativo univoco dell'operazione
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/deferredtask/result/{uuid}")
+	public void getDeferredTaskResult(final @Suspended AsyncResponse asyncResponse,
+			@HeaderParam(BASIC_AUTH_HEADER) final String basic, @HeaderParam(SHIB_AUTH_ID) final String auth,
+			@PathParam("uuid") final String uuid) {
+		runTask(new ServiceTask("GET /deferredtask/result/" + uuid, asyncResponse) {
+			@Override
+			public Object execute() throws ExecutionException, InterruptedException, AuthException {
+				checkAuthorization(basic, auth, FN_VALIDAZIONE, false, false);
+				return getDeferredTaskResult(uuid);
+			}
+		});
+	}
+
+	// Chiede di interrompere un'operazione eseguita in background
+	// {uuid} identificativo univoco dell'operazione
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/deferredtask/cancel/{uuid}")
+	public void cancelDeferredTask(final @Suspended AsyncResponse asyncResponse,
+			@HeaderParam(BASIC_AUTH_HEADER) final String basic, @HeaderParam(SHIB_AUTH_ID) final String auth,
+			@PathParam("uuid") final String uuid) {
+		runTask(new ServiceTask("GET /deferredtask/cancel/" + uuid, asyncResponse) {
+			@Override
+			public Object execute() throws AuthException, InterruptedException {
+				checkAuthorization(basic, auth, FN_VALIDAZIONE, false, false);
+				return cancelDeferredTask(uuid);
 			}
 		});
 	}

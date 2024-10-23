@@ -10,6 +10,8 @@ public class SensorId {
 		NET, STATION, SENSOR
 	};
 
+	public static final String WILDCARD = "*";
+
 	private String netId;
 	private String cityId;
 	private String itemId;
@@ -32,9 +34,9 @@ public class SensorId {
 		this.cityId = fields[1];
 		this.itemId = fields[2];
 		this.parameterId = fields[3];
-		this.netId_re = "*".equals(netId) ? ".?." : netId;
-		this.cityId_re = "*".equals(cityId) ? ".?.?.?.?.?." : cityId;
-		this.itemId_re = "*".equals(itemId) ? "[0-9]+" : itemId;
+		this.netId_re = WILDCARD.equals(netId) ? ".?." : netId;
+		this.cityId_re = WILDCARD.equals(cityId) ? ".?.?.?.?.?." : cityId;
+		this.itemId_re = WILDCARD.equals(itemId) ? "[0-9]+" : itemId;
 		this.parameterId_re = "*".equals(parameterId) ? ".+" : parameterId;
 	}
 
@@ -67,6 +69,10 @@ public class SensorId {
 		default:
 			return false;
 		}
+	}
+
+	public String getNetworkId() {
+		return netId;
 	}
 
 	@Override

@@ -101,4 +101,10 @@ public abstract class TimelyElaboration extends Elaboration {
 	public TimeBase getTimeBase() {
 		return TimeBase.TIME;
 	}
+
+	@Override
+	public PlotType getPlotType() {
+		return PlotType.LINEAR;
+	}
+
 }

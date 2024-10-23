@@ -9,15 +9,15 @@ import java.util.Date;
 public class DailyValue extends Value {
 
 	public DailyValue(Date timestamp) {
-		super(ElabUtils.getDay(timestamp));
+		super(timestamp);
 	}
 
 	public DailyValue(Date timestamp, Double value) {
-		super(ElabUtils.getDay(timestamp), value);
+		super(timestamp, value);
 	}
 
 	public DailyValue(Date timestamp, Double value, Double error) {
-		super(ElabUtils.getDay(timestamp), value, error);
+		super(timestamp, value, error);
 	}
 
 }

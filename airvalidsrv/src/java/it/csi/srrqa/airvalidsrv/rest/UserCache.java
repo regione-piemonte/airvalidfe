@@ -17,10 +17,12 @@ public class UserCache {
 
 	private static final int EXPIRY_TIME_MIN = 5;
 	public static final String FUNCTION_VALIDAZIONE = "validazione";
+	public static final String FUNCTION_APP_ADMIN = "app_admin";
 	private AuthClientProvider clientProvider;
 	private String userKey;
 	private CacheItem<Utente> user;
 	private CacheItem<FunctionFlags> validationFlags;
+	private CacheItem<FunctionFlags> appAdminFlags;
 	private CacheItem<Map<Integer, FunctionFlags>> srrqaDomainFlagsMap;
 
 	public UserCache(AuthClientProvider authClientProvider, final String userKey, final boolean enableShibbolet) {
@@ -41,6 +43,13 @@ public class UserCache {
 						user.getItem().getIdUtente());
 			}
 		};
+		appAdminFlags = new CacheItem<FunctionFlags>(EXPIRY_TIME_MIN) {
+			@Override
+			protected FunctionFlags loadItem() {
+				return clientProvider.getAuthServiceClient().getFunctionFlags(FUNCTION_APP_ADMIN,
+						user.getItem().getIdUtente());
+			}
+		};
 		srrqaDomainFlagsMap = new CacheItem<Map<Integer, FunctionFlags>>(EXPIRY_TIME_MIN) {
 			@Override
 			protected Map<Integer, FunctionFlags> loadItem() {
@@ -55,6 +64,7 @@ public class UserCache {
 	public void invalidate() {
 		user.invalidate();
 		validationFlags.invalidate();
+		appAdminFlags.invalidate();
 		srrqaDomainFlagsMap.invalidate();
 	}
 
@@ -80,9 +90,19 @@ public class UserCache {
 		}
 	}
 
+	public FunctionFlags getAppAdminFlags() throws AuthException {
+		try {
+			return appAdminFlags.getItem();
+		} catch (Exception e) {
+			throw new AuthException("Cannot read permissions for username '" + userKey + "'", e);
+		}
+	}
+
 	public FunctionFlags getFunctionFlags(String function) throws AuthException {
 		if (FUNCTION_VALIDAZIONE.equals(function))
 			return getValidationFlags();
+		else if (FUNCTION_APP_ADMIN.equals(function))
+			return getAppAdminFlags();
 		return null;
 	}
 

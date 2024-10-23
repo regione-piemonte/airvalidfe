@@ -18,7 +18,8 @@ public class CalibrationInfo extends Calibration {
 	public CalibrationInfo(Calibration cal) {
 		super(cal.getCodice_istat_comune(), cal.getProgr_punto_com(), cal.getId_parametro(), cal.getTicketId(),
 				cal.getInstrumentId(), cal.getBeginDate(), cal.getEndDate(), cal.getYearly(), cal.getZero(),
-				cal.getSpan(), cal.getCylinderConcentration(), cal.getConverterEfficiency());
+				cal.getSpan(), cal.getCylinderConcentration(), cal.getConverterEfficiency(),
+				cal.getCalibrationApplied());
 	}
 
 	public CalibrationInfo(Calibration cal, boolean timeFound) {

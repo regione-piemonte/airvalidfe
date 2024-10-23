@@ -1,0 +1,61 @@
+[
+	{
+		"id_parametro": "01",
+		"alarmThreshold": 500,
+		"healthHourlyThreshold": 350,
+		"healthDailyThreshold": 125
+	},
+	{
+		"id_parametro": "02",
+		"health8HoursThreshold": 10
+	},
+	{
+		"id_parametro": "04",
+		"alarmThreshold": 400,
+		"healthHourlyThreshold": 200
+	},
+	{
+		"id_parametro": "05",
+		"attentionThreshold": 180,
+		"alarmThreshold": 240,
+		"health8HoursThreshold": 120,
+		"vegetationThreshold": 40,
+		"mm8h_over_100": 100
+	},
+	{
+		"id_parametro": "PM10_T",
+		"healthDailyThreshold": 50
+	},
+	{
+		"id_parametro": "PM10_GAV",
+		"healthDailyThreshold": 50
+	},
+	{
+		"id_parametro": "PM10_GBV",
+		"healthDailyThreshold": 50
+	},
+	{
+		"id_parametro": "PM10_B",
+		"healthDailyThreshold": 50
+	},
+	{
+		"id_parametro": "PM10_BH",
+		"healthDailyThreshold": 50
+	},
+	{
+		"id_parametro": "PM10_BD",
+		"healthDailyThreshold": 50
+	},
+	{
+		"id_parametro": "PM10_N",
+		"healthDailyThreshold": 50
+	},
+	{
+		"id_parametro": "PM10TCON",
+		"healthDailyThreshold": 50
+	},
+	{
+		"id_parametro": "PM10TSTD",
+		"healthDailyThreshold": 50
+	}
+]

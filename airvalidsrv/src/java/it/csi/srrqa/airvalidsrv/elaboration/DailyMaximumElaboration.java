@@ -50,9 +50,9 @@ public class DailyMaximumElaboration extends DailyElaboration {
 				Double value = getDatumValue(datum, numDecimals);
 				if (value != null && value.doubleValue() > maxValue) {
 					maxValue = value;
-					tempMax = new DailyValue(datum.getTimestamp(), value);
+					tempMax = new DailyValue(ElabUtils.getDay(datum.getTimestamp()), value);
 				} else
-					dailyDate = datum.getTimestamp();
+					dailyDate = ElabUtils.getDay(datum.getTimestamp());
 			}
 			if (tempMax != null && tempMax.getValue() != null) {
 				resultValues[i] = tempMax;

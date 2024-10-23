@@ -11,9 +11,11 @@ public class DataLock implements Serializable {
 
 	private static final long serialVersionUID = -8085451376361578587L;
 	private String measurementId;
-	private Integer year;
+	private Integer beginYear;
+	private Integer endYear;
 	private String userId;
 	private String userInfo;
+	private String contextId;
 	private Date date;
 	private boolean locked;
 	private Boolean myLock;
@@ -21,17 +23,20 @@ public class DataLock implements Serializable {
 	public DataLock() {
 	}
 
-	public DataLock(String measurementId, Integer year, String userId, String userInfo) {
-		this(measurementId, year, userId, userInfo, new Date(), true, null);
+	public DataLock(String measurementId, Integer beginYear, Integer endYear, String userId, String userInfo,
+			String contextId) {
+		this(measurementId, beginYear, endYear, userId, userInfo, contextId, new Date(), true, null);
 	}
 
-	public DataLock(String measurementId, Integer year, String userId, String userInfo, Date date, boolean locked,
-			Boolean myLock) {
+	public DataLock(String measurementId, Integer beginYear, Integer endYear, String userId, String userInfo,
+			String contextId, Date date, boolean locked, Boolean myLock) {
 		super();
 		this.measurementId = measurementId;
-		this.year = year;
+		this.beginYear = beginYear;
+		this.endYear = endYear;
 		this.userId = userId;
 		this.userInfo = userInfo;
+		this.contextId = contextId;
 		this.date = date;
 		this.locked = locked;
 		this.myLock = myLock;
@@ -45,12 +50,20 @@ public class DataLock implements Serializable {
 		this.measurementId = measurementId;
 	}
 
-	public Integer getYear() {
-		return year;
+	public Integer getBeginYear() {
+		return beginYear;
 	}
 
-	public void setYear(Integer year) {
-		this.year = year;
+	public void setBeginYear(Integer beginYear) {
+		this.beginYear = beginYear;
+	}
+
+	public Integer getEndYear() {
+		return endYear;
+	}
+
+	public void setEndYear(Integer endYear) {
+		this.endYear = endYear;
 	}
 
 	public String getUserId() {
@@ -67,6 +80,14 @@ public class DataLock implements Serializable {
 
 	public void setUserInfo(String userInfo) {
 		this.userInfo = userInfo;
+	}
+
+	public String getContextId() {
+		return contextId;
+	}
+
+	public void setContextId(String contextId) {
+		this.contextId = contextId;
 	}
 
 	public Date getDate() {
@@ -95,12 +116,13 @@ public class DataLock implements Serializable {
 
 	@Override
 	public String toString() {
-		return "DataLock [measurementId=" + measurementId + ", year=" + year + ", userId=" + userId + ", date=" + date
+		return "DataLock [measurementId=" + measurementId + ", beginYear=" + beginYear + ", endYear=" + endYear
+				+ ", userId=" + userId + ", userInfo=" + userInfo + ", contextId=" + contextId + ", date=" + date
 				+ ", locked=" + locked + ", myLock=" + myLock + "]";
 	}
 
 	public DataLock copy(boolean myLock) {
-		return new DataLock(measurementId, year, userId, userInfo, date, locked, myLock);
+		return new DataLock(measurementId, beginYear, endYear, userId, userInfo, contextId, date, locked, myLock);
 	}
 
 }

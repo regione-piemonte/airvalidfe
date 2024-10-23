@@ -32,4 +32,9 @@ public class ScalingElaboration extends Elaboration {
 		return TimeBase.TIMESTAMP;
 	}
 
+	@Override
+	public PlotType getPlotType() {
+		return PlotType.LINEAR;
+	}
+
 }

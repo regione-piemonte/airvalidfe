@@ -14,15 +14,17 @@ public class SensorNameWithKeyAndPeriod extends NameWithKeyAndPeriod {
 	private String measureUnitId;
 	private Integer measurementPeriod;
 	private Integer decimalDigits;
+	private Boolean virtual;
 	private boolean correctionSupported;
 
 	public SensorNameWithKeyAndPeriod(String name, String key, boolean active, String extraInfo, String flags,
 			Date beginDate, Date endDate, String measureUnitId, Integer measurementPeriod, Integer decimalDigits,
-			boolean correctionSupported) {
+			Boolean virtual, boolean correctionSupported) {
 		super(name, key, active, extraInfo, flags, beginDate, endDate);
 		this.measureUnitId = measureUnitId;
 		this.measurementPeriod = measurementPeriod;
 		this.decimalDigits = decimalDigits;
+		this.virtual = virtual;
 		this.correctionSupported = correctionSupported;
 	}
 
@@ -50,6 +52,14 @@ public class SensorNameWithKeyAndPeriod extends NameWithKeyAndPeriod {
 		this.decimalDigits = decimalDigits;
 	}
 
+	public Boolean getVirtual() {
+		return virtual;
+	}
+
+	public void setVirtual(Boolean virtual) {
+		this.virtual = virtual;
+	}
+
 	public boolean isCorrectionSupported() {
 		return correctionSupported;
 	}
@@ -63,8 +73,8 @@ public class SensorNameWithKeyAndPeriod extends NameWithKeyAndPeriod {
 		return "SensorNameWithKeyAndPeriod [name=" + getName() + ", key=" + getKey() + ", active=" + isActive()
 				+ ", extraInfo=" + getExtraInfo() + ", flags=" + getFlags() + ", beginDate=" + getBeginDate()
 				+ ", endDate=" + getEndDate() + ", measureUnitId=" + measureUnitId + ", measurementPeriod="
-				+ measurementPeriod + ", decimalDigits=" + decimalDigits + ", correctionSupported="
-				+ correctionSupported + "]";
+				+ measurementPeriod + ", decimalDigits=" + decimalDigits + ", virtual=" + virtual
+				+ ", correctionSupported=" + correctionSupported + "]";
 	}
 
 }

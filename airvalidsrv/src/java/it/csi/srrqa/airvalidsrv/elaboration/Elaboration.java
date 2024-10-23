@@ -20,6 +20,10 @@ public abstract class Elaboration implements ElaborationItf {
 	public enum TimeBase {
 		TIMESTAMP, DATE, TIME, WEEKTIME, TIMESTAMP_NO_YEAR, TIMESTAMP_NO_YEAR_MONTH, NONE;
 	}
+	
+	public enum PlotType {
+		LINEAR, HISTOGRAM, SCATTER_PLOT
+	}
 
 	public static final int ADDITIONAL_DECIMALS_FOR_ERROR = 1;
 
@@ -55,7 +59,7 @@ public abstract class Elaboration implements ElaborationItf {
 		if (dataPeriodMinutes <= 0)
 			throw new IllegalArgumentException("Data period should be positive");
 		Value[] values = computeImpl(data, dataPeriodMinutes, numDecimals);
-		return new ElaborationResult(getId(), name, getTimeBase(), values);
+		return new ElaborationResult(getId(), name, getTimeBase(), getPlotType(), values);
 	}
 
 	@Override

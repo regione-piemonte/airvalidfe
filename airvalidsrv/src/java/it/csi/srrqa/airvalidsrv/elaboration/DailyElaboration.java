@@ -36,7 +36,7 @@ public abstract class DailyElaboration extends Elaboration {
 				MeasureValue datum = data.get((numDatumInDay * i) + j);
 				// verify that date is the same for all data of the day
 				if (!ElabUtils.getDay(datum.getTimestamp()).equals(dayDate))
-					throw new ElaborationException("Error: date not consistent on day:" + dayDate);
+					throw new ElaborationException("Error: date not consistent on day '" + dayDate + "'");
 				Double doubleValue = getDatumValue(datum, numDecimals);
 				Date timestamp = datum.getTimestamp();
 				dayValues[j] = new Value(timestamp, doubleValue);
@@ -57,7 +57,7 @@ public abstract class DailyElaboration extends Elaboration {
 		Double doubleMeanValue = super.computeMean(values, minimumData, numDecimals);
 		Double error = doubleMeanValue == null ? null
 				: round(computeError(values, doubleMeanValue), numDecimalsForError);
-		return new DailyValue(values[0].getTimestamp(), doubleMeanValue, error);
+		return new DailyValue(ElabUtils.getDay(values[0].getTimestamp()), doubleMeanValue, error);
 	}
 
 	protected DailyValue computeDevStd(Value[] values, int dataPeriodMinutes, Integer numDecimals)
@@ -78,4 +78,10 @@ public abstract class DailyElaboration extends Elaboration {
 	public TimeBase getTimeBase() {
 		return TimeBase.DATE;
 	}
+
+	@Override
+	public PlotType getPlotType() {
+		return PlotType.LINEAR;
+	}
+
 }

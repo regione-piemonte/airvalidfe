@@ -53,7 +53,8 @@ public abstract class WeekBasedTimelyElaboration extends TimelyElaboration {
 
 	protected WeekTimelyValue computeMean(Value[] values, int dayOfWeek, Integer numDecimals)
 			throws ElaborationException {
-
+		if (values == null || values.length == 0)
+			throw new ElaborationException("Error: too few data for week based elaboration");
 		Integer numDecimalsForError = numDecimals == null ? null : numDecimals + 1;
 		Double doubleMeanValue = computeMean(values, (Integer) null, numDecimals);
 		Date timestamp = values[0].getTimestamp();

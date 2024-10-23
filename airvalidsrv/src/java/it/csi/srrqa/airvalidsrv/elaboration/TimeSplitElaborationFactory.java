@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
+import it.csi.srrqa.airvalidsrv.elaboration.Elaboration.PlotType;
 import it.csi.srrqa.airvalidsrv.elaboration.Elaboration.TimeBase;
 
 public class TimeSplitElaborationFactory implements ElaborationItf {
@@ -94,6 +95,11 @@ public class TimeSplitElaborationFactory implements ElaborationItf {
 	@Override
 	public TimeBase getTimeBase() {
 		return timeBase;
+	}
+
+	@Override
+	public PlotType getPlotType() {
+		return PlotType.LINEAR;
 	}
 
 }

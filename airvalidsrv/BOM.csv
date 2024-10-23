@@ -1,6 +1,6 @@
 name+version*,license*,Copyrights*,end-of-support,dependencies,language,repository,email,url
-airdb-model-1.1.1.jar,Apache-2.0; MIT (Rilasciata da CSI Piemonte su richiesta),CSI-Piemonte,-,-,Java,-,-,-
-airdbService-client-1.1.1.jar,Apache-2.0; MIT (Rilasciata da CSI Piemonte su richiesta),CSI-Piemonte,-,-,Java,-,-,-
+airdb-model-1.1.7.jar,Apache-2.0; MIT (Rilasciata da CSI Piemonte su richiesta),CSI-Piemonte,-,-,Java,-,-,-
+airdbService-client-1.1.7.jar,Apache-2.0; MIT (Rilasciata da CSI Piemonte su richiesta),CSI-Piemonte,-,-,Java,-,-,-
 auth-model-1.0.3.jar ,EUPL 1.2;CSI-Piemonte;-;-;Java;-;-;-
 authservice-client-1.0.1.jar,Apache-2.0; MIT (Rilasciata da CSI Piemonte su richiesta),CSI-Piemonte,-,-,Java,-,-,-
 commons-io-2.5.jar,Apache-2.0,-,-,-,Java,-,-,-
@@ -20,6 +20,7 @@ jboss-logging-annotations-2.1.0.Final.jar;Apache-2.0,-,-,-,Java,-,-,-
 json-patch-1.0.jar;LGPL,-,-,-,Java,-,-,-
 log4j-1.2.17.jar,Apache-2.0,-,-,-,Java,-,-,-
 reactive-streams-1.0.2.jar;CCO,-,-,-,Java,-,-,-
+reportisticalib-1.0.4.jar,Apache-2.0; MIT (Rilasciata da CSI Piemonte su richiesta),CSI-Piemonte,-,-,Java,-,-,-
 resteasy-client-3.7.0.Final.jar;Apache-2.0,-,-,-,Java,-,-,-
 resteasy-jackson2-provider-3.7.0.Final.jar;Apache-2.0,-,-,-,Java,-,-,-
 resteasy-jaxrs-3.7.0.Final.jar;Apache-2.0,-,-,-,Java,-,-,-

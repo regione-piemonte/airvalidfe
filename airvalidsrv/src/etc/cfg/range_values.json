@@ -1,0 +1,290 @@
+[
+	{
+		"paramMeanType": {
+			"id_parametro": "05",
+			"type": 2
+		},
+		"values": [
+			60,
+			120,
+			180,
+			240
+		]
+	},
+	{
+		"paramMeanType": {
+			"id_parametro": "05",
+			"type": 0
+		},
+		"values": [
+			90,
+			180,
+			210,
+			240
+		]
+	},
+	{
+		"paramMeanType": {
+			"id_parametro": "BENZENE",
+			"type": 3
+		},
+		"values": [
+			2,
+			3.5,
+			5,
+			10
+		]
+	},
+	{
+		"paramMeanType": {
+			"id_parametro": "01",
+			"type": 0
+		},
+		"values": [
+			140,
+			210,
+			350,
+			500
+		]
+	},
+	{
+		"paramMeanType": {
+			"id_parametro": "01",
+			"type": 1
+		},
+		"values": [
+			50,
+			75,
+			125,
+			150
+		]
+	},
+	{
+		"paramMeanType": {
+			"id_parametro": "02",
+			"type": 2
+		},
+		"values": [
+			5,
+			7,
+			10,
+			16
+		]
+	},
+	{
+		"paramMeanType": {
+			"id_parametro": "POL_PM10",
+			"type": 1
+		},
+		"values": [
+			20,
+			30,
+			50,
+			75
+		]
+	},
+	{
+		"paramMeanType": {
+			"id_parametro": "POL_PM10",
+			"type": 4
+		},
+		"values": [
+			10,
+			20,
+			40,
+			48
+		]
+	},
+	{
+		"paramMeanType": {
+			"id_parametro": "PM10_T",
+			"type": 1
+		},
+		"values": [
+			20,
+			30,
+			50,
+			75
+		]
+	},
+	{
+		"paramMeanType": {
+			"id_parametro": "PM10_T",
+			"type": 4
+		},
+		"values": [
+			10,
+			20,
+			40,
+			48
+		]
+	},
+	{
+		"paramMeanType": {
+			"id_parametro": "PM10_GAV",
+			"type": 1
+		},
+		"values": [
+			20,
+			30,
+			50,
+			75
+		]
+	},
+	{
+		"paramMeanType": {
+			"id_parametro": "PM10_GAV",
+			"type": 4
+		},
+		"values": [
+			10,
+			20,
+			40,
+			48
+		]
+	},
+	{
+		"paramMeanType": {
+			"id_parametro": "PM10_GBV",
+			"type": 1
+		},
+		"values": [
+			20,
+			30,
+			50,
+			75
+		]
+	},
+	{
+		"paramMeanType": {
+			"id_parametro": "PM10_GBV",
+			"type": 4
+		},
+		"values": [
+			10,
+			20,
+			40,
+			48
+		]
+	},
+	{
+		"paramMeanType": {
+			"id_parametro": "PM10_B",
+			"type": 1
+		},
+		"values": [
+			20,
+			30,
+			50,
+			75
+		]
+	},
+	{
+		"paramMeanType": {
+			"id_parametro": "PM10_B",
+			"type": 4
+		},
+		"values": [
+			10,
+			20,
+			40,
+			48
+		]
+	},
+	{
+		"paramMeanType": {
+			"id_parametro": "PM10_BH",
+			"type": 1
+		},
+		"values": [
+			20,
+			30,
+			50,
+			75
+		]
+	},
+	{
+		"paramMeanType": {
+			"id_parametro": "PM10_BH",
+			"type": 4
+		},
+		"values": [
+			10,
+			20,
+			40,
+			48
+		]
+	},
+	{
+		"paramMeanType": {
+			"id_parametro": "PM10_BD",
+			"type": 1
+		},
+		"values": [
+			20,
+			30,
+			50,
+			75
+		]
+	},
+	{
+		"paramMeanType": {
+			"id_parametro": "PM10_BD",
+			"type": 4
+		},
+		"values": [
+			10,
+			20,
+			40,
+			48
+		]
+	},
+	{
+		"paramMeanType": {
+			"id_parametro": "PM10_N",
+			"type": 1
+		},
+		"values": [
+			20,
+			30,
+			50,
+			75
+		]
+	},
+	{
+		"paramMeanType": {
+			"id_parametro": "PM10_N",
+			"type": 4
+		},
+		"values": [
+			10,
+			20,
+			40,
+			48
+		]
+	},
+	{
+		"paramMeanType": {
+			"id_parametro": "04",
+			"type": 0
+		},
+		"values": [
+			100,
+			140,
+			200,
+			300
+		]
+	},
+	{
+		"paramMeanType": {
+			"id_parametro": "04",
+			"type": 3
+		},
+		"values": [
+			26,
+			32,
+			40,
+			60
+		]
+	}
+]

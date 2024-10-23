@@ -6,6 +6,7 @@ package it.csi.srrqa.airvalidsrv.elaboration;
 
 import java.util.Date;
 
+import it.csi.srrqa.airvalidsrv.elaboration.Elaboration.PlotType;
 import it.csi.srrqa.airvalidsrv.elaboration.Elaboration.TimeBase;
 
 public interface ElaborationItf {
@@ -19,5 +20,7 @@ public interface ElaborationItf {
 	public String getName();
 
 	public TimeBase getTimeBase();
+
+	public PlotType getPlotType();
 
 }

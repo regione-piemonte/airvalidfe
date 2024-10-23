@@ -44,9 +44,9 @@ public class DailyMinimumElaboration extends DailyElaboration {
 				Double value = getDatumValue(datum, numDecimals);
 				if (value != null && value.doubleValue() < minValue) {
 					minValue = value;
-					tempMin = new DailyValue(datum.getTimestamp(), value);
+					tempMin = new DailyValue(ElabUtils.getDay(datum.getTimestamp()), value);
 				} else
-					dailyDate = datum.getTimestamp();
+					dailyDate = ElabUtils.getDay(datum.getTimestamp());
 			}
 
 			if (tempMin != null && tempMin.getValue() != null) {

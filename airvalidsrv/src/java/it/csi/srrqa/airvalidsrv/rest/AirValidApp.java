@@ -4,7 +4,10 @@
  */
 package it.csi.srrqa.airvalidsrv.rest;
 
+import java.io.File;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
@@ -18,9 +21,15 @@ import org.apache.log4j.PropertyConfigurator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
+import it.csi.srrqa.reportisticalib.report.RangeValues;
+import it.csi.srrqa.reportisticalib.report.ThresholdObject;
+
 public class AirValidApp extends Application {
 
 	public static final String LOGGER_BASENAME = "airvalidsrv.service";
+	private static final String CFG_DIR = "airvalidsrv/cfg";
+	private static final String THRESHOLDS_FILE = "thresholds.json";
+	private static final String RANGE_VALUES_FILE = "range_values.json";
 	private static Logger lg = Logger.getLogger(LOGGER_BASENAME + "." + AirValidApp.class.getSimpleName());
 	private Set<Object> singletons = new HashSet<Object>();
 
@@ -44,6 +53,11 @@ public class AirValidApp extends Application {
 				servletContext.getInitParameter("authServiceUser"), //
 				servletContext.getInitParameter("authServicePwd"));
 		lg.debug("Auth Service config: " + authServiceCfg);
+		ServiceConfig solrServiceCfg = new ServiceConfig(//
+				servletContext.getInitParameter("solrServiceURL"), //
+				servletContext.getInitParameter("solrServiceUser"), //
+				servletContext.getInitParameter("solrServicePwd"));
+		lg.debug("Solr Service config: " + solrServiceCfg);
 		boolean enableShibbolet = "true".equalsIgnoreCase(servletContext.getInitParameter("enableShibbolet"));
 		String strMeasureLockTimeout_m = servletContext.getInitParameter("measureLockTimeout_m");
 		int measureLockTimeout_m;
@@ -72,14 +86,18 @@ public class AirValidApp extends Application {
 			try {
 				referencePress_kPa = Double.parseDouble(strReferencePress_kPa);
 			} catch (Exception ex) {
-				throw new AppException("Cannot parse reference presuure '" + strReferencePress_kPa + "'");
+				throw new AppException("Cannot parse reference pressure '" + strReferencePress_kPa + "'");
 			}
 		}
 		lg.debug("Reference pressure is " + referencePress_kPa + " kPa");
 		MeasureCorrector corrector = new MeasureCorrector(referenceTemp_K, referencePress_kPa);
+		lg.debug("Loading configuration files...");
+		List<ThresholdObject> listThresholds = readThresholdsConfig();
+		List<RangeValues> listRangeValues = readRangeValuesConfig();
 		DataCache dataCache = (DataCache) servletContext.getAttribute(ContextListener.DATA_CACHE_ATTR_NAME);
-		singletons.add(new AirValidService(airDbServiceCfg, copDbServiceCfg, authServiceCfg, enableShibbolet,
-				measureLockTimeout_m, disableTrustManager, corrector, dataCache));
+		singletons.add(new AirValidService(airDbServiceCfg, copDbServiceCfg, authServiceCfg, solrServiceCfg,
+				enableShibbolet, measureLockTimeout_m, disableTrustManager, corrector, listThresholds, listRangeValues,
+				dataCache));
 		singletons.add(new ContextResolver<ObjectMapper>() {
 			@Override
 			public ObjectMapper getContext(Class<?> type) {
@@ -96,6 +114,38 @@ public class AirValidApp extends Application {
 	@Override
 	public Set<Object> getSingletons() {
 		return singletons;
+	}
+
+	private List<ThresholdObject> readThresholdsConfig() throws AppException {
+		File cfgDir = new File(CFG_DIR);
+		if (!cfgDir.isDirectory())
+			throw new AppException("Configuration folder '" + CFG_DIR + "' missing");
+		File thresholdsFile = new File(CFG_DIR + File.separator + THRESHOLDS_FILE);
+		if (!thresholdsFile.isFile())
+			throw new AppException("Thresolds configuration file '" + thresholdsFile.getPath() + "' missing");
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			return Arrays.asList(mapper.readValue(thresholdsFile, ThresholdObject[].class));
+		} catch (Exception ex) {
+			throw new AppException("Cannot read/parse thresolds configuration file '" + thresholdsFile.getPath() + "'",
+					ex);
+		}
+	}
+
+	private List<RangeValues> readRangeValuesConfig() throws AppException {
+		File cfgDir = new File(CFG_DIR);
+		if (!cfgDir.isDirectory())
+			throw new AppException("Configuration folder '" + CFG_DIR + "' missing");
+		File rangeValuesFile = new File(CFG_DIR + File.separator + RANGE_VALUES_FILE);
+		if (!rangeValuesFile.isFile())
+			throw new AppException("Range values configuration file '" + rangeValuesFile.getPath() + "' missing");
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			return Arrays.asList(mapper.readValue(rangeValuesFile, RangeValues[].class));
+		} catch (Exception ex) {
+			throw new AppException(
+					"Cannot read/parse range values configuration file '" + rangeValuesFile.getPath() + "'", ex);
+		}
 	}
 
 }

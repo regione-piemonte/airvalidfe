@@ -79,4 +79,10 @@ public abstract class HourlyElaboration extends Elaboration {
 	public TimeBase getTimeBase() {
 		return TimeBase.TIMESTAMP;
 	}
+
+	@Override
+	public PlotType getPlotType() {
+		return PlotType.LINEAR;
+	}
+
 }

@@ -49,4 +49,9 @@ public class GlobalMeanElaboration extends Elaboration {
 		return TimeBase.NONE;
 	}
 
+	@Override
+	public PlotType getPlotType() {
+		return PlotType.LINEAR;
+	}
+
 }
