@@ -24,7 +24,7 @@ export class ImpostazioniComponent implements OnInit {
     'parametri',
     'azioni'
   ]
-  
+
 
 
   constructor(
@@ -40,7 +40,7 @@ export class ImpostazioniComponent implements OnInit {
           'Rete 1', 'Rete 2', 'Rete 3'
         ],
         stazioni: [
-          'Stazione 1', 'Stazione 2', 'Stazione 3' 
+          'Stazione 1', 'Stazione 2', 'Stazione 3'
         ],
         parametri: [
           'Parametri 1', 'Parametri 2', 'Parametri 3'
@@ -53,7 +53,7 @@ export class ImpostazioniComponent implements OnInit {
           'Rete 1', 'Rete 2', 'Rete 3'
         ],
         stazioni: [
-          'Stazione 1', 'Stazione 2', 'Stazione 3' 
+          'Stazione 1', 'Stazione 2', 'Stazione 3'
         ],
         parametri: [
           'Parametri 1', 'Parametri 2', 'Parametri 3'
@@ -66,7 +66,7 @@ export class ImpostazioniComponent implements OnInit {
           'Rete 1', 'Rete 2', 'Rete 3'
         ],
         stazioni: [
-          'Stazione 1', 'Stazione 2', 'Stazione 3' 
+          'Stazione 1', 'Stazione 2', 'Stazione 3'
         ],
         parametri: [
           'Parametri 1', 'Parametri 2', 'Parametri 3'
@@ -76,7 +76,7 @@ export class ImpostazioniComponent implements OnInit {
   }
 
   changeLanguage() {
-    console.log('selectedLanguage' + this.selectedLanguage);
+    // console.info('selectedLanguage' + this.selectedLanguage);
     this.translateService.use(this.selectedLanguage);
   }
 

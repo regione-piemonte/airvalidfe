@@ -1,4 +1,4 @@
-<!--  
+<!--
  Copyright Regione Piemonte - 2023
  SPDX-License-Identifier: EUPL-1.2-or-later
  -->
@@ -13,10 +13,36 @@
     <p [innerHTML]="data.message"></p>
   </div>
 
-  <mat-selection-list #tarature [color]="colorList" [multiple]="false">
-    <ng-container *ngFor="let tar of data?.taratura; let i = index; let last = last" >
-      <mat-list-option *ngIf="!last" [value]="{start: tar.endDate, end: data.taratura[i + 1]?.beginDate }">
-        {{tar.endDate | date: 'dd/MM/yyyy'}} - {{data.taratura[i + 1]?.beginDate | date: 'dd/MM/yyyy'}}
+
+  <ng-template #cardItem let-tar let-tarBefore="before" let-first='first'>
+    <div class="d-flex justify-content-around">
+      <div style="width: 25%">{{tar?.endDate | date: 'dd/MM/yyyy'}}</div>
+      <div style="width: 25%">{{tar?.futureDate | date: 'dd/MM/yyyy'}}</div>
+      <div style="width: 17%">{{tar?.zero}}</div>
+      <div style="width: 17%">{{tar?.span}}</div>
+      <div style="width: 17%">{{tar?.cylinderConcentration}}</div>
+    </div>
+  </ng-template>
+
+  <ng-template #listaVuota >
+    <p>{{'Nessuna Taratura valida' | translate}}</p>
+  </ng-template>
+
+
+  <mat-selection-list #tarature [color]="colorList" [multiple]="false" *ngIf="taratura?.length else listaVuota">
+    <mat-slide-toggle [formControl]="taratureProgressive"  labelPosition="before">
+      {{'input.toggle_linear_select.label' | translate}}
+    </mat-slide-toggle>
+    <section class="d-flex justify-content-around" style="margin-bottom: 10px">
+      <div style="width: 25%">First date</div>
+      <div style="width: 25%">Last date</div>
+      <div style="width: 17%">Zero</div>
+      <div style="width: 17%">Span</div>
+      <div style="width: 17%">Concentraz.</div>
+    </section>
+    <ng-container *ngFor="let tar of taratura; let i = index; let last = last; first as asFirst" >
+      <mat-list-option [value]="{start: tar.endDate, end: tar.futureDate}">
+        <ng-container *ngTemplateOutlet="cardItem;context:{$implicit: tar, before: taratura[i + 1]}"></ng-container>
       </mat-list-option>
     </ng-container>
   </mat-selection-list>
@@ -24,11 +50,10 @@
 </mat-dialog-content>
 
 <mat-dialog-actions class="btn-action-modal justify-content-between">
-  <button mat-button class="mat-raised-button" (click)="close()" attr.aria-label="
-      {{'button.aria_label.chiudi' | translate}}">
+  <button mat-button class="mat-raised-button" (click)="close()" attr.aria-label="{{'button.aria_label.chiudi' | translate}}">
     {{'button.chiudi' | translate}}
   </button>
-  <button *ngIf="data.actionButton" mat-button class="mat-raised-button mat-primary" (click)="save()"
+  <button *ngIf="data.actionButton" mat-button class="mat-raised-button mat-primary" [disabled]="!tarature || (!!tarature && tarature.selectedOptions.isEmpty())" (click)="save()"
           attr.aria-label="{{'button.aria_label.chiudi' | translate}}">{{data.actionButton}}
   </button>
 

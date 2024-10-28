@@ -1,125 +1,237 @@
-<!--  
+<!--
  Copyright Regione Piemonte - 2023
  SPDX-License-Identifier: EUPL-1.2-or-later
  -->
-<mat-dialog-content [formGroup]="form">
-  <ng-container *ngIf="!showStep2">
-    
-    <div mat-dialog-title class="dialog-title">
-      <h2 mat-dialog-title>
-        {{'dialog_init_config.step_1.title' | translate}}
-      </h2>
-      <button mat-icon-button aria-label="close dialog" mat-dialog-close class="btn-dialog--close">
-        <mat-icon>close</mat-icon>
-      </button>
-    </div>
-    
 
+<ng-template #closeBtn>
+  <button (click)="close()" mat-icon-button aria-label="close dialog" mat-dialog-close class="btn-dialog--close">
+    <mat-icon>close</mat-icon>
+  </button>
+</ng-template>
+
+<!--Creo il template per la selezione del periodo-->
+<ng-template #buttonGroup>
+  <mat-button-toggle-group #group="matButtonToggleGroup" [value]="period"
+                           attr.aria-label="{{'button.group.scelta_periodo_parametri.label' | translate}}"
+                           (change)="setPeriod(group.value)"
+                           class="btn-type-modal">
+
+    <!--Giornaliera per validazione | Personalizzata per eleborazione e reportistica-->
+    <mat-button-toggle [disabled]="selectedReportistica?.group === 'Standard' && selectedReportistica?.value !== 'variable'" value="personalizzato">{{ 'Personalizzato' | translate }}</mat-button-toggle>
+    <mat-button-toggle [disabled]="selectedReportistica?.group === 'Standard' && selectedReportistica?.value !== 'daily'" value="giorno">{{ 'Giorno'| translate}}</mat-button-toggle>
+    <mat-button-toggle [disabled]="selectedReportistica?.group === 'Standard' && selectedReportistica?.value !== 'variable' " value="mese">{{ 'Mese' | translate }}</mat-button-toggle>
+    <mat-button-toggle [disabled]="selectedReportistica?.group === 'Standard' && selectedReportistica?.value === 'daily'" value="anno">{{ 'Anno' | translate }}</mat-button-toggle>
+  </mat-button-toggle-group>
+</ng-template>
+
+<!--Creo il template per la selezione del db da scegliere-->
+<ng-template #toggleDb>
+  <p>
+    {{ 'dialog_init_config.step_2.paragraph_db' | translate }}
+  </p>
+  <div [formGroup]="sliderForm" style="margin-bottom: 20px">
+    <mat-slide-toggle formControlName="dbToggle" class="toggle--db">
+      {{ sliderForm.value.dbToggle ? ('input.toggle_db_reg' | translate) : ('input.toggle_db_cop' | translate) }}
+    </mat-slide-toggle>
+  </div>
+</ng-template>
+
+<mat-dialog-content [formGroup]="form">
+  <!--Solo nella primo step-->
+  <ng-container *ngIf="!showStep2">
+    <section>
+      <div mat-dialog-title class="dialog-title">
+        <h2 mat-dialog-title>
+          {{ 'dialog_init_config.step_1.title' | translate }}
+        </h2>
+        <ng-container *ngTemplateOutlet="closeBtn"></ng-container>
+      </div>
       <p>
-        {{'dialog_init_config.step_1.paragraph' | translate}}
+        {{ 'dialog_init_config.step_1.paragraph' | translate }}
       </p>
       <nav>
-      <mat-button-toggle-group formControlName="lavoro"  aria-label="Seleziona la tipologia di lavoro" class="btn-type-modal mb-5">
-        <mat-button-toggle value="validazione">{{'main_menu.validazione' | translate}}</mat-button-toggle>
-        <mat-button-toggle disabled value="elaborazione">
-          {{'main_menu.elaborazione' | translate}}
-        </mat-button-toggle>
-        <mat-button-toggle disabled value="reportistica"
-          >{{'main_menu.reportistica' | translate}}</mat-button-toggle
-        >
-      </mat-button-toggle-group>
+        <mat-button-toggle-group formControlName="lavoro" aria-label="Seleziona la tipologia di lavoro" class="btn-type-modal mb-5">
+          <mat-button-toggle value="validazione">{{ 'main_menu.validazione' | translate }}</mat-button-toggle>
+          <mat-button-toggle value="reportistica">{{ 'main_menu.reportistica' | translate }}</mat-button-toggle>
+          <mat-button-toggle [disabled]="environment.wizard.elaborazione" value="elaborazione">{{ 'main_menu.elaborazione' | translate }}</mat-button-toggle>
+        </mat-button-toggle-group>
       </nav>
       <div class="btn-action-modal justify-content-end">
-      
-        <button
-          mat-button
-          aria-label="Prosegui allo step 2"
-          class="mat-raised-button mat-primary"
-          [disabled]="!form.get(['lavoro'])?.valid"
-          (click)="next()"
-        >
-        {{'button.prosegui' | translate}}
+        <button mat-button aria-label="Prosegui allo step 2" class="mat-raised-button mat-primary"
+                [disabled]="!form.get(['lavoro'])?.valid" (click)="next()">
+          {{ 'button.prosegui' | translate }}
         </button>
       </div>
+    </section>
   </ng-container>
 
-  <ng-container *ngIf="showStep2">
+  <!--Solo in Elaborazione e Reportistica-->
+  <ng-container *ngIf="notValidazione() && !showTypePeriod">
+    <section>
+      <div mat-dialog-title class="dialog-title">
+        <h2 mat-dialog-title>
+          {{ 'dialog_init_config.step_1.' + form.value.lavoro +'.title' | translate }}
+        </h2>
+        <ng-container *ngTemplateOutlet="closeBtn"></ng-container>
+      </div>
+      <p>
+        {{ 'dialog_init_config.step_1.' + form.value.lavoro +'.paragraph' | translate }}
+      </p>
+      <ng-container [ngSwitch]="tipo$ | async ">
+        <nav *ngSwitchCase="'elaborazione'">
+          <mat-button-toggle-group (change)="changeType()" formControlName="tipoElaborazione" aria-label="Seleziona la tipologia di lavoro"
+                                   class="btn-type-modal mb-5">
+            <mat-button-toggle value="standard">{{ 'dialog_init_config.step_elaborazione.standard' | translate }}
+            </mat-button-toggle>
+            <mat-button-toggle value="specialistica">{{ 'dialog_init_config.step_elaborazione.specialist' | translate }}
+            </mat-button-toggle>
+          </mat-button-toggle-group>
+          <!--Nel caso che venga selezionato il tasto specialistica apro un nuovo select-->
+
+          <app-specialistico-form (lockDb)="sliderForm.disable()" [listServiceToSpecialistica]="listServiceToSpecialistica" *ngIf="!!listServiceToSpecialistica.length" (formStatusSpecialistica)="onFormStatusChange($event)">
+            <ng-container *ngTemplateOutlet="toggleDb"></ng-container>
+          </app-specialistico-form>
+        </nav>
+        <app-trigger-menu-reportistica *ngSwitchCase="'reportistica'" [renderTableReportistica]="scelta_render!"
+                                       [renderTableReportisticaSpecialistica]="scelta_render_specialistica!"
+                                       [renderTableReportisticaStandard]="scelta_render_standard!"
+                                       (valueChange)="selectReportistica($event)">
+          <app-reportistica-standard *ngIf="selectedReportistica && selectedReportistica?.group === 'Standard'"
+                                     [valueControlTime]="selectedReportistica.value"
+                                     (formValue)="standardForm = $event "></app-reportistica-standard>
+        </app-trigger-menu-reportistica>
+        <div *ngSwitchDefault>
+          Default
+        </div>
+      </ng-container>
+
+      <div class="btn-action-modal justify-content-end">
+        <button mat-button aria-label="Prosegui allo step 2" class="mat-raised-button mat-primary" [disabled]="!isFormValid()" (click)="selectRenderGrafico()">
+          {{ 'button.prosegui' | translate }}
+        </button>
+      </div>
+    </section>
+  </ng-container>
+
+  <!--Step 2 e tipo ===  validazione-->
+  <ng-container *ngIf="showStep2 && (tipo$ | async) === 'validazione'">
+    <section *ngIf="(tipo$ | async) !== 'validazione'" class="mb-3">
+      <div mat-dialog-title class="dialog-title">
+        <h2 mat-dialog-title>
+          {{ 'dialog_init_config.step_2.title_db' | translate }}
+        </h2>
+        <ng-container *ngTemplateOutlet="closeBtn"></ng-container>
+      </div>
+      <ng-container *ngTemplateOutlet="toggleDb"></ng-container>
+  </section>
     <div mat-dialog-title class="dialog-title">
-      <h2 mat-dialog-title>{{'dialog_init_config.step_2.title' | translate}}</h2>
-      <button mat-icon-button aria-label="close dialog" mat-dialog-close  class="btn-dialog--close">
+      <h2 mat-dialog-title>{{ 'dialog_init_config.step_2.title' | translate }}</h2>
+      <ng-container *ngTemplateOutlet="closeBtn"></ng-container>
+    </div>
+    <p>
+      {{ 'dialog_init_config.step_1.paragraph' | translate }}
+    </p>
+    <ng-container *ngTemplateOutlet="buttonGroup"></ng-container>
+
+    <div class="d-flex justify-content-between my-5" *ngIf="(tipo$ | async) as tipo">
+      <mat-form-field appearance="fill">
+        <mat-label>
+          {{ 'dialog_init_config.step_1.from' | translate }}
+        </mat-label>
+        <input matInput [max]="maxDate" [matDatepicker]="pickerFrom" formControlName="startDate"/>
+        <mat-hint>DD/MM/YYYY</mat-hint>
+        <mat-datepicker-toggle matSuffix [for]="pickerFrom"></mat-datepicker-toggle>
+        <mat-datepicker #pickerFrom [startView]=" tipo === 'validazione' && period === 'mese' ? 'year' : currentView"
+                        (yearSelected)="chosenDateHandler($event, pickerFrom, 'anno')"
+                        (monthSelected)="chosenDateHandler($event, pickerFrom, 'mese', tipo)">
+        </mat-datepicker>
+      </mat-form-field>
+      <mat-form-field appearance="fill" *ngIf="period=='personalizzato'">
+
+        <mat-label>
+          {{ 'dialog_init_config.step_1.to' | translate }}
+        </mat-label>
+        <input matInput [max]="maxDate" [matDatepicker]="pickerTo" formControlName="endDate"/>
+        <mat-hint>DD/MM/YYYY</mat-hint>
+        <mat-datepicker-toggle matSuffix [for]="pickerTo"></mat-datepicker-toggle>
+        <mat-datepicker #pickerTo></mat-datepicker>
+      </mat-form-field>
+    </div>
+
+    <div class="btn-action-modal justify-content-between">
+      <button mat-button class="mat-raised-button" *ngIf="showStep2 && !(changePeriod$ | async)"
+              (click)="showStep2 = !showStep2">
+        {{ 'button.indietro' | translate }}
+      </button>
+      <button mat-button class="mat-raised-button mat-primary"
+              attr.aria-label="{{'Vai alla pagina di ' + form.value.lavoro}}" [disabled]="!form.valid" (click)="save()">
+        {{ 'button.prosegui' | translate }}
+      </button>
+    </div>
+  </ng-container>
+
+  <!--Tipo Elaborazione or Reportistica e show Periodo-->
+  <ng-container *ngIf="selectedRender && (tipo$ | async) !== 'validazione' && showTypePeriod">
+    <section *ngIf="(tipo$ | async) !== 'validazione'" class="mb-3">
+      <div mat-dialog-title class="dialog-title">
+        <h2 mat-dialog-title>
+          {{ 'dialog_init_config.step_2.title_db' | translate }}
+        </h2>
+        <ng-container *ngTemplateOutlet="closeBtn"></ng-container>
+      </div>
+      <p>
+        {{ 'dialog_init_config.step_2.paragraph_db' | translate }}
+      </p>
+      <div [formGroup]="sliderForm">
+        <mat-slide-toggle formControlName="dbToggle" class="toggle--db">
+          {{ sliderForm.value.dbToggle ? ('input.toggle_db_reg' | translate) : ('input.toggle_db_cop' | translate) }}
+        </mat-slide-toggle>
+      </div>
+    </section>
+    <div mat-dialog-title class="dialog-title">
+      <h2 mat-dialog-title>{{ 'dialog_init_config.step_2.title' | translate }}</h2>
+      <button mat-icon-button aria-label="close dialog" mat-dialog-close class="btn-dialog--close"
+              *ngIf="(tipo$ | async) !== 'elaborazione'">
         <mat-icon>close</mat-icon>
       </button>
     </div>
-      <p>
-        {{'dialog_init_config.step_1.paragraph' | translate}}
-      </p>
-      <mat-button-toggle-group #group="matButtonToggleGroup" attr.aria-label="{{'button.group.scelta_periodo_parametri.label' | translate}}" (change)="setPeriod(group.value)" value="giornaliera"  class="btn-type-modal">
-        <mat-button-toggle value="giornaliera">
-          {{ 'button.group.scelta_periodo_parametri.toggle_group.0.name' | translate}}
-        </mat-button-toggle>
-        <mat-button-toggle value="mensile">
-          {{ 'button.group.scelta_periodo_parametri.toggle_group.1.name' | translate}}
-        </mat-button-toggle>
-        <mat-button-toggle value="annuale">
-          {{ 'button.group.scelta_periodo_parametri.toggle_group.2.name' | translate}}
-        </mat-button-toggle>
-      </mat-button-toggle-group>
+    <ng-container *ngTemplateOutlet="buttonGroup"></ng-container>
 
-      <div class="d-flex justify-content-between my-5">
-        <mat-form-field appearance="fill">
-          <mat-label>
-            {{ 'dialog_init_config.step_1.from' | translate }}
-          </mat-label>
-          <input
-            matInput
-            [max]="maxDate" 
-            [matDatepicker]="pickerFrom"
-            formControlName="startDate"
-          />
-          <mat-hint>DD/MM/YYYY</mat-hint>
-          <mat-datepicker-toggle
-            matSuffix
-            [for]="pickerFrom"
-          ></mat-datepicker-toggle>
-          <mat-datepicker  #pickerFrom   [startView]="currentView"
-                           (yearSelected)="chosenDateHandler($event, pickerFrom, 'anno')"
-                           (monthSelected)="chosenDateHandler($event, pickerFrom, 'mese')">
-          </mat-datepicker>
-        </mat-form-field>
+    <div class="d-flex justify-content-between my-5">
+      <mat-form-field appearance="fill">
+        <mat-label>
+          {{ 'dialog_init_config.step_1.from' | translate }}
+        </mat-label>
+        <input matInput [max]="maxDate" [matDatepicker]="pickerFrom" formControlName="startDate"/>
+        <mat-hint>DD/MM/YYYY</mat-hint>
+        <mat-datepicker-toggle matSuffix [for]="pickerFrom"></mat-datepicker-toggle>
+        <mat-datepicker #pickerFrom [startView]="getCurentView()"
+                        (yearSelected)="chosenDateHandler($event, pickerFrom, 'anno')"
+                        (monthSelected)="chosenDateHandler($event, pickerFrom, 'mese')">
+        </mat-datepicker>
+      </mat-form-field>
 
-       <mat-form-field appearance="fill" *ngIf="period=='giornaliera'">
-          
-          <mat-label>
-            {{ 'dialog_init_config.step_1.to' | translate }}
-          </mat-label>
-          <input
-            matInput
-            [max]="maxDate" 
-            [matDatepicker]="pickerTo"
-            formControlName="endDate"
-          />
-          <mat-hint>DD/MM/YYYY</mat-hint>
-          <mat-datepicker-toggle
-            matSuffix
-            [for]="pickerTo"
-          ></mat-datepicker-toggle>
-          <mat-datepicker #pickerTo></mat-datepicker>
-        </mat-form-field>
-      </div>
+      <mat-form-field appearance="fill" *ngIf="period=='personalizzato'">
 
+        <mat-label>
+          {{ 'dialog_init_config.step_1.to' | translate }}
+        </mat-label>
+        <input matInput [max]="maxDate" [matDatepicker]="pickerTo" formControlName="endDate"/>
+        <mat-hint>DD/MM/YYYY</mat-hint>
+        <mat-datepicker-toggle matSuffix [for]="pickerTo"></mat-datepicker-toggle>
+        <mat-datepicker #pickerTo></mat-datepicker>
+      </mat-form-field>
+    </div>
 
-
-      <div class="btn-action-modal justify-content-end">
-        
-        <button
-          mat-button
-          class="mat-raised-button mat-primary"
-          attr.aria-label="{{'Vai alla pagina di ' + form.value.lavoro}}"
-          [disabled]="!form.valid"
-          (click)="save()"
-        >
-        {{'button.prosegui' | translate}}
-        </button>
-      </div>
+    <div class="btn-action-modal justify-content-between">
+      <button mat-button class="mat-raised-button" *ngIf="showStep2 && !(changePeriod$ | async)"
+              (click)="showStep2 = !showStep2; showTypePeriod = !showTypePeriod; selectedReportistica = undefined">
+        {{ 'button.indietro' | translate }}
+      </button>
+      <button mat-button class="mat-raised-button mat-primary"
+              attr.aria-label="{{'Vai alla pagina di ' + form.value.lavoro}}" [disabled]="!form.valid" (click)="save()">
+        {{ 'button.prosegui' | translate }}
+      </button>
+    </div>
   </ng-container>
 </mat-dialog-content>

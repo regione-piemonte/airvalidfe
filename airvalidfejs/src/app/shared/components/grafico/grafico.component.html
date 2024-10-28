@@ -1,76 +1,74 @@
-<!--  
+<!--
  Copyright Regione Piemonte - 2023
  SPDX-License-Identifier: EUPL-1.2-or-later
  -->
-<div [ngClass]="'theme-graph--' + themeColorMode">
-  <h2 class="visually-hidden">{{'page.validazione.split_grafico.aria_label.grafici' | translate}}</h2>
-  <div class="row justify-content-between align-items-center mt-2" *ngIf="echartsOptions">
-    <div class="col-auto">
-      <h2 class="visually-hidden">{{'page.validazione.split_grafico.aria_label.scala' | translate}}</h2>
-      <mat-button-toggle-group #groupScale="matButtonToggleGroup" value="assoluta"
-                               aria-label="Seleziona la scala per visualizzare i dati sul grafico"
-                               (change)="setScale(groupScale.value)"
-                               class="btn-type-graph">
-        <mat-button-toggle
-          value="{{'button.group.scelta_scala.0.value' | translate}}">{{'button.group.scelta_scala.0.name' | translate}}</mat-button-toggle>
-        <mat-button-toggle
-          value="{{'button.group.scelta_scala.1.value' | translate}}">{{'button.group.scelta_scala.1.name' | translate}}</mat-button-toggle>
-        <mat-button-toggle
-          value="{{'button.group.scelta_scala.2.value' | translate}}">{{'button.group.scelta_scala.2.name' | translate}}</mat-button-toggle>
+<ng-container *ngIf="hasGrafici$ | async">
+  <div [ngClass]="'theme-graph--' + themeColorMode">
+    <h2 class="visually-hidden">{{'page.validazione.split_grafico.aria_label.grafici' | translate}}</h2>
+    <div class="row justify-content-between align-items-center mt-2" *ngIf="echartsOptions">
+      <div class="col-auto">
+        <h2 class="visually-hidden">{{'page.validazione.split_grafico.aria_label.scala' | translate}}</h2>
+        <mat-button-toggle-group #groupScale="matButtonToggleGroup" [value]="scalaFormControl.value"
+                                 aria-label="Seleziona la scala per visualizzare i dati sul grafico"
+                                 [formControl]="scalaFormControl"
+                                 class="btn-type-graph">
+          <mat-button-toggle
+            value="{{'button.group.scelta_scala.0.value' | translate}}">{{'button.group.scelta_scala.0.name' | translate}}</mat-button-toggle>
+          <mat-button-toggle
+            value="{{'button.group.scelta_scala.1.value' | translate}}">{{'button.group.scelta_scala.1.name' | translate}}</mat-button-toggle>
+          <mat-button-toggle
+            value="{{'button.group.scelta_scala.2.value' | translate}}">{{'button.group.scelta_scala.2.name' | translate}}</mat-button-toggle>
 
-      </mat-button-toggle-group>
+        </mat-button-toggle-group>
+      </div>
+
+      <div class="col-auto">
+        <h2 class="visually-hidden">{{'page.validazione.split_grafico.aria_label.periodo' | translate}}</h2>
+
+        <mat-button-toggle-group #group="matButtonToggleGroup"
+                                 aria-label="Seleziona il periodo per visualizzare i dati sul grafico"
+                                 [matTooltip]="(indiceSelezionato<0) ? ('button.group.tooltip.no_selection' | translate) : ''"
+                                 [formControl]="periodFormControl"
+                                 [value]="periodSelected" [disabled]="!(parametroSelezionato$ | async)?.parameter" class="btn-type-graph">
+          <button [disabled]="hasDisableNextOrPrev()"
+                  class="btn-period--secondary"
+                  (click)="setForm('prec')"
+                  [matTooltip]="(indiceSelezionato >= 0) ? ('button.group.tooltip.prev_day' | translate) : ''">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          <mat-button-toggle value="1"
+                             [matTooltip]="(indiceSelezionato>=0) ? ('button.group.tooltip.one_day' | translate) : ''">{{'button.group.scelta_periodo.1.name' | translate}}
+          </mat-button-toggle>
+          <mat-button-toggle value="3" [disabled]="periodoDays < 3"
+                             [matTooltip]="(indiceSelezionato>=0) ? ('button.group.tooltip.three_day' | translate) : ''">{{'button.group.scelta_periodo.2.name' | translate}}
+          </mat-button-toggle>
+          <mat-button-toggle value="7" [disabled]="periodoDays < 7"
+                             [matTooltip]="(indiceSelezionato>=0) ? ('button.group.tooltip.one_week' | translate) : ''">{{'button.group.scelta_periodo.3.name' | translate}}
+          </mat-button-toggle>
+          <mat-button-toggle value="30" [disabled]="periodoDays < 30"
+                             [matTooltip]="(indiceSelezionato>=0) ? ('button.group.tooltip.one_month' | translate) : ''">{{'button.group.scelta_periodo.4.name' | translate}}
+          </mat-button-toggle>
+          <mat-button-toggle value="full"
+                             [matTooltip]="(indiceSelezionato>=0) ? ('button.group.tooltip.reset_range' | translate) : ''">{{'button.group.scelta_periodo.5.name' | translate}}
+          </mat-button-toggle>
+          <mat-button-toggle value="personalized" (click)="setPeriod('personalized')"
+                             [matTooltip]="(indiceSelezionato>=0) ? ('button.group.tooltip.custom_range' | translate) : ''">
+            {{'button.group.scelta_periodo.6.name' | translate}}
+          </mat-button-toggle>
+          <button [disabled]="hasDisableNextOrPrev()" class="btn-period--secondary"
+                  (click)="setForm('succ')"
+                  [matTooltip]="(indiceSelezionato>=0) ? ('button.group.tooltip.next_day' | translate) : ''">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </mat-button-toggle-group>
+
+      </div>
 
 
     </div>
-
-    <div class="col-auto">
-      <h2 class="visually-hidden">{{'page.validazione.split_grafico.aria_label.periodo' | translate}}</h2>
-
-      <mat-button-toggle-group #group="matButtonToggleGroup"
-                               aria-label="Seleziona il periodo per visualizzare i dati sul grafico"
-                               (change)="setPeriod(group.value)"
-                               [matTooltip]="(indiceSelezionato<0) ? ('button.group.tooltip.no_selection' | translate) : ''"
-                               [(ngModel)]="periodSelected"
-                               [value]="periodSelected" [disabled]="indiceSelezionato<0" class="btn-type-graph">
-        <button [disabled]="hasDisableNextOrPrev()"
-                class="btn-period--secondary"
-                (click)="setPeriod('prec')"
-                [matTooltip]="(indiceSelezionato >= 0) ? ('button.group.tooltip.prev_day' | translate) : ''">
-          <mat-icon>chevron_left</mat-icon>
-        </button>
-        <mat-button-toggle value="1"
-                           [matTooltip]="(indiceSelezionato>=0) ? ('button.group.tooltip.one_day' | translate) : ''">{{'button.group.scelta_periodo.1.name' | translate}}
-        </mat-button-toggle>
-        <mat-button-toggle value="3" [disabled]="periodoDays < 3"
-                           [matTooltip]="(indiceSelezionato>=0) ? ('button.group.tooltip.three_day' | translate) : ''">{{'button.group.scelta_periodo.2.name' | translate}}
-        </mat-button-toggle>
-        <mat-button-toggle value="7" [disabled]="periodoDays < 7"
-                           [matTooltip]="(indiceSelezionato>=0) ? ('button.group.tooltip.one_week' | translate) : ''">{{'button.group.scelta_periodo.3.name' | translate}}
-        </mat-button-toggle>
-        <mat-button-toggle value="30" [disabled]="periodoDays < 30"
-                           [matTooltip]="(indiceSelezionato>=0) ? ('button.group.tooltip.one_month' | translate) : ''">{{'button.group.scelta_periodo.4.name' | translate}}
-        </mat-button-toggle>
-        <mat-button-toggle value="full"
-                           [matTooltip]="(indiceSelezionato>=0) ? ('button.group.tooltip.reset_range' | translate) : ''">{{'button.group.scelta_periodo.5.name' | translate}}
-        </mat-button-toggle>
-        <mat-button-toggle value="personalized"
-                           [matTooltip]="(indiceSelezionato>=0) ? ('button.group.tooltip.custom_range' | translate) : ''">
-          {{'button.group.scelta_periodo.6.name' | translate}}
-        </mat-button-toggle>
-        <button [disabled]="hasDisableNextOrPrev()" class="btn-period--secondary"
-                (click)="setPeriod('succ')"
-                [matTooltip]="(indiceSelezionato>=0) ? ('button.group.tooltip.next_day' | translate) : ''">
-          <mat-icon>chevron_right</mat-icon>
-        </button>
-      </mat-button-toggle-group>
-
-    </div>
-
-
-  </div>
-  <section *ngIf="echartsOptions">
-    <div class="d-flex align-items-baseline justify-content-between">
-      <div class="d-flex align-items-baseline ">
+    <section *ngIf="echartsOptions">
+      <div class="d-flex align-items-baseline justify-content-between mt-4">
+        <div class="d-flex align-items-baseline ">
           <h2 class="mt-3 title-section-graph">{{ 'page.validazione.split_grafico.title_1' | translate }}</h2>
           <div>
             <p class="d-inline-flex ms-2 title-reference-period">
@@ -82,8 +80,7 @@
                   {{'page.validazione.split_grafico.from' | translate }}
                 </dt>
                 <dd>
-    
-                  {{startDatePersonalized | date: 'EEEE dd/MM/yyyy HH:mm'}}
+                  {{graphicOptions.instance && graphicOptions.getInstanceZoomData()?.startValue ? dateService.generateNameToTimeStamp({timestamp: graphicOptions.getInstanceZoomData().startValue}) : ''}}
                 </dd>
               </dl>
               <dl attr.aria-label="{{'page.validazione.split_grafico.aria_label.fine_periodo' | translate}}">
@@ -91,100 +88,84 @@
                   {{'page.validazione.split_grafico.to' | translate }}
                 </dt>
                 <dd>
-                  {{endDatePersonalized | date: 'EEEE dd/MM/yyyy HH:mm'}}
+                  {{graphicOptions.instance && graphicOptions.getInstanceZoomData()?.endValue ? dateService.generateNameToTimeStamp({timestamp: graphicOptions.getInstanceZoomData().endValue}) : ''}}
                 </dd>
               </dl>
             </div>
           </div>
+        </div>
+        <!-- Toggle per visualizzare i limiti-->
+        <mat-slide-toggle class="toggle--decimal" labelPosition="before" [(ngModel)]="limitToggle"  (change)="changeLimit($event)" aria-label="Toggle per visualizzare i limiti">
+          {{'input.label_limiti' | translate}}
+        </mat-slide-toggle>
+        <mat-form-field>
+          <mat-label>{{'input.label_select_choice_render_validazione' | translate}}</mat-label>
+          <mat-select [(value)]="selectedRenderGraph" id="datiEvidenziati" (valueChange)="changeRender(selectedRenderGraph)" >
+            <mat-option *ngFor="let choice of choiceModeRender" [value]="choice.value">
+              {{choice.name}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
       </div>
 
-      <!-- <button mat-icon-button 
-      [matMenuTriggerFor] = "dataGraphSettings"
-      [matTooltip]="('button.settings') | translate">
-      <mat-icon>more_vert</mat-icon>
-      </button> -->
-      <mat-menu #dataGraphSettings="matMenu" yPosition="below" xPosition="before" class="menu-user">
-        <div class="menu-user">
-          <ul class="list-unstyled p-3 mb-0">
-            <li>
-              <mat-form-field>
-                <mat-label>{{'input.label_select_choice_render' | translate}}</mat-label>
-                <mat-select [(value)]="selectedRenderGraph" id="fontSizeSelect" (valueChange)="changeRender(selectedRenderGraph)" >
-                  <mat-option *ngFor="let choice of choiceModeRender" [value]="choice.value">
-                    {{choice.name}}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
-            </li>
-          </ul>
-        </div>
-      </mat-menu>
-    </div>
-
-    <div class="row justify-content-center">
-      <div class="col-11">
-        <div echarts [options]="echartsOptions" (chartInit)="onChartInitHtml($event, 'chartInit')"
-          [extentions]="echartsExtentions" (chartClick)="onChartEvent($event,'chartClick')"
-          (chartDblClick)="onChartEvent($event,'chartDblClick')"
-          (chartMouseDown)="onChartEvent($event,'chartMouseDown')"
-          (chartMouseUp)="onChartEvent($event,'chartMouseUp')"
-          (chartMouseOver)="onChartEvent($event,'chartMouseOver')"
-          (chartMouseOut)="onChartEvent($event,'chartMouseOut')"
-          (chartGlobalOut)="onChartEvent($event,'chartGlobalOut')"
-          (chartContextMenu)="onChartEvent($event,'chartContextMenu')"
-          (chartDataZoom)="onChartEvent($event,'chartDataZoom')">
-        </div>
-      </div>
-    </div>
-
-
-  </section>
-
-
-  <section *ngIf="echartsOptions">
-    <div class="row">
-      <div class="col-12">
-        <div class="d-flex align-items-baseline">
-          <h2 *ngIf="echartsExtentions">{{'page.validazione.split_grafico.title_2' | translate }}</h2>
-          <div>
-            <p class="d-inline-flex ms-2 title-reference-period">
-              {{'page.validazione.split_grafico.subtitle_2' | translate }}
-            </p>
-            <div class="reference-period">
-              <dl aria-label="Partenza del periodo di riferimento">
-                <dt>
-                  {{'page.validazione.split_grafico.from' | translate }}
-                </dt>
-                <dd>
-                  {{startDate | date: 'dd/MM/yyyy'}}
-                </dd>
-              </dl>
-              <dl aria-label="Fine del periodo di riferimento">
-                <dt>
-                  {{'page.validazione.split_grafico.to' | translate }}
-                </dt>
-                <dd>
-                  {{endDate | date: 'dd/MM/yyyy'}}
-                </dd>
-              </dl>
-            </div>
-
-          </div>
-
-
-        </div>
-        <div class="row justify-content-center">
-          <div class="col-11">
-
-            <div echarts [options]="echartsOptionsOverView" [extentions]="echartsExtentions">
-            </div>
+      <div class="row justify-content-center">
+        <div class="col-12 pe-4">
+          <div echarts [options]="echartsOptions"
+               (chartInit)="onChartInitHtml($event, 'chartInit')"
+               [extentions]="echartsExtentions" >
           </div>
         </div>
-
       </div>
-    </div>
-  </section>
-</div>
+
+
+    </section>
+
+
+    <section *ngIf="echartsOptions">
+      <div class="row">
+        <div class="col-12">
+          <div class="d-flex align-items-baseline">
+            <h2 *ngIf="echartsExtentions">{{'page.validazione.split_grafico.title_2' | translate }}</h2>
+            <div>
+              <p class="d-inline-flex ms-2 title-reference-period">
+                {{'page.validazione.split_grafico.subtitle_2' | translate }}
+              </p>
+              <div class="reference-period">
+                <dl aria-label="Partenza del periodo di riferimento">
+                  <dt>
+                    {{'page.validazione.split_grafico.from' | translate }}
+                  </dt>
+                  <dd>
+                    {{startDate}}
+                  </dd>
+                </dl>
+                <dl aria-label="Fine del periodo di riferimento">
+                  <dt>
+                    {{'page.validazione.split_grafico.to' | translate }}
+                  </dt>
+                  <dd>
+                    {{endDate}}
+                  </dd>
+                </dl>
+              </div>
+
+            </div>
+
+
+          </div>
+          <div class="row justify-content-center">
+            <div class="col-12 pe-4">
+
+              <div echarts [options]="echartsOptionsOverView" [extentions]="echartsExtentions">
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  </div>
+</ng-container>
 <ngx-spinner name="time" type="ball-clip-rotate"
              bdColor="rgba(0,0,0,0.8)"
              size="medium"

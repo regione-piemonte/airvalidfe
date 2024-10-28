@@ -13,7 +13,7 @@ export class ColorService {
 
   count=-1
   private colorsList = [
-   
+
     '#FA9600',
     '#7DBC00',
     '#00A0FD',
@@ -56,22 +56,34 @@ export class ColorService {
       this.count=0
       return this.colorsList[this.count]
     }
-   /* this.count++
-    if ((7 + (this.count * 3)) < (this.colorsList.length-1)) {
-     
-      console.log("indice",((7 + this.count * 3)))
-      return this.colorsList[7 + this.count * 3];
-    } else {
-      
-   
-      console.log("indice",(((7 + this.count * 3) % 16)))
-      return this.colorsList[((7 + this.count * 3) % 16)];
-    }*/
   }
 
   generateColor() {
     return (
       '#' + (0x1000000 + Math.random() * 0xffffff).toString(16).substr(1, 6)
     );
+  }
+
+  generateNewColor(){
+    let number = Math.random() * 16777215;
+    let floorNumber = Math.floor(number).toString(16);
+    return `#${floorNumber}`;
+  }
+
+  getNewColor(i: number) {
+    if (i <= 0){
+      throw new Error("Invalid index");
+    }
+    return this.getColorsList()[i];
+  }
+
+  /**
+   * Generates a new color derived from the given base color.
+   *
+   * @param {number} i - The base color in hexadecimal format (e.g., "#RRGGBB").
+   * @return {string} A new color derived from the provided base color.
+   */
+  generateNewColorFromBase(i: number): string {
+      return this.getColor(i)
   }
 }

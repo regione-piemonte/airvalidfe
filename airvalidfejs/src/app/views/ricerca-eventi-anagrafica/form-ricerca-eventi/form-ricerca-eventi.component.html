@@ -1,0 +1,76 @@
+<!--  
+ Copyright Regione Piemonte - 2024
+ SPDX-License-Identifier: EUPL-1.2-or-later
+ -->
+<div class="container">
+  <div class="wrap-form p-5">
+    <form [formGroup]="searchForm" (ngSubmit)="onSubmit()">
+      <p class="text--info">{{ 'input.required' | translate }}</p>
+      <div class="row">
+        <div class="col-6">
+          <h3>Seleziona il periodo</h3>
+          <div class="row">
+            <div class="col-6">
+              <!-- DatePicker Inizio -->
+              <mat-form-field appearance="fill">
+                <input matInput [matDatepicker]="picker1" formControlName="startDate" placeholder="Data Inizio">
+                <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+                <mat-datepicker #picker1></mat-datepicker>
+              </mat-form-field>
+            </div>
+            <div class="col-6">
+              <!-- DatePicker Fine -->
+              <mat-form-field appearance="fill">
+                <input matInput [matDatepicker]="picker2" formControlName="endDate" placeholder="Data Fine">
+                <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+                <mat-datepicker #picker2></mat-datepicker>
+                <mat-error *ngIf="errorEndDate">{{ errorMessage }}</mat-error>
+              </mat-form-field>
+            </div>
+
+          </div>
+        </div>
+        <div class="col-6">
+          <h3>Seleziona il tipo di ricerca</h3>
+          <div class="row">
+            <div class="col-auto">
+              <!-- Select -->
+              <mat-form-field appearance="fill">
+                <mat-select placeholder="Seleziona" formControlName="typeSelect" (selectionChange)="onSelectChange()">
+                  <mat-option value="reg">Anagrafica REG</mat-option>
+                  <mat-option value="cop">Anagrafica COP</mat-option>
+                  <mat-option value="events">Eventi</mat-option>
+                </mat-select>
+                <mat-error *ngIf="searchForm.get('typeSelect')?.invalid && searchForm.get('typeSelect')?.touched">
+                  Campo obbligatorio
+                </mat-error>
+              </mat-form-field>
+
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <div class="row">
+        <div class="col-6">
+          <h3>Inserisci il testo</h3>
+          <!-- Input Testo -->
+          <mat-form-field class="w-100" appearance="fill">
+            <input matInput placeholder="Testo" formControlName="textInput" class="col-12">
+            <mat-error *ngIf="searchForm.get('textInput')?.invalid && searchForm.get('textInput')?.touched">
+              Campo obbligatorio
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col-6 align-content-end mb-3 text-end">
+          <!-- Submit Button -->
+          <button
+            mat-button
+            class="mat-raised-button mat-primary" type="submit" [disabled]="searchForm.invalid">Cerca</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

@@ -3,7 +3,7 @@
  *SPDX-License-Identifier: EUPL-1.2-or-later
  */
 import { Component, OnInit, Input } from '@angular/core';
-import { environment } from 'src/environments/environment';
+import { environment } from '@environments/environment';
 
 @Component({
   selector: 'app-page-title',

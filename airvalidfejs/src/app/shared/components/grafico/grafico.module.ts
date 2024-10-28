@@ -20,29 +20,31 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { TranslateModule } from '@ngx-translate/core';
 import { NgxSpinnerModule } from 'ngx-spinner';
+import {MatSlideToggleModule} from "@angular/material/slide-toggle";
 
 
 @NgModule({
 
     declarations: [GraficoComponent],
-  imports: [
-    MatMenuModule,
-    CommonModule,
-    MatTableModule,
-    EchartsxModule,
-    FormsModule,
-    MatButtonToggleModule,
-    MatIconModule,
-    MatFormFieldModule,
-    ReactiveFormsModule,
-    MatTooltipModule,
-    MatDatepickerModule,
-    MatInputModule,
-    MatButtonModule,
-    TranslateModule,
-    NgxSpinnerModule,
-    MatSelectModule
-  ],
+    imports: [
+        MatMenuModule,
+        CommonModule,
+        MatTableModule,
+        EchartsxModule,
+        FormsModule,
+        MatButtonToggleModule,
+        MatIconModule,
+        MatFormFieldModule,
+        ReactiveFormsModule,
+        MatTooltipModule,
+        MatDatepickerModule,
+        MatInputModule,
+        MatButtonModule,
+        TranslateModule,
+        NgxSpinnerModule,
+        MatSelectModule,
+        MatSlideToggleModule
+    ],
   exports:[GraficoComponent]
 
 })

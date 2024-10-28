@@ -1,0 +1,36 @@
+#airvalid {
+  .mat-tab-label-active {
+    background-color: $primary;
+    color: $white;
+  }
+  .mat-tab-label {
+    opacity: 1;
+    &:not(.mat-tab-label-active) {
+      &:hover {
+        background-color: rgba($black, $alpha: 0.1);
+      }
+    }
+  }
+
+  .mat-tab-body {
+    margin-top: 15px;
+
+    .mat-tab-body-content {
+      overflow: hidden;
+    }
+  }
+
+  .tab--fieldset {
+    margin-bottom: 15px;
+    legend {
+      text-transform: uppercase;
+      @include font-size(14px);
+      font-weight: bold;
+      
+    }
+    section {
+      display: flex;
+      justify-content: space-between;
+    }
+  }
+}

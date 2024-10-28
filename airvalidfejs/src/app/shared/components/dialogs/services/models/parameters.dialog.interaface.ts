@@ -2,7 +2,8 @@
  *Copyright Regione Piemonte - 2023
  *SPDX-License-Identifier: EUPL-1.2-or-later
  */
-import { Parametro , Stazione } from '../../../../../core/models/dataService';
+import { Parametro  } from '@models/dataService';
+import {Parametri, Stazioni} from "@models/validazione";
 
 export interface IModdelParametersDialog {
   selected: Selected
@@ -11,7 +12,7 @@ export interface IModdelParametersDialog {
 
 export interface Selected {
   areeTerritoriali: AreeTerritoriali[]
-  stazioni: Stazione[]
+  stazioni: Stazioni[]
   parametri: Parametri[]
 }
 
@@ -25,7 +26,7 @@ export interface AreeTerritoriali {
   endDate: any
 }
 
-export interface Stazioni {
+export interface StazioniOld {
   name: string
   key: string
   active: boolean
@@ -35,17 +36,19 @@ export interface Stazioni {
   endDate: any
 }
 
-export interface Parametri {
-  name: string
-  key: string
-  active: boolean
-  extraInfo: string
-  flags: any
-  beginDate: number
-  endDate: any
-  measureUnitId: string
-  measurementPeriod: number
-  decimalDigits: number
+export interface ParametriOld {
+  active: boolean;
+  beginDate: number;
+  correctionSupported?: boolean
+  decimalDigits: number;
+  endDate: any;
+  extraInfo: string;
+  flags: any;
+  key: string;
+  measureUnitId: string;
+  measurementPeriod: number;
+  name: string;
+  virtual?: boolean;
 }
 
 export interface All {

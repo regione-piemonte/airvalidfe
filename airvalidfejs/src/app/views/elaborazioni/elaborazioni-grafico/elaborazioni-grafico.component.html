@@ -1,0 +1,68 @@
+<section class="graph-elaboration" [class.active-graph]="grafico!.active" (click)="activeGrafico()">
+  <div class="d-flex justify-content-end mb-3" *ngIf="index > 0 && grafico.indexTime > 0">
+    <button mat-button class="mat-primary-text" (click)="deleteElement()">
+      <mat-icon>delete</mat-icon>
+      Elimina grafico
+    </button>
+  </div>
+  <div class="graph-elaboration-container">
+
+    <nav>
+      <div class="btn-toggle-group--container" id="btn-toggle-group--render">
+        <ng-container *ngFor="let render of elaborationChoiceType | async">
+          <button mat-button [matMenuTriggerFor]="renderMenu" #menuTrigger="matMenuTrigger" *ngIf="render.active"
+                  [class.btn-toggle-group--primary-selected]="selectedRender && render.value == selectedRender.group"
+                  (click)="selectGraphic($event)" class="btn-toggle-group--primary">
+            {{ render.text }}
+          </button>
+          <mat-menu #renderMenu="matMenu">
+            <ng-container *ngFor="let group of render.toggle_group">
+              <button mat-menu-item [matMenuTriggerFor]="childMenu" #menuTrigger="matMenuTrigger"
+                      [class.selected]="selectedRender && group.value == selectedRender.sub_group"
+                      (click)="$event.stopPropagation();$event.preventDefault();"
+                      *ngIf="group.toggle_group && group.toggle_group.length > 0 && group.active">
+                {{ group.text }}
+              </button>
+              <button mat-menu-item *ngIf="!group.toggle_group || group.toggle_group.length === 0"
+                      (click)="updateValue(group)" [class.selected]="group.isSelected">
+                {{ group.text }}
+              </button>
+              <mat-menu #childMenu="matMenu">
+                <span *ngFor="let child of group.toggle_group">
+                  <span *ngIf="child.toggle_group && child.toggle_group.length > 0">
+                    <button mat-menu-item color="primary" [matMenuTriggerFor]="childMenu"
+                            [class.selected]="selectedRender && child.value == selectedRender.sub_group">
+                      <span>{{ child.text }}</span>
+                    </button>
+                    <mat-menu #childMenu2="matMenu" [overlapTrigger]="false">
+                      <span *ngFor="let child_sub of child.toggle_group">
+                        <button mat-menu-item color="primary" [matMenuTriggerFor]="childMenu2">
+                          <span>{{ child_sub.text }}</span>
+                        </button>
+                      </span>
+                    </mat-menu>
+                  </span>
+                  <span *ngIf="!child.toggle_group || child.toggle_group.length === 0">
+                    <button mat-menu-item (click)="updateValue(child)" [class.selected]="child.isSelected">
+                      {{ child.text }}
+                    </button>
+                  </span>
+                </span>
+              </mat-menu>
+            </ng-container>
+          </mat-menu>
+        </ng-container>
+      </div>
+    </nav>
+    <!--Select material-->
+    <ng-container *ngIf="!grafico.tipo.includes('new')">
+      <mat-form-field appearance="fill">
+        <mat-label>{{'input.label_select_choice_render' | translate}}</mat-label>
+        <mat-select [(ngModel)]="selectedMaterial" (selectionChange)="updateMaterial($event.value)" style="max-width: 180px;">
+          <mat-option *ngFor="let material of materials" [value]="material.value">{{ material.name }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </ng-container>
+  </div>
+  <div echarts [options]="echartsOptions" [extentions]="echartsExtentions" (chartInit)="chartInit($event)"></div>
+</section>

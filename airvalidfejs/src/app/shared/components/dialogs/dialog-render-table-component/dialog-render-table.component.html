@@ -1,0 +1,26 @@
+<mat-dialog-content class="modal--render-table">
+  <ng-container>
+    <div mat-dialog-title class="dialog-title">
+      <h2 mat-dialog-title>{{((tipo$ | async) === 'reportistica') ? ('button.scelta_reportistica.label' | translate) : ('button.group.scelta_elaborazione.label' | translate)}}</h2>
+      <button mat-icon-button aria-label="close dialog" mat-dialog-close class="btn-dialog--close">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <section class="text-center">
+      <ng-container *ngIf="(tipo$ | async) === 'reportistica'">
+        <app-trigger-menu-reportistica [renderTableReportistica]="renderTableReportistica" [renderTableReportisticaSpecialistica]="renderTableReportisticaSpecialistica" (valueChange)="onValueChange($event)"></app-trigger-menu-reportistica>
+      </ng-container>
+      <ng-container *ngIf="(tipo$ | async) === 'elaborazione' && renderTableElaborazione">
+        <app-trigger-menu-elaborazione [renderTableElaborazione]="renderTableElaborazione" (valueChange)="onValueChange($event)"></app-trigger-menu-elaborazione>
+      </ng-container>
+      <p *ngIf="renderChoice" class="my-5">
+        {{'page.validazione.modali.seleziona_render_report_elab.paragraph' | translate}} <strong class="text-uppercase">{{renderChoice!.text}}</strong>
+      </p>
+    </section>
+    <div class="btn-action-modal justify-content-end">
+      <button mat-button class="mat-raised-button mat-primary" (click)="next()" [disabled]="!renderChoice">
+        {{'button.prosegui' | translate}}
+      </button>
+    </div>
+  </ng-container>
+</mat-dialog-content>

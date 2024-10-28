@@ -1,0 +1,46 @@
+<div class="modal-dragdrop" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle>
+  <div mat-dialog-title class="dialog-title">
+    <h2>
+      Eventi
+    </h2>
+    <button class="mat-elevation-z0 btn-dialog--close" mat-icon-button
+      aria-label="{{'button.aria_label.chiudi' | translate}}" mat-dialog-close>
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <table mat-table [dataSource]="data" multiTemplateDataRows>
+    <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay">
+      <th mat-header-cell *matHeaderCellDef> {{'table.header_eventi.'+ column | translate}} </th>
+      <td mat-cell *matCellDef="let element">
+        <ng-container *ngIf="column === 'endDate' || column === 'beginDate'">
+          {{ element[column] | date: 'dd/MM/yyyy HH:mm' }}
+        </ng-container>
+        <ng-container *ngIf="column !== 'endDate' && column !== 'beginDate' && column !== 'notes'">
+          {{ element[column] }}
+        </ng-container>
+        <ng-container *ngIf="column === 'notes' && element[column].length > 0">
+          {{ element.notes.join('\n') | trimText }}
+        </ng-container>
+      </td>
+    </ng-container>
+
+    <!-- Expanded Content Column - The detail row is made up of this one column that spans across all columns -->
+    <ng-container matColumnDef="expandedDetail">
+      <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplay.length">
+        <div class="element-detail" [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
+          <div class="element-description">
+            {{element.notes.join('\n')}}
+          </div>
+        </div>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+    <tr mat-row *matRowDef="let element; columns: columnsToDisplay;" class="element-row"
+      [class.expanded-row]="expandedElement === element" [class.mouse-pointer]="element.notes" (click)="toggleExpansion(element)">
+    </tr>
+    <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row"></tr>
+  </table>
+
+</div>

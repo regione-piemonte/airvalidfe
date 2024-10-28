@@ -1,0 +1,209 @@
+<!--  
+ Copyright Regione Piemonte - 2024
+ SPDX-License-Identifier: EUPL-1.2-or-later
+ -->
+<div class="container-fluid my-5 container--result">
+
+  <div class="row">
+    <div *ngIf="filtri && territorialItems!.length > 0" class="col-3 col--filter">
+      <div class="d-flex justify-content-between mb-4">
+        <h3>Filtri</h3>
+        <button mat-button class="mat-raised-button mat-primary" *ngIf="isResetActive(filtri)"
+          (click)="resetEvent()">Reset</button>
+      </div>
+      <!-- Mat Expansion Panel for Accordion -->
+      <mat-accordion multi>
+        <mat-expansion-panel *ngFor="let filtro of filtri" [expanded]="true">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <h5 class="filter-title" *ngIf="filtro?.items!.length > 0">{{ filterTitles[filtro.id] }}</h5>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+
+          <!-- Contenuto dell'accordion -->
+          <section class="card-body mx-2 my-2">
+            <div role="button" [class.filter_active]="item?.active" class="d-flex justify-content-between filter"
+              (click)="selectedFilter(item, filtro.id)" *ngFor="let item of filtro?.items">
+              <span>{{item?.name}}</span>
+              <strong>{{item?.count}}</strong>
+            </div>
+          </section>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </div>
+    <div *ngIf="territorialItems!.length > 0; else noResult" class="col-9 col--results">
+      <div class="d-flex justify-content-between align-items-end pt-3">
+        <div #focusPagination tabindex="0">
+          <p *ngIf="total">Visualizzazione dei risultati da <strong>{{begin + 1}}</strong> a <strong>{{begin + countResult}}</strong> - Totale risultati <strong>{{total}}</strong></p>
+          <div class="d-flex justify-content-around py-3 pagination-button">
+            <div class="btn--change">
+              <button mat-button class="mat-raised-button mat-primary me-4" [disabled]="(begin - countResult) < 0" (click)="changePagination('prec')">
+                Precedente
+              </button>
+              <button mat-button class="mat-raised-button mat-primary" [disabled]="(begin + countResult) >= total" (click)="changePagination('succ')">
+                Successivo
+              </button>
+            </div>
+    
+          </div>
+        </div>
+        <div class="select-change">
+          <mat-form-field appearance="fill">
+            <mat-label>Elementi per pagina</mat-label>
+            <mat-select [formControl]="countControl" name="selectField">
+              <mat-option *ngFor="let element of listChangeCount" [value]="element">{{element}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="content-result">
+
+        <article *ngFor="let item of territorialItems">
+          <mat-card>
+            <div [ngSwitch]="true">
+  
+              <div *ngSwitchCase="!!item.event">
+                <mat-card-title>
+  
+                  <h5>{{item?.networkName}} - {{item.stationName}} {{item.sensorName ? '- ' + item?.sensorName : ''}}
+                  </h5>
+                </mat-card-title>
+                <mat-card-content class="data-card">
+  
+                  <dl>
+                    <dt>Data inizio:</dt>
+                    <dd>{{item.event.beginDate | date}}</dd>
+                  </dl>
+  
+                  <dl>
+                    <dt>Data fine:</dt>
+                    <dd>{{item.event.endDate | date}}</dd>
+                  </dl>
+  
+                  <dl>
+                    <dt>Origine:</dt>
+                    <dd>{{item.event.origin}}</dd>
+                  </dl>
+  
+                  <dl>
+                    <dt>Tipo:</dt>
+                    <dd>{{item.event.type}}</dd>
+                  </dl>
+  
+                  <dl class="flex-column">
+                    <dt>Note:</dt>
+                    <dd *ngFor="let note of item.event.notes; let i=index">
+                      {{i + 1 }} - {{note}}
+                    </dd>
+                  </dl>
+  
+                </mat-card-content>
+  
+              </div>
+              <div *ngSwitchDefault>
+                <mat-card-title>
+                  <h5>
+                    <a href="{{item?.stationUrl}}" *ngIf="item?.stationUrl; else viewTitle">{{item?.title}}</a>
+                    <ng-template #viewTitle>{{item?.title}}</ng-template>
+                  </h5>
+  
+  
+                </mat-card-title>
+                <mat-card-content class="data-card">
+                  <dl>
+                    <dt>
+                      Attivo dal:
+                    </dt>
+                    <dd>
+                      {{item?.beginDate}}
+                    </dd>
+                  </dl>
+                  <dl *ngIf="item?.endDate">
+                    <dt>
+                      fino al:
+                    </dt>
+                    <dd>
+                      {{item?.endDate}}
+                    </dd>
+                  </dl>
+                  <dl>
+                    <dt>
+                      Indirizzo:
+                    </dt>
+                    <dd>
+                      {{item?.address}}
+                    </dd>
+                  </dl>
+                  <dl>
+                    <dt>
+                      {{item.stationType}} altitudine:
+                    </dt>
+                    <dd>
+                      {{item.altitude}}
+                    </dd>
+                  </dl>
+                  <dl *ngIf="item.national">
+                    <dt>
+                      Tipo di stazione:
+                    </dt>
+                    <dd>
+                      Stazione Nazionale
+                    </dd>
+                  </dl>
+                  <dl>
+                    <dt>
+                      Proprietà:
+                    </dt>
+                    <dd>
+                      {{item.publicOwned ? 'ARPA' : 'Privata'}}
+                    </dd>
+                  </dl>
+                  <dl>
+                    <dt>
+                      Gestione:
+                    </dt>
+                    <dd>
+                      {{item.publicManaged ? 'ARPA' : 'Privata'}}
+                    </dd>
+                  </dl>
+                  <dl>
+                    <dt>
+                      Sensore:
+                    </dt>
+                    <dd>
+                      {{item.toBePublisched ? 'PUBBLICO' : 'NON PUBBLICO'}}
+                    </dd>
+                  </dl>
+                </mat-card-content>
+              </div>
+            </div>
+          </mat-card>
+        </article>
+      </div>
+      <div class="d-flex justify-content-around p-3 pagination-button">
+        <div class="btn--change">
+          <button mat-button class="mat-raised-button mat-primary me-4" [disabled]="(begin - countResult) < 0" (click)="changePagination('prec')">
+            Precedente
+          </button>
+          <button mat-button class="mat-raised-button mat-primary" [disabled]="(begin + countResult) >= total" (click)="changePagination('succ')">
+            Successivo
+          </button>
+        </div>
+
+      </div>
+    </div>
+    <ng-template #noResult>
+      <div class="col-5 mx-auto col--results mt-4" role="alert">
+        <mat-card>
+          <mat-card-title>
+            <h5>Attenzione!</h5>
+          </mat-card-title>
+          <mat-card-content class="data-card">
+            Non sono presenti risultati
+          </mat-card-content>
+        </mat-card>
+
+      </div>
+    </ng-template>
+  </div>
+</div>

@@ -1,0 +1,139 @@
+<!-- Creo una lista di selector -->
+<h3>{{'dialog_init_config.step_1.elaborazioni_specialistiche.title' | translate}}</h3>
+<p class="text--info">{{'input.required' | translate}}</p>
+
+<ng-content></ng-content>
+
+<mat-select [formControl]="reportSpecialistico" (selectionChange)="callService(); onFieldChange()" style="margin-bottom: 10px">
+  <mat-option *ngFor="let item of listServiceToSpecialistica" [value]="item.id" >{{ item.description }}</mat-option>
+</mat-select>
+
+<!-- Dopo la risposta faccio vedere che cosa e meglio-->
+<ng-container *ngIf="(specialisticoStore$ | async) as timeState" [ngSwitch]="timeState.time?.timeUnit">
+  <!--Nel caso che la selezione sia per due anni-->
+  <ng-container *ngSwitchCase="'YEAR'">
+    <!-- template Doppio anno-->
+    <section style="display: flex; justify-content: space-between">
+      <mat-form-field appearance="fill">
+
+        <mat-label>Primo Anno</mat-label>
+        <input matInput [matDatepicker]="picker1" [formControl]="firstYear">
+        <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+        <mat-datepicker #picker1 startView="multi-year" (yearSelected)="yearSelect($event,{datapicker: picker1, timeState} ); onFieldChange()"></mat-datepicker>
+      </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>Secondo Anno</mat-label>
+        <input [disabled]="timeState.time?.countMax === 1" matInput [matDatepicker]="picker2" [formControl]="secondYear" [errorStateMatcher]="matcher">
+        <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+        <mat-datepicker #picker2 startView="multi-year"
+                        (yearSelected)="yearSelect($event, {datapicker: picker2, annoSelected: 'secondoAnno', timeState}); onFieldChange()"></mat-datepicker>
+      </mat-form-field>
+    </section>
+  </ng-container>
+  <!--Nel caso che la selezione sia per una data-->
+  <ng-container *ngSwitchCase="'DATE'">
+
+    <section style="display: flex; justify-content: space-between">
+      <mat-form-field appearance="fill">
+        <mat-label>Inizio</mat-label>
+        <input matInput [matDatepicker]="picker1" [formControl]="firstDate"
+               (dateChange)="handleDate($event, 'inizio'); onFieldChange()">
+        <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+        <mat-datepicker #picker1 startView="month"></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Fine</mat-label>
+        <input matInput [matDatepicker]="picker2" [formControl]="lastDate"
+               (dateChange)="handleDate($event, 'fine'); onFieldChange()">
+
+        <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+        <mat-datepicker #picker2 startView="month"></mat-datepicker>
+      </mat-form-field>
+    </section>
+
+  </ng-container>
+  <!--Nel caso che non sia gestita una tempistica-->
+  <!-- <ng-container *ngSwitchDefault>
+    <div style="color: red">Tempistica non gestita</div>
+  </ng-container> -->
+</ng-container>
+
+<!-- Ricevo la lista dei parametri da selezionare -->
+<ng-container *ngIf="networkSelector$ | async as state">
+
+  <ng-container *ngIf="parametriSelector$ | async as parametriState">
+    <mat-form-field *ngIf="parametriState?.items?.length" style="display: contents">
+      <mat-label>Seleziona il parametro</mat-label>
+      <mat-select [formControl]="keyParametersControl" (closed)="closeToSelected('PARAMETER', state.complete)" (selectionChange)="onFieldChange()">
+        <mat-option *ngFor="let group of parametriState.items; trackBy: trackByKey" [value]="group.key">{{ group?.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </ng-container>
+
+  <mat-form-field *ngIf="state.item?.length" style="display: contents">
+    <mat-label>Seleziona la rete</mat-label>
+    <mat-select multiple [formControl]="keysControl" [compareWith]="isEqual" #areeTerritoriali class="select-more-option" (closed)="closeToSelected('NETWORK', state.complete)" (selectionChange)="onFieldChange()">
+      <div class="select--border">
+        <mat-checkbox (change)="selectAll($event, keysControl, state.item); onFieldChange()">
+          {{'input.check_all' | translate}}
+        </mat-checkbox>
+      </div>
+      <div class="select--btn">
+        <button (click)="areeTerritoriali.close()" class="mat-raised-button mat-primary" mat-button>
+          {{'button.conferma' | translate}}
+        </button>
+      </div>
+      <mat-option *ngFor="let group of state.item; trackBy: trackByKey" [value]="group.key">{{ group?.name }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+
+
+  <!--Ricevo la lista delle stazioni-->
+  <ng-container *ngIf="stationSelecto$ | async as stationList">
+    <mat-form-field *ngIf="stationList.items?.length && !state.complete" style="display: contents">
+      <mat-label>Seleziona la stazione</mat-label>
+      <mat-select multiple [formControl]="keyStationControl" [compareWith]="isEqual" (closed)="closeToSelected ('STATION', stationList.complete)" (selectionChange)="onFieldChange(stationList)" class="select-more-option" #stazioni>
+        <div class="select--border">
+         <mat-checkbox (change)="selectAll($event, keyStationControl, stationList.items); onFieldChange()">
+          {{'input.check_all' | translate}}
+        </mat-checkbox>
+        </div>
+        <div class="select--btn">
+          <button (click)="stazioni.close()" class="mat-raised-button mat-primary" mat-button>
+            {{'button.conferma' | translate}}
+          </button>
+        </div>
+        <mat-option *ngFor="let param of stationList.items" [value]="param.key">{{ param?.name }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!--Ricevo la lista dei parametri-->
+    <ng-container *ngIf="sensoriSelector$ | async as stationControl">
+      <mat-form-field *ngIf="stationControl.items?.length && !stationList.complete" style="display: contents">
+        <mat-label>Seleziona il parametro</mat-label>
+        <mat-select multiple [formControl]="keySensorsControl" (closed)="closeToSelected('SENSOR', stationControl.complete)" #parametri [compareWith]="isEqual" (selectionChange)="onFieldChange()">
+          <div class="select--border">
+            <mat-checkbox (change)="selectAll($event, keySensorsControl, stationControl.items, 'sensor'); onFieldChange()">
+              {{'input.check_all' | translate}}
+            </mat-checkbox>
+          </div>
+          <div class="select--btn">
+            <button (click)="parametri.close()" class="mat-raised-button mat-primary" mat-button>
+              {{'button.conferma' | translate}}
+            </button>
+          </div>
+          <mat-option *ngFor="let param of stationControl.items" [value]="param.keys">{{ param.name }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </ng-container>
+  </ng-container>
+
+
+</ng-container>
+
+
+

@@ -10,7 +10,6 @@
       <mat-icon>close</mat-icon>
     </button>
   </div>
-  {{validazioneLayout}}
   <p>{{'page.impostazioni.paragraph' | translate}}</p>
   <form [formGroup]="form">
     <!-- scelta lingua -->
@@ -26,6 +25,9 @@
           Italiano
         </mat-radio-button>
       </mat-radio-group>
+      <div *ngIf="form.get('languageRadioControl')!.hasError('required')">
+        Campo obbligatorio
+      </div>
     </section>
 
     <!-- scelta tema -->
@@ -35,6 +37,9 @@
         <mat-radio-button value="light">{{'input.theme.light' | translate}}</mat-radio-button>
         <mat-radio-button value="dark">{{'input.theme.dark' | translate}}</mat-radio-button>
       </mat-radio-group>
+      <div *ngIf="form.get('themeRadioControl')!.hasError('required')">
+        Campo obbligatorio
+      </div>
     </section>
 
     <!-- scelta tema -->
@@ -51,6 +56,9 @@
           {{'input.layout.option.2.name' | translate}}
         </mat-radio-button>
       </mat-radio-group>
+      <div *ngIf="form.get('layoutRadioControl')!.hasError('required')">
+        Campo obbligatorio
+      </div>
     </section>
 
     <!-- scelta font -->
@@ -61,81 +69,112 @@
         <mat-radio-button value="regular">{{'input.font.option.1.name' | translate}}</mat-radio-button>
         <mat-radio-button value="big">{{'input.font.option.2.name' | translate}}</mat-radio-button>
       </mat-radio-group>
+      <div *ngIf="form.get('fontRadioControl')!.hasError('required')">
+        Campo obbligatorio
+      </div>
     </section>
-    <!-- tabella di riepilogo dei preset -->
+
+    <!-- scelta font -->
     <section>
-      <h3 id="tablePreset">
-        {{'page.impostazioni.title_sec.preset' | translate}}
-      </h3>
-      <table #table mat-table [dataSource]=" tablePreset" class="w-100 table--settings">
-        <!-- <ng-container matColumnDef="id">
-          <th mat-header-cell *matHeaderCellDef>
-            {{ 'table.body.preset.0' | translate}}
-          </th>
-          <td mat-cell *matCellDef="let element">
-            {{element.id}}</td>
-        </ng-container> -->
-        <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef>
-            {{ 'table.body.preset.1' | translate}}
-          </th>
-          <td mat-cell *matCellDef="let element">
-            {{element}}
-          </td>
-        </ng-container>
-        <!-- <ng-container matColumnDef="rete">
-          <th mat-header-cell *matHeaderCellDef>
-            {{ 'table.body.preset.2' | translate}}
-          </th>
-          <td mat-cell *matCellDef="let element">
-            <span *ngFor="let rete of element.rete" class="cell-element--multi">
-              {{rete}}
-            </span>
-          </td>
-        </ng-container>
-        <ng-container matColumnDef="stazioni">
-          <th mat-header-cell *matHeaderCellDef>
-            {{ 'table.body.preset.3' | translate}}
-          </th>
-          <td mat-cell *matCellDef="let element">
-            <span *ngFor="let stazione of element.stazioni" class="cell-element--multi">
-              {{stazione}}
-            </span>
-          </td>
-        </ng-container>
-        <ng-container matColumnDef="parametri">
-          <th mat-header-cell *matHeaderCellDef>
-            {{ 'table.body.preset.4' | translate}}
-          </th>
-          <td mat-cell *matCellDef="let element">
-            <span *ngFor="let parametri of element.parametri" class="cell-element--multi">
-              {{parametri}}
-            </span>
-          </td>
-        </ng-container> -->
-        <ng-container matColumnDef="azioni">
-          <th mat-header-cell *matHeaderCellDef>
-            <span class="visually-hidden">{{ 'table.body.preset.5' | translate}}</span>
-          </th>
-          <td mat-cell *matCellDef="let element">
-            <button mat-icon-button matTooltip="{{'button.aria_label.delete' | translate }} {{element}}" class="text--error" (click)="deleteConfig(element)">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </td>
-        </ng-container>
+      <h3 id="areeTerritorialiOpt">{{'page.impostazioni.title_sec.net' | translate}}</h3>
+      <mat-form-field appearance="fill" *ngIf="listaAreeTerritoriali$" style="width: 80%;">
+        <mat-label>
+          {{'dialog_init_config.step_3.title_net' | translate}}
+        </mat-label>
+        <mat-select aria-labelledby="areeTerritorialiOpt" [(value)]="areeTerritoriali" [compareWith]="compareobj">
+          <mat-option value="">{{'input.select_default_net.label' | translate}}</mat-option>
+          <mat-option *ngFor="let element of listaAreeTerritoriali$" [value]="element">{{ element.name }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </section>
 
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; let i=index; columns: displayedColumns;">
-        </tr>
+    <!-- tabella di riepilogo dei preset -->
+    <section class="mt-5">
 
-      </table>
+      <mat-accordion multi>
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <h3 id="tablePreset" class="mat-dialog-title">
+                {{'page.impostazioni.title_sec.preset' | translate}}
+              </h3>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+      
+          <div [ngClass]="tablePreset.data.length > 5 ? 'table-wrapper--settings' : ''">
+            <table #table mat-table [dataSource]=" tablePreset" class="w-100 table--settings">
+              <!-- <ng-container matColumnDef="id">
+                <th mat-header-cell *matHeaderCellDef>
+                  {{ 'table.body.preset.0' | translate}}
+                </th>
+                <td mat-cell *matCellDef="let element">
+                  {{element.id}}</td>
+              </ng-container> -->
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef>
+                  {{ 'table.body.preset.1' | translate}}
+                </th>
+                <td mat-cell *matCellDef="let element">
+                  {{element}}
+                </td>
+              </ng-container>
+              <!-- <ng-container matColumnDef="rete">
+                <th mat-header-cell *matHeaderCellDef>
+                  {{ 'table.body.preset.2' | translate}}
+                </th>
+                <td mat-cell *matCellDef="let element">
+                  <span *ngFor="let rete of element.rete" class="cell-element--multi">
+                    {{rete}}
+                  </span>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="stazioni">
+                <th mat-header-cell *matHeaderCellDef>
+                  {{ 'table.body.preset.3' | translate}}
+                </th>
+                <td mat-cell *matCellDef="let element">
+                  <span *ngFor="let stazione of element.stazioni" class="cell-element--multi">
+                    {{stazione}}
+                  </span>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="parametri">
+                <th mat-header-cell *matHeaderCellDef>
+                  {{ 'table.body.preset.4' | translate}}
+                </th>
+                <td mat-cell *matCellDef="let element">
+                  <span *ngFor="let parametri of element.parametri" class="cell-element--multi">
+                    {{parametri}}
+                  </span>
+                </td>
+              </ng-container> -->
+              <ng-container matColumnDef="azioni">
+                <th mat-header-cell *matHeaderCellDef>
+                  <span class="visually-hidden">{{ 'table.body.preset.5' | translate}}</span>
+                </th>
+                <td mat-cell *matCellDef="let element">
+                  <button mat-icon-button matTooltip="{{'button.aria_label.delete' | translate }} {{element}}" class="text--error" (click)="deleteConfig(element)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+      
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; let i=index; columns: displayedColumns;">
+              </tr>
+      
+            </table>
+          </div>
+          
+        </mat-expansion-panel>
+      </mat-accordion>
     </section>
 
     <div class="d-flex justify-content-between mt-5">
       <button mat-button class="mat-raised-button" (click)="close()" attr.aria-label="{{'button.aria_label.annulla' | translate}}">
         {{'button.annulla' | translate}}
       </button>
-      <button mat-button class="mat-raised-button mat-primary" (click)="onSubmit()">
+      <button mat-button class="mat-raised-button mat-primary" type="submit" (click)="onSubmit()">
         {{'button.save_settings' | translate}}
       </button>
     </div>

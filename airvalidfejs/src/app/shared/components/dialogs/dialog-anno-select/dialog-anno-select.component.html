@@ -5,7 +5,7 @@
 <mat-dialog-content [formGroup]="form">
     <ng-container>
       <div mat-dialog-title class="dialog-title">
-        <h2 mat-dialog-title>Scelta anno</h2>
+        <h2 mat-dialog-title>{{'dialog_anno.title' | translate}}</h2>
         <button
           mat-icon-button
           aria-label="close dialog"
@@ -16,10 +16,10 @@
         </button>
       </div>
   
-      <p>Selezionare l'anno</p>
+      <p>{{'dialog_anno.subtitle' | translate}}</p>
 
       <mat-form-field appearance="fill" >
-        <mat-label>Anno</mat-label>
+        <mat-label>{{'dialog_anno.year' | translate}}</mat-label>
         <mat-select formControlName="anno"  >
           <mat-option *ngFor="let element of listaAnno" [value]="element">{{element}}</mat-option>
         </mat-select>
@@ -30,7 +30,7 @@
           <button
             mat-button
             class="mat-raised-button mat-primary"
-            attr.aria-label="{{'Vai alla pagina di ' + form.value.lavoro}}"
+            [attr.aria-label]="('dialog_anno.aria_label' | translate) + form.value.lavoro"
             [disabled]="!form.valid"
             (click)="save()"
           >

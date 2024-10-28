@@ -2,11 +2,10 @@
  *Copyright Regione Piemonte - 2023
  *SPDX-License-Identifier: EUPL-1.2-or-later
  */
-import { Component, Inject, OnInit } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { ColorPickerControl, ColorsTable } from '@iplab/ngx-color-picker';
-import { DialogParametersComponent } from '../dialog-parameters/dialog-parameters.component';
-import { ColorService } from 'src/app/core/services/utility/color.service';
+import { Component , Inject , OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA , MatDialogRef } from '@angular/material/dialog';
+import { ColorPickerControl } from '@iplab/ngx-color-picker';
+import { ColorService } from '../../../../core/services';
 
 @Component({
   selector: 'app-dialog-color-picker',
@@ -31,7 +30,7 @@ public chromeControl = new ColorPickerControl()
   ngOnInit(): void {
   }
 
- 
+
 
   save() {
     this.dialogRef.close(this.color);

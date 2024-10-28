@@ -3,7 +3,7 @@
     @extend .pb-4;
     @extend .d-flex;
     flex-direction: column; 
-    @extend .justify-content-between;
+    // @extend .justify-content-between;
     @extend .h-100;
     background-color: $blue;
     .router-link {
@@ -16,7 +16,7 @@
           border-bottom: none;
         }
         &:hover, &:focus {
-          background-color: $blue-400;
+          background-color: $blue-800;
           border-radius: 0px;
           border: 3px solid $grey-500;
           .mat-list-item-content {
@@ -32,6 +32,11 @@
           .mat-list-item-content {
             color: $white;
             .mat-icon {
+              color: $yellow;
+            }
+          }
+          &:hover,&:focus {
+            .mat-icon {
               color: $white;
             }
           }
@@ -39,7 +44,7 @@
         &[disabled="true"] {
           background-color: $grey-200;
           cursor: no-drop;
-          a {
+          a, button {
             cursor: no-drop;
           }
           &:hover {
@@ -64,6 +69,29 @@
           color: $grey-900;
           justify-content: center;
           @include font-size(12px);
+        }
+      }
+
+      .router-link-item {
+        button {
+          border: none;
+          word-break: break-word;
+          background-color: transparent;
+          .titlePage {
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            width: 61px;
+            display: block;
+          }
+        }
+        &:hover, &:focus {
+          .mat-list-item-content {
+            color: $white;
+            .mat-icon, .titlePage {
+              color: $white;
+            }
+          }
         }
       }
     }

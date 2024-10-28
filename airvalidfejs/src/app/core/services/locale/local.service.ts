@@ -2,12 +2,16 @@
  *Copyright Regione Piemonte - 2023
  *SPDX-License-Identifier: EUPL-1.2-or-later
  */
-import { Injectable } from '@angular/core';
-import compareAsc from 'date-fns/compareAsc';
+import {Injectable} from '@angular/core';
 import * as moment from 'moment';
-import { PeriodType } from '../../../shared/components/grafico/compositive_grafic/models';
-import { format , isAfter , isBefore } from 'date-fns';
-import { throwUnknownPortalTypeError } from '@angular/cdk/portal/portal-errors';
+import {PeriodType} from '@components/shared/grafico/compositive_grafic/models';
+import {addDays, format, isAfter, isBefore} from 'date-fns';
+import {Store} from "@ngrx/store";
+import {AppState} from "../../../state";
+import {dialogConfigSelector} from "@selectors/*";
+import {filter, map, Observable, of, switchMap, take} from "rxjs";
+import {ISelectPeriodoState} from "@reducers/*";
+import {IPropsChangeLavoro, setDateStoreAction} from "@actions/*";
 
 @Injectable( {
   providedIn: 'root'
@@ -17,7 +21,9 @@ export class LocalService {
   START_DATE = 'startDate';
   END_DATE = 'endDate';
 
-  constructor() {
+  constructor(
+    private readonly store: Store<AppState>
+  ) {
     this.setDefaultTimezone()
   }
 
@@ -29,8 +35,40 @@ export class LocalService {
     return localStorage.getItem( key ) ?? '';
   }
 
+  /**
+   * Retrieve the time store as an observable.
+   *
+   * @returns {Observable<ISelectPeriodoState>} - The observable containing the time store.
+   */
+  getTimeStore(): Observable<ISelectPeriodoState> {
+    return this.store.select<ISelectPeriodoState>(dialogConfigSelector).pipe(
+      filter(data => !!data.periodo),
+      take(1)
+    )
+  }
+
+  getDataWithDataStore<T>(callback: (start: string, end: string) => Observable<T>) {
+    return this.getTimeStore().pipe(
+      map(({periodo}) => ({start: periodo?.dataInizioTime, end: periodo?.dataFineTime})),
+      switchMap(({start, end}) => callback(start!,end!))
+    )
+  }
+
+  getAnnoStore(fineAnno: boolean = false): Observable<number> {
+    return this.getTimeStore().pipe(
+      filter(data => !!data),
+      map<ISelectPeriodoState, number>(({periodo}) => {
+        return Number(format(new Date(!fineAnno ? +periodo?.dataInizioTime! : +periodo?.dataFineTime!), 'yyyy'));
+      })
+    )
+  }
+
   setItem( key: string , value: string ): void {
-    localStorage.setItem( key , value );
+    // localStorage.setItem( key , value );
+  }
+
+  setDateStore(key: keyof IPropsChangeLavoro, value: string) {
+    this.store.dispatch(setDateStoreAction(key, value))
   }
 
   removeItem( key: string ): void {
@@ -41,39 +79,12 @@ export class LocalService {
     localStorage.clear();
   }
 
-  getLanguage(): string {
-    return this.getItem( 'language' );
-  }
 
-  setLanguage( language: string ): void {
-    this.setItem( 'language' , language );
-  }
-
-  getTimezone(): string {
-    return this.getItem( 'timezone' );
-  }
-
-  setTimezone( timezone: string ): void {
-    this.setItem( 'timezone' , timezone );
-  }
-
-  verifyTimezone( value: number , action?: PeriodType ): void {
-    let diff = action === 'prec' ? isBefore( value , +this.getItem( this.START_DATE ) ): isAfter( value , +this.getItem( this.END_DATE ) );
-    if ( action === 'prec' && value && diff ) {
-      this.setItem( this.START_DATE , value.toString() );
-    }
-    if ( action === 'succ' && value && diff ) {
-      this.setItem( this.END_DATE , value.toString() );
-    }
-  }
-
-  getPeriodoLocal(formatOnlyDate: boolean = false): { startDate: string, endDate: string } {
-    let startDate = !formatOnlyDate ? this.getFormatPeriod( +this.getItem( this.START_DATE ) ) : this.getFormatPeriodDate( +this.getItem( this.START_DATE ));
-    let endDate = !formatOnlyDate ? this.getFormatPeriod( +this.getItem( this.END_DATE ) ) : this.getFormatPeriodDate( +this.getItem( this.END_DATE ));
-    return {
-      startDate,
-      endDate
-    }
+  getPeriodoLocalObs<T>(formatOnlyDate: boolean = false): Observable<{ startDate: string, endDate: string }> {
+    return this.getDataWithDataStore((start, end) => of({
+      startDate: !formatOnlyDate ? this.getFormatPeriod( +start ) : this.getFormatPeriodDate( +start),
+      endDate: !formatOnlyDate ? this.getFormatPeriod( +end ) : this.getFormatPeriodDate( addDays( new Date(+end), -1 ).getTime())
+    }))
   }
 
   getFormatPeriod( date: number ) {

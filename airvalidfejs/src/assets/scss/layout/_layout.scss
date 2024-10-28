@@ -15,8 +15,6 @@
           }
         }
       }
-
-
     }
   }
 
@@ -49,6 +47,7 @@
 
   as-split-area as-split .as-split-area {
     padding: 0px 5px;
+    overflow-y: auto;
 
     .validazione-grafico {
       padding: 0px 20px;
@@ -67,7 +66,7 @@
       @extend .d-flex;
 
       dt {
-        @extend .me-1
+        @extend .me-1;
       }
 
       dd {
@@ -79,6 +78,30 @@
         @extend .ms-2;
       }
     }
+
+    &.report-period {
+      justify-content: space-between;
+      width: 100%;
+      container: period / inline-size;
+    }
+    @container period (width < 500px) {
+      &.reference-period {
+        flex-direction: column;
+        @extend .mb-2;
+      }
+    }
+    .block--date {
+      @extend .d-flex;
+    }
+  }
+
+  .content-align {
+    container: period / inline-size;
+    @container period (width < 500px) {
+      .reference-period {
+        flex-direction: column;
+      }
+    }
   }
 
   .data-list {
@@ -87,14 +110,22 @@
       @extend .mb-0;
       @extend .justify-content-start;
 
+      @include media-breakpoint-down(lg) {
+        flex-direction: column;
+      }
+
       dt {
         visibility: hidden;
-        width: 0px
+        width: 0px;
+        height: 0px;
       }
 
       dd {
-        &:first-of-type {
-          @extend .me-2;
+        @extend .me-2;
+        @extend .fw-bold;
+
+        &:last-of-type {
+          @extend .me-0;
         }
       }
     }
@@ -104,6 +135,7 @@
     &--row {
       @extend .d-flex;
       width: 100%;
+      min-height: calc(100vh - 45px);
 
       &.main-menu {
         &--true {
@@ -139,58 +171,71 @@
         }
       }
     }
-
   }
 
   .theme {
-    &--light {}
+    &--light {
+      .as-horizontal > .as-split-gutter,
+      .as-vertical > .as-split-gutter {
+        background-color: $blue-700;
+      }
+    }
 
     &--dark {
       background-color: $blue-1000;
-      color: $yellow;
+      color: $darkmode;
 
       tr.mat-header-row {
         background-color: $blue-900;
+
         .mat-header-cell {
-          color: $yellow;
+          color: $darkmode;
         }
-        
       }
 
       tr.mat-row:hover {
-        background-color: $blue-900;
+        background-color: $grey-900;
+
         .mat-cell {
-          color: $yellow;
-          
+          color: $darkmode;
+
+          .mat-checkbox-frame {
+            border-color: $darkmode;
+          }
+
+          .mat-select-value,
+          .mat-select-arrow {
+            color: $darkmode;
+          }
         }
-        
       }
-      
+
       .toggle {
         &--decimal {
           .mat-slide-toggle-bar {
             background-color: $grey-900;
           }
+
           .mat-slide-toggle-thumb {
-            background-color: $yellow;
+            background-color: $darkmode;
           }
         }
       }
-      
 
       .btn-user--menu .mat-button-wrapper {
-        color: $yellow!important;
+        color: $darkmode !important;
       }
 
       .mat-button.mat-button-base:not(.mat-primary):not(.mat-primary-text) {
         background-color: $blue-1000;
-        color: $yellow;
+        color: $darkmode;
+
         .mat-button-wrapper {
-          color: $yellow;
+          color: $darkmode;
         }
       }
 
-      .side-bar-content .router-link .mat-list-item[disabled=true] {
+      .side-bar-content .router-link .mat-list-item[disabled="true"] {
         background-color: $black;
       }
 
@@ -199,34 +244,33 @@
         background-color: $black;
       }
 
-      
-
       tr.mat-row {
         .mat-cell {
           &.mat-column-validato {
             input {
               background-color: transparent;
-              color: $yellow;
-              border-color: $yellow;
+              color: $darkmode;
+              border-color: $darkmode;
             }
           }
         }
       }
 
-      .as-horizontal > .as-split-gutter, .as-vertical > .as-split-gutter {
+      .as-horizontal > .as-split-gutter,
+      .as-vertical > .as-split-gutter {
         background-color: $blue-900;
-        border: 1px solid $yellow;
+        border: 1px solid $darkmode;
       }
 
       .reference-period dl dd,
       .mat-icon-button.mat-primary,
       .mat-button.mat-primary-text {
-        color: $yellow!important;
+        color: $darkmode !important;
       }
 
       .mat-paginator {
         background-color: $blue-1000;
-        color: $yellow;
+        color: $darkmode;
       }
 
       .mat-table {
@@ -236,23 +280,20 @@
           &:not(:hover):not(:focus):not(.selected) {
             .mat-cell {
               &:not(:hover):not(:focus) {
-                color: $yellow;
+                color: $darkmode;
 
                 .mat-select-value,
                 .mat-select-arrow {
-                  color: $yellow;
+                  color: $darkmode;
                 }
 
                 .mat-checkbox-frame {
-                  border-color: $yellow;
+                  border-color: $darkmode;
                 }
               }
             }
           }
-
-
         }
-
       }
 
       .theme-graph {
@@ -267,22 +308,248 @@
         background-color: $blue-1000;
 
         .mat-list-item-content {
-          color: $yellow;
+          color: $darkmode;
         }
 
         .router-link .mat-list-item.list-item-active {
-          &:not([disabled=true]) {
+          &:not([disabled="true"]) {
             .mat-list-item-content {
-              color: $yellow;
+              color: $darkmode;
+
               .mat-icon {
-                color: $yellow;
+                color: $darkmode;
               }
             }
-
           }
         }
+      }
+      .wrap-form, .container--result {
+        background-color: transparent;
 
+        .mat-form-field-appearance-fill .mat-form-field-flex {
+          background-color: rgba($white, .3);
+          color: $darkmode;
+        }
+        
+
+        .col--filter {
+          .mat-expansion-panel-header-title, .card-body {
+            color: $darkmode;
+          }
+          .mat-expansion-panel {
+            background-color: transparent;
+          }
+        }
+        .col--results {
+          .mat-card {
+            background-color: transparent;
+            border: 1px solid $darkmode;
+            .mat-card-title {
+
+              color: $darkmode;
+              background-color: transparent;
+            }
+            dd,dt {
+              color: $darkmode;
+            }
+            dd {
+              font-weight: bold;
+            }
+          }
+        }
+      }
+      .search-page {
+        .text--info {
+          color: $darkmode;
+        }
+        a, span {
+          color: $darkmode;
+        }
       }
     }
   }
+
+  //page elaborazioni
+  .btn-toggle-group--container {
+    @extend .d-flex;
+    gap: 32px;
+    justify-content: space-around;
+
+    &#btn-toggle-group--render {
+      .btn-toggle-group {
+        &--primary {
+          background-color: $white;
+          border: 1px solid $grey-500;
+          border-radius: 8px;
+          width: 150px;
+          line-height: 48px;
+          color: $black;
+          @extend .text-capitalize;
+          @extend .fw-normal;
+
+          &:hover {
+            background-color: $blue-500;
+            color: $white;
+          }
+
+          &.btn-toggle-group--primary-selected {
+            background-color: $blue-500;
+            color: $white;
+          }
+          &.mat-button-disabled {
+            background-color: $grey-400;
+            cursor: not-allowed;
+            &:hover {
+              color: $grey-500;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .header--action {
+    @extend .d-flex;
+    @extend .justify-content-between;
+    @extend .align-items-baseline;
+  }
+
+  .box-report--list {
+    clear: both;
+    padding-top: 35px;
+    h3 {
+      &:not(:first-child) {
+        @extend .mt-3;
+      }
+    }
+  }
+
+  .tab-dettaglio-elaborazione {
+    .mat-tab-header {
+      display: none;
+    }
+  }
+}
+
+// pagina ricerca
+
+.wrap-form {
+  background-color: $grey-300;
+}
+
+.search-page {
+  .container--result {
+    background-color: rgba($blue-100, 0.4);
+  }
+  .col {
+    &--filter {
+      // background-color: rgba($blue-100, 0.2);
+      padding: 25px;
+      section:not(:first-child) {
+        h5 {
+          margin-top: 25px;
+        }
+      }
+      .mat-expansion-panel-content {
+        max-height: 300px;
+        overflow: auto;
+
+        .mat-expansion-panel-body {
+          padding-left: 0px;
+          padding-right: 0px;
+        }
+      }
+    }
+    &--results {
+      .mat-card {
+        padding: 0px;
+        margin-bottom: 25px;
+
+        .mat-card-title {
+          background-color: $blue;
+          color: $white;
+          padding: 10px 25px;
+          border-top-left-radius: 5px;
+          border-top-right-radius: 5px;
+          h5 {
+            margin-bottom: 0px;
+          }
+          h5,
+          a {
+            color: $white;
+            font-size: 18px;
+            text-transform: uppercase;
+            font-weight: bold;
+          }
+        }
+        .mat-card-content {
+          padding: 10px 25px;
+          border-bottom-left-radius: 5px;
+          border-bottom-right-radius: 5px;
+        }
+
+        .data-card {
+          dl {
+            @extend .d-flex;
+            margin-bottom: 0px;
+
+            dt {
+              @extend .me-1;
+            }
+
+            dd {
+              margin-bottom: 0px;
+              color: $blue;
+              @extend .fw-bold;
+            }
+          }
+        }
+        &:hover,
+        &:focus {
+          @include shadowCard($shadow);
+        }
+      }
+      .pagination-button {
+        // background-color: rgba($blue-100, 0.2);
+      }
+    }
+  }
+
+  // Crea una classe per hover con bg che cambia
+  .filter:hover {
+    background-color: $grey-900;
+    color: $white;
+  }
+
+  // Crea una class per gestire padding e margin element
+  .filter {
+    padding: 5px 10px;
+    margin-bottom: 5px;
+    border-radius: 15px;
+    span {
+      max-width: 80%;
+    }
+  }
+  a,
+  span {
+    display: block;
+  }
+  .filter_active {
+    background: $blue-800;
+    color: $white;
+    &:hover {
+      background: $blue-900;
+    }
+  }
+}
+
+.hide-spinner {
+  ngx-spinner {
+    z-index: 1 !important;
+    position: relative !important;
+  }
+}
+
+.select-change .mat-form-field-appearance-fill .mat-form-field-flex {
+  background-color: $white;
 }

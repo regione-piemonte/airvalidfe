@@ -4,11 +4,12 @@
  */
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import {CanDeactivateGuardValidazione} from "@views/validazione/can-deactivare-guard-validazione.service";
 
 const routes: Routes = [
   {
     path: '',
-    redirectTo: 'validazione',
+    redirectTo: 'init-setting',
     pathMatch: 'full',
   },
   {
@@ -20,9 +21,16 @@ const routes: Routes = [
     }
   },
   {
+    path: 'init-setting',
+    loadChildren: () =>
+      import('./views/init-setting-page/init-setting-page.module').then((m) => m.InitSettingPageModule),
+
+  },
+  {
     path: 'validazione',
     loadChildren: () =>
       import('./views/validazione/validazione.module').then((m) => m.ValidazioneModule),
+    canDeactivate:[CanDeactivateGuardValidazione],
     data: {
       title: 'Validazione'
     }
@@ -37,14 +45,13 @@ const routes: Routes = [
   },
 
   {
-    path: 'elaborazioni',
+    path: 'elaborazione',
     loadChildren: () =>
       import('./views/elaborazioni/elaborazioni.module').then((m) => m.ElaborazioniModule),
     data: {
       title: 'Elaborazioni'
     }
   },
-
   {
     path: 'impostazioni',
     loadChildren: () =>
@@ -52,11 +59,19 @@ const routes: Routes = [
     data: {
       title: 'Impostazioni utente'
     }
-  }
+  },  {
+    path: 'ricerca_eventi_anagrafica',
+    loadChildren: () =>
+      import('./views/ricerca-eventi-anagrafica/ricerca-eventi-anagrafica.module').then((m) => m.RicercaEventiAnagraficaModule),
+    data: {
+      title: 'Ricerca Eventi Anagrafica'
+    }
+  },
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+  imports: [RouterModule.forRoot(routes,{})],
+  exports: [RouterModule],
+  providers:[CanDeactivateGuardValidazione]
 })
 export class AppRoutingModule { }

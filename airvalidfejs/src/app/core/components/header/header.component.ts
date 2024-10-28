@@ -2,17 +2,21 @@
  *Copyright Regione Piemonte - 2023
  *SPDX-License-Identifier: EUPL-1.2-or-later
  */
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
-import { Title } from '@angular/platform-browser';
-import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
-import { Observable, filter, map } from 'rxjs';
-import { TranslateService } from '@ngx-translate/core';
-import { LanguageService } from '../../services/locale/language.service';
-import { UserService } from '../../services/api/user/user.service';
-import { ThemeColorService } from '../../services/utility/theme-color.service';
-import { DialogSettingsComponent } from './../../../shared/components/dialogs/dialog-settings/dialog-settings.component';
-import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog'
-import { ThemeFontService } from './../../services/utility/theme-font.service';
+import {Component, OnInit} from '@angular/core';
+import {Title} from '@angular/platform-browser';
+import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
+import {delay, filter, map, Observable} from 'rxjs';
+import {TranslateService} from '@ngx-translate/core';
+import {LanguageService} from '../../services/locale/language.service';
+import {UserService} from '@services/core/api';
+import {ThemeColorService} from '../../services/utility/theme-color.service';
+import {DialogSettingsComponent} from '@components/shared/dialogs/dialog-settings/dialog-settings.component';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog'
+import {ThemeFontService} from '@services/core/utility/theme-font.service';
+import {NgxSpinnerService} from 'ngx-spinner';
+import {environment} from '@environments/environment';
+import {finalize} from 'rxjs/operators';
+import {LocalService} from "@services/core/locale/local.service";
 
 @Component({
   selector: 'app-header',
@@ -42,15 +46,17 @@ export class HeaderComponent implements OnInit {
     private titleService: Title,
     private translateService: TranslateService,
     private languageService: LanguageService,
-    private userService:UserService,
+    private userService: UserService,
     private dialog: MatDialog,
     private _themeFontService: ThemeFontService,
-    private _themeColorService: ThemeColorService
+    private _themeColorService: ThemeColorService,
+    private spinner: NgxSpinnerService,
+    private readonly localService: LocalService
   ) {}
 
   ngOnInit() {
 
-    this.changeTheme();
+    // this.changeTheme();
 
     this.user$=this.userService.getUserInfo();
     this.languageService.currentLanguage$.subscribe((language: string) => {
@@ -112,5 +118,20 @@ export class HeaderComponent implements OnInit {
 
   changeTheme() {
     this._themeColorService.setThemeColor(this.themeSelect);
+  }
+
+  logout() {
+    this.spinner.show( 'global' );
+
+    this.userService.logout()
+      .pipe(
+        delay(5000),
+        finalize(() => this.spinner.hide('global'))
+      )
+      .subscribe((res) => {
+        this.localService.clear();
+        document.cookie = '';
+        location.replace(environment.baseUrl + environment.logout );
+    });
   }
 }

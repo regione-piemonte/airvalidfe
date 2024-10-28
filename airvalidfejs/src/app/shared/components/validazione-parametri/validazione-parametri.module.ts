@@ -12,17 +12,20 @@ import { ColorPickerModule } from '@iplab/ngx-color-picker';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslateModule } from '@ngx-translate/core'
+import { PipesModule } from '../../../core/pipes/pipes.module';
 
 @NgModule({
   declarations: [ValidazioneParametriComponent],
-  imports: [CommonModule,
+  imports: [
+    CommonModule,
+    PipesModule,
     MatTableModule,
     MatMenuModule,
     ColorPickerModule,
     MatButtonModule,
     MatTooltipModule,
     BrowserAnimationsModule,
-    TranslateModule
+    TranslateModule,
   ],
   exports: [ValidazioneParametriComponent],
 })

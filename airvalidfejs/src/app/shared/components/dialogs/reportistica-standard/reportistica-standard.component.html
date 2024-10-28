@@ -1,0 +1,31 @@
+<div class="mt-2">
+  <form [formGroup]="form" class="d-flex flex-column">
+    <p>
+      {{'reportistica.standard_type.title' | translate}} <strong>{{ 'reportistica.standard_type.' + form.get('controlTime')?.value | translate }}</strong>
+    </p>
+    <mat-form-field>
+      <mat-select [formControlName]="'flag'">
+        <mat-option value="true">{{ 'levelSelect.0.name' | translate }}</mat-option>
+        <mat-option value="false">{{ 'levelSelect.1.name' | translate }}</mat-option>
+      </mat-select>
+      <mat-label>{{'reportistica.label.flag' | translate}}</mat-label>
+    </mat-form-field>
+
+    <hr>
+
+    <mat-slide-toggle [formControlName]="'colori_evidenziazione'">{{'reportistica.toggle.color' | translate}}</mat-slide-toggle>
+    <mat-slide-toggle [formControlName]="'nomi_reti'">{{'reportistica.toggle.reti' | translate}}</mat-slide-toggle>
+    <mat-slide-toggle [formControlName]="'anagrafiche_righe'">{{'reportistica.toggle.riga' | translate}}</mat-slide-toggle>
+    <hr>
+
+    <div [formGroupName]="'tabelle'" style="display: flex; flex-direction: column">
+      <mat-slide-toggle *ngIf="form.get('tabelle.sintesi')?.enabled" [formControlName]="'sintesi'">{{'reportistica.toggle.sintesi' | translate}}</mat-slide-toggle>
+      <mat-slide-toggle *ngIf="form.get('tabelle.giorno_medio')?.enabled" [formControlName]="'giorno_medio'">{{'reportistica.toggle.giorno_medio' | translate}}</mat-slide-toggle>
+      <mat-slide-toggle *ngIf="form.get('tabelle.statistiche_giornaliere')?.enabled" [formControlName]="'statistiche_giornaliere'">{{'reportistica.toggle.statistiche_giornaliere' | translate}}</mat-slide-toggle>
+      <mat-slide-toggle *ngIf="form.get('tabelle.statistiche_mensili')?.enabled" [formControlName]="'statistiche_mensili'">{{'reportistica.toggle.statistiche_mensili' | translate}}</mat-slide-toggle>
+      <mat-slide-toggle *ngIf="form.get('tabelle.matrice_oraria')?.enabled" [formControlName]="'matrice_oraria'">{{'reportistica.toggle.matrice_oraria' | translate}}</mat-slide-toggle>
+      <mat-slide-toggle *ngIf="form.get('tabelle.stat_giorni_settimana')?.enabled" [formControlName]="'stat_giorni_settimana'">{{'reportistica.toggle.statistica_settimanale' | translate}}</mat-slide-toggle>
+      <mat-slide-toggle *ngIf="form.get('tabelle.percentili')?.enabled" [formControlName]="'percentili'">{{'reportistica.toggle.percentili' | translate}}</mat-slide-toggle>
+    </div>
+  </form>
+</div>

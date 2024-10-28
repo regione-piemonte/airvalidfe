@@ -5,22 +5,24 @@
 
 //variabili custm
 @import 'assets/scss/base/variables';
+@import 'assets/scss/base/typography';
 
 // librerie
-@import '@angular/material/prebuilt-themes/indigo-pink.css';
+//@import '@angular/material/prebuilt-themes/indigo-pink.css';
 @import 'bootstrap/scss/bootstrap';
-@import 'flag-icons/css/flag-icons.min.css';
 
-
-@import 'assets/scss/base/typography';
 @import 'assets/scss/base/mixins';
 
 @import 'assets/scss/element/button';
+@import 'assets/scss/element/calendar';
 @import 'assets/scss/element/card';
 @import 'assets/scss/element/expansion';
 @import 'assets/scss/element/form';
+@import 'assets/scss/element/graph';
 @import 'assets/scss/element/modal';
 @import 'assets/scss/element/sidebar';
+@import 'assets/scss/element/snackbar';
+@import 'assets/scss/element/tab';
 @import 'assets/scss/element/table';
 
 @import 'assets/scss/layout/header';

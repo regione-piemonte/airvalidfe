@@ -1,4 +1,4 @@
-<!--  
+<!--
  Copyright Regione Piemonte - 2023
  SPDX-License-Identifier: EUPL-1.2-or-later
  -->
@@ -10,24 +10,30 @@
         <mat-icon aria-label="" *ngIf="openClose">arrow_forward</mat-icon>
       </button>
     </mat-list-item>
-    <mat-list-item *ngFor="let sideMenuItem of sideMenuItems" color="primary" [class.list-item-active]="routerLinkActiveInstance.isActive"
+    <mat-list-item *ngFor="let sideMenuItem of sideMenuItems" color="primary" [class.list-item-active]=""
+    class="router-link-item"
     [attr.title]="sideMenuItem.name"
     [attr.disabled]="sideMenuItem.disabled">
-      <a routerLinkActive
-      [routerLink]="!sideMenuItem.disabled ? sideMenuItem.path : ''" [attr.aria-label]="('button.aria_label.go_to_page.' + sideMenuItem.name.toLowerCase()) | translate"
-      #routerLinkActiveInstance="routerLinkActive"
-      >
+      <button
+        [disabled]="sideMenuItem.disabled"
+        (click)="openNew(sideMenuItem.path)" [attr.aria-label]="('button.aria_label.go_to_page.' + sideMenuItem.name.toLowerCase()) | translate">
         <mat-icon aria-label="">{{sideMenuItem.icon}}</mat-icon>
-        <span *ngIf="openClose" class="titlePage">{{sideMenuItem.name}}</span>
-      </a>
+        <span class="titlePage visually-hidden">{{sideMenuItem.name}}</span>
+      </button>
     </mat-list-item>
   </mat-nav-list>
   <mat-nav-list aria-label="opzioni di pagina">
-    <!-- <mat-list-item routerLink="#" title="modifica layout">
-      <mat-icon aria-label="">view_quilt</mat-icon>
-    </mat-list-item> -->
-    <mat-list-item (click)="ricaricaValidazione()" attr.title="{{'button.refresh_page' | translate}}">
+    <mat-list-item (click)="ricaricaValidazione()" [attr.title]="'button.refresh_page' | translate">
       <mat-icon aria-label="">cached</mat-icon>
+    </mat-list-item>
+    <mat-list-item title="" *ngIf="location.pathname.includes('validazione')" (click)="changePeriodo()" [attr.title]="'button.change_period' | translate">
+      <mat-icon aria-label="">calendar_today</mat-icon>
+    </mat-list-item>
+    <mat-list-item title="salva dimensione riquadri" *ngIf="saveLayout" (click)="saveLayoutSubmit()">
+      <mat-icon aria-label="">view_quilt</mat-icon>
+    </mat-list-item>
+    <mat-list-item title="ricerca anagrafica eventi" (click)="openSearchAnagrafica()">
+      <mat-icon aria-label="">search</mat-icon>
     </mat-list-item>
   </mat-nav-list>
 </aside>

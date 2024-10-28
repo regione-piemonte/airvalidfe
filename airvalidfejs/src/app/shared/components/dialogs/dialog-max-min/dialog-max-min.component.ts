@@ -13,10 +13,8 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
   styleUrls: ['./dialog-max-min.component.scss'],
 })
 export class DialogMaxMinComponent implements OnInit {
-  form!: FormGroup;
-  description: string;
-
-  maxDate: any;
+  form: FormGroup = this._createForm();
+  description: string = '';
 
   constructor(
     private fb: FormBuilder,
@@ -26,11 +24,15 @@ export class DialogMaxMinComponent implements OnInit {
     this.description = data.description;
   }
 
-  ngOnInit() {
-    this.form = this.fb.group({
+  private _createForm(): FormGroup {
+    return this.fb.group({
       max: ['', [Validators.required]],
       min: ['', [Validators.required]],
     });
+  }
+
+  ngOnInit() {
+
   }
 
   save() {

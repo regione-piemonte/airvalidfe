@@ -1,86 +1,211 @@
-<!--  
+<!--
  Copyright Regione Piemonte - 2023
  SPDX-License-Identifier: EUPL-1.2-or-later
  -->
- <div class="split-layout-content--height">
-  <as-split direction="horizontal" *ngIf="validazioneLayout$?.set == 'default'">
-    <as-split-area [size]="validazioneLayout$?.default.slide_a">
+<div class="split-layout-content--height">
+  <as-split direction="horizontal" *ngIf="validazioneLayout$!.set !== 'reverse'">
+
+    <!--Parte sinistra con tabelle-->
+    <as-split-area [size]="validazioneLayout$!.default.slide_a ?? 0">
       <as-split direction="vertical">
         <as-split-area>
-          <app-validazione-grafico class="validazione-grafico"
-            [changeValueInput]='changeValueDataOutput$.asObservable()' [dataset]="dataset$.asObservable()"
-            [visibilityNotValidDataSeries]="visibilityNotValidDataSeries$.asObservable()"
-            [visibilitySeries]="visibilitySeries$.asObservable()" [deleteSeries]="deleteSeries$.asObservable()"
-            [changeColorSeries]="changeColorSeries$.asObservable()">
-          </app-validazione-grafico>
+          <!--Accordion per controlli-->
+          <ng-container *ngIf="dataSource$ | async as data">
+            <card-accordion *ngIf="data.key" [lista]="data.report" [titleReport]="titleTable ?? ''"
+              [period$]="data.periodo" [renderChoice]="data.key"
+              [title]="('page.reportistica.split_left.title' | translate)">
+            </card-accordion>
+          </ng-container>
+          <!--Accordion per standard-->
+          <ng-container *ngIf="dataStandardSource$ | async as data">
+            <app-card-accordion-report-standard [formato]="data.formato"
+              [period]="{dataInizio: data.periodo.dataInizio, dataFine: data.periodo.dataFine}"
+              [type]="data.periodo.standard!.controlTime" [header]="data.report.header" [tabelle]="data.report.tables">
+            </app-card-accordion-report-standard>
+          </ng-container>
         </as-split-area>
       </as-split>
     </as-split-area>
-    <as-split-area [size]="validazioneLayout$?.default.slide_b">
+
+    <!--Parte destra con lista Report-->
+    <as-split-area [size]="validazioneLayout$!.default.slide_b ?? 0">
       <as-split direction="vertical">
-        <as-split-area [size]="validazioneLayout$?.default.slide_c">
-          <app-validazione-parametri [dataInput]="parameters$.asObservable()" (paramsOutput)="getParams($event)"
-            (rowSelected)="getRow($event)" (visibilityNotValidDataSeries)="getVisibilityNotValid($event)"
-            (visibilitySeries)="getVisibility($event)" (deleteSeries)="deleteSeries($event)"
-            (changeColorSeries)="changeColorSeries($event)">
-          </app-validazione-parametri>
-        </as-split-area>
-        <as-split-area [size]="validazioneLayout$?.default.slide_d">
-          <app-validazione-dettaglio [dataInput]="datasetDettaglio$.asObservable()"
-            (valueDataOutput)="changeValueDataOutput($event)">
-          </app-validazione-dettaglio>
+        <as-split-area [size]="validazioneLayout$!.default.slide_c ?? 0">
+          <div class="mt-3">
+            <button mat-button class="mat-primary-text float-start" (click)="openDialog()"
+              attr.aria-label="{{'button.aria_label.add_report' | translate}}">
+              <i class="material-icons mr-1">add</i>{{ 'button.add_report' | translate }}
+            </button>
+
+            <ng-container *ngIf="getAllCardState$ | async as stateCard">
+              <!--Bottone elimina nel caso che ci sia una lista di report-->
+              <button mat-button class="mat-primary-text float-end" (click)="removeReport()" *ngIf="stateCard.length"
+                attr.aria-label="{{'button.aria_label.remove_report' | translate}}">
+                <i class="material-icons mr-1">delete</i>{{ 'button.remove_report' | translate }}
+              </button>
+
+              <div class="box-report--list">
+                <ng-container *ngFor="let report of stateCard">
+                  <ng-container [ngSwitch]="report.type.text">
+                    <!--Nel caso di controllo-->
+                    <ng-container *ngSwitchCase="'Controllo'">
+                      <mat-card class="mb-2" [class.selected]="report.formato === titleTable">
+                        <mat-card-title>
+                          <h3>Data inizio: {{ report.periodo.dataInizio | date:'dd/MM/yyyy' }} - Data fine:
+                            {{ report.periodo.dataFine | date:'dd/MM/yyyy' }}</h3>
+                        </mat-card-title>
+                        <mat-card-content>
+                          <h4 *ngIf="report.key">{{ getTitle(report.key) }}</h4>
+
+                          <ul>
+                            <li *ngFor="let item of getArray(report.report)">
+                              {{ item.parametro }}
+                            </li>
+                          </ul>
+
+                          <div class="d-flex justify-content-between align-items-baseline">
+                            <em class="mb-0">{{ titleDateTime(report.formato | json) }}</em>
+
+                            <button *ngIf="report.key" mat-icon-button
+                              (click)="renderItem(report, getTitle(report.key))" matTooltip="visualizza i dettagli"
+                              color="primary"><i class="material-icons">text_snippet</i>
+                            </button>
+                          </div>
+                        </mat-card-content>
+                      </mat-card>
+                    </ng-container>
+                    <!--Nel caso di Standard-->
+                    <ng-container *ngSwitchDefault>
+                      <mat-card class="mb-2" [class.selected]="report.formato === titleTable">
+                        <mat-card-title>
+                          <h3>Data inizio: {{ report.periodo.dataInizio | date:'dd/MM/yyyy' }} - Data fine:
+                            {{ report.periodo.dataFine | date:'dd/MM/yyyy' }}</h3>
+                        </mat-card-title>
+                        <mat-card-content>
+                          <h4>{{ report.type.group }} - {{ report.type.text }}</h4>
+                          <h4>{{ standardFlag(report.periodo.standard!.flag) }}</h4>
+                          <ul>
+                            <li *ngFor="let id of getParameterList(report)">{{ id }}</li>
+                          </ul>
+                          <div class="d-flex justify-content-between align-items-baseline">
+                            <em class="mb-0">{{ titleDateTime(report.formato | json) }}</em>
+                            <button mat-icon-button (click)="renderStandardItem(report)"
+                              matTooltip="visualizza i dettagli" color="primary"><i
+                                class="material-icons">text_snippet</i></button>
+                          </div>
+                        </mat-card-content>
+                      </mat-card>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </div>
+
+            </ng-container>
+
+          </div>
         </as-split-area>
       </as-split>
     </as-split-area>
   </as-split>
-  <as-split direction="horizontal" *ngIf="validazioneLayout$?.set == 'col'">
-    <as-split-area [size]="validazioneLayout$?.col.slide_a">
-      <app-validazione-grafico class="validazione-grafico" [changeValueInput]='changeValueDataOutput$.asObservable()'
-        [dataset]="dataset$.asObservable()"
-        [visibilityNotValidDataSeries]="visibilityNotValidDataSeries$.asObservable()"
-        [visibilitySeries]="visibilitySeries$.asObservable()" [deleteSeries]="deleteSeries$.asObservable()"
-        [changeColorSeries]="changeColorSeries$.asObservable()">
-      </app-validazione-grafico>
-    </as-split-area>
-    <as-split-area [size]="validazioneLayout$?.col.slide_b">
-      <app-validazione-dettaglio [dataInput]="datasetDettaglio$.asObservable()"
-        (valueDataOutput)="changeValueDataOutput($event)">
-      </app-validazione-dettaglio>
-    </as-split-area>
-    <as-split-area [size]="validazioneLayout$?.col.slide_c">
-      <app-validazione-parametri [dataInput]="parameters$.asObservable()" (paramsOutput)="getParams($event)"
-        (rowSelected)="getRow($event)" (visibilityNotValidDataSeries)="getVisibilityNotValid($event)"
-        (visibilitySeries)="getVisibility($event)" (deleteSeries)="deleteSeries($event)"
-        (changeColorSeries)="changeColorSeries($event)">
-      </app-validazione-parametri>
-    </as-split-area>
-  </as-split>
-  <as-split direction="horizontal" *ngIf="validazioneLayout$?.set == 'reverse'">
-    <as-split-area [size]="validazioneLayout$?.reverse.slide_c">
+
+
+  <as-split direction="horizontal" *ngIf="validazioneLayout$!.set == 'reverse'">
+    <!--Parte sinistra con tabelle-->
+    <as-split-area [size]="validazioneLayout$!.reverse.slide_a ?? 0">
       <as-split direction="vertical">
-        <as-split-area [size]="validazioneLayout$?.reverse.slide_a">
-          <app-validazione-dettaglio [dataInput]="datasetDettaglio$.asObservable()"
-            (valueDataOutput)="changeValueDataOutput($event)">
-          </app-validazione-dettaglio>
-        </as-split-area>
-        <as-split-area [size]="validazioneLayout$?.reverse.slide_b">
-          <app-validazione-parametri [dataInput]="parameters$.asObservable()" (paramsOutput)="getParams($event)"
-            (rowSelected)="getRow($event)" (visibilityNotValidDataSeries)="getVisibilityNotValid($event)"
-            (visibilitySeries)="getVisibility($event)" (deleteSeries)="deleteSeries($event)"
-            (changeColorSeries)="changeColorSeries($event)">
-          </app-validazione-parametri>
-        </as-split-area>
+          <div class="mt-3">
+            <button mat-button class="mat-primary-text float-start" (click)="openDialog()"
+              attr.aria-label="{{'button.aria_label.add_report' | translate}}">
+              <i class="material-icons mr-1">add</i>{{ 'button.add_report' | translate }}
+            </button>
+
+            <ng-container *ngIf="getAllCardState$ | async as stateCard">
+              <!--Bottone elimina nel caso che ci sia una lista di report-->
+              <button mat-button class="mat-primary-text float-end" (click)="removeReport()" *ngIf="stateCard.length"
+                attr.aria-label="{{'button.aria_label.remove_report' | translate}}">
+                <i class="material-icons mr-1">delete</i>{{ 'button.remove_report' | translate }}
+              </button>
+
+              <div class="box-report--list">
+                <ng-container *ngFor="let report of stateCard">
+                  <ng-container [ngSwitch]="report.type.text">
+                    <!--Nel caso di controllo-->
+                    <ng-container *ngSwitchCase="'Controllo'">
+                      <mat-card class="mb-2" [class.selected]="report.formato === titleTable">
+                        <mat-card-title>
+                          <h3>Data inizio: {{ report.periodo.dataInizio | date:'dd/MM/yyyy' }} - Data fine:
+                            {{ report.periodo.dataFine | date:'dd/MM/yyyy' }}</h3>
+                        </mat-card-title>
+                        <mat-card-content>
+                          <h4 *ngIf="report.key">{{ getTitle(report.key) }}</h4>
+
+                          <ul>
+                            <li *ngFor="let item of getArray(report.report)">
+                              {{ item.parametro }}
+                            </li>
+                          </ul>
+
+                          <div class="d-flex justify-content-between align-items-baseline">
+                            <em class="mb-0">{{ titleDateTime(report.formato | json) }}</em>
+
+                            <button *ngIf="report.key" mat-icon-button
+                              (click)="renderItem(report, getTitle(report.key))" matTooltip="visualizza i dettagli"
+                              color="primary"><i class="material-icons">text_snippet</i>
+                            </button>
+                          </div>
+                        </mat-card-content>
+                      </mat-card>
+                    </ng-container>
+                    <!--Nel caso di Standard-->
+                    <ng-container *ngSwitchDefault>
+                      <mat-card class="mb-2" [class.selected]="report.formato === titleTable">
+                        <mat-card-title>
+                          <h3>Data inizio: {{ report.periodo.dataInizio | date:'dd/MM/yyyy' }} - Data fine:
+                            {{ report.periodo.dataFine | date:'dd/MM/yyyy' }}</h3>
+                        </mat-card-title>
+                        <mat-card-content>
+                          <h4>{{ report.type.group }} - {{ report.type.text }}</h4>
+                          <h4>{{ standardFlag(report.periodo.standard!.flag) }}</h4>
+                          <ul>
+                            <li *ngFor="let id of getParameterList(report)">{{ id }}</li>
+                          </ul>
+                          <div class="d-flex justify-content-between align-items-baseline">
+                            <em class="mb-0">{{ titleDateTime(report.formato | json) }}</em>
+                            <button mat-icon-button (click)="renderStandardItem(report)"
+                              matTooltip="visualizza i dettagli" color="primary"><i
+                                class="material-icons">text_snippet</i></button>
+                          </div>
+                        </mat-card-content>
+                      </mat-card>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </div>
+
+            </ng-container>
+
+          </div>
       </as-split>
     </as-split-area>
-    <as-split-area [size]="validazioneLayout$?.reverse.slide_d">
+
+    <!--Parte destra con lista Report-->
+    <as-split-area [size]="validazioneLayout$!.reverse.slide_b ?? 0">
       <as-split direction="vertical">
         <as-split-area>
-          <app-validazione-grafico class="validazione-grafico"
-            [changeValueInput]='changeValueDataOutput$.asObservable()' [dataset]="dataset$.asObservable()"
-            [visibilityNotValidDataSeries]="visibilityNotValidDataSeries$.asObservable()"
-            [visibilitySeries]="visibilitySeries$.asObservable()" [deleteSeries]="deleteSeries$.asObservable()"
-            [changeColorSeries]="changeColorSeries$.asObservable()">
-          </app-validazione-grafico>
+          <!--Accordion per controlli-->
+          <ng-container *ngIf="dataSource$ | async as data">
+            <card-accordion *ngIf="data.key" [lista]="data.report" [titleReport]="titleTable ?? ''"
+              [period$]="data.periodo" [renderChoice]="data.key"
+              [title]="('page.reportistica.split_left.title' | translate)">
+            </card-accordion>
+          </ng-container>
+          <!--Accordion per standard-->
+          <ng-container *ngIf="dataStandardSource$ | async as data">
+            <app-card-accordion-report-standard [formato]="data.formato"
+              [period]="{dataInizio: data.periodo.dataInizio, dataFine: data.periodo.dataFine}"
+              [type]="data.periodo.standard!.controlTime" [header]="data.report.header" [tabelle]="data.report.tables">
+            </app-card-accordion-report-standard>
+          </ng-container>
         </as-split-area>
       </as-split>
     </as-split-area>

@@ -82,9 +82,22 @@
     }
 
   }
+  .input-label {
+    &--hidden {
+      .mat-form-field-label {
+        visibility: hidden;
+        height: 0px;
+      }
+    }
+  }
+
+  .mat--one-option {
+    height: 4em;
+    align-items: center;
+    margin-bottom: 55px;
+  }
 }
 
-      
 .toggle {
   &--decimal {
     .mat-slide-toggle-content {
@@ -92,4 +105,14 @@
       font-weight: bold;
     }
   }
+  &--db {
+    .mat-slide-toggle-bar {
+      background-color: rgba($primary, 0.54);
+    }
+    .mat-slide-toggle-thumb {
+      background-color: $primary;
+    }
+  }
+
+
 }

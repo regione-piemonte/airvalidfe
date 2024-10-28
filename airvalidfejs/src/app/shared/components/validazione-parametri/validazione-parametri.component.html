@@ -2,26 +2,62 @@
  Copyright Regione Piemonte - 2023
  SPDX-License-Identifier: EUPL-1.2-or-later
  -->
-<div class="d-flex justify-content-between align-items-baseline">
+<div class="header--action">
 
   <div>
+    <!--Titolo componente-->
     <h2 class="d-inline-flex mb-0 me-3">{{'page.validazione.split_parametro.title' | translate}}</h2>
+    <!--Button per la apertura modal export excel-->
     <button [disabled]="!disableExport" mat-icon-button color="primary" (click)="openDialogExport()"
-      [matTooltip]="'button.export' | translate" attr.aria-label="{{'button.aria_label.export_paramas' | translate}}">
+      [matTooltip]="'button.export' | translate" [attr.aria-label]="'button.aria_label.export_paramas' | translate">
       <i class="material-icons mr-1">download</i>
     </button>
   </div>
 
+  <!--Nel caso che ci sia una lista di parametri-->
+  <ng-container *ngIf="(listParametri$ | async) as listaParametri ">
+    <!--Tasto delete all parametri-->
+    <button mat-button class="mat-primary-text" (click)="openDialogDeleteAll()"
+      [attr.aria-label]="'button.aria_label.delete_params' | translate" *ngIf="listaParametri.length > 0">
+      <i class="material-icons mr-1 ">delete</i>
+      {{ 'button.delete_params' | translate }}
+    </button>
+
+    <!--Tasto rimuovi parametro-->
+    <button mat-button class="mat-primary-text" (click)="openRemoveParameterDialog()"
+      [attr.aria-label]="'button.aria_label.add_params' | translate" *ngIf="listaParametri.length > 0">
+      <i class="material-icons mr-1">remove</i>
+      rimuovi
+    </button>
+  </ng-container>
+
+  <!--Tasto add parametro-->
   <button mat-button class="mat-primary-text" (click)="openDialog()"
-    attr.aria-label="{{'button.aria_label.add_params' | translate}}">
+    [attr.aria-label]="'button.aria_label.add_params' | translate">
     <i class="material-icons mr-1">add</i>
     {{ 'button.add_params' | translate }}
   </button>
-</div>
-<div class="overflow-x--visible">
-  <table mat-table [dataSource]="dataSourceMat" class="summary-table table--parameters">
 
-    <!-- Position Column -->
+</div>
+<!--Tabella Parametri-->
+<div class="overflow-x--visible">
+  <table mat-table #table [dataSource]="dataSourceMat" class="summary-table table--parameters">
+    <!--Prima colonna Eventi-->
+    <ng-container matColumnDef="Eventi">
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let element; let i = index">
+        <ng-container *ngIf="(parametroSelezionato$ | async)?.parameter?.parametro?.key === element?.parametro?.key">
+          <ng-container *ngIf="(eventi$ | async) as eventi">
+            <button mat-icon-button (click)="openDialogEventi(eventi)" class="blinking-icon"
+              [matTooltip]="'visualizza gli eventi per ' + element?.parametro?.name"
+              [attr.aria-label]="'eventi disponibili per ' + element?.parametro?.name" *ngIf="eventi.length > 0 ">
+              <i class="material-icons">notification_important</i>
+            </button>
+          </ng-container>
+        </ng-container>
+      </td>
+    </ng-container>
+    <!-- Parametro Column -->
     <ng-container matColumnDef="Parametro">
       <th mat-header-cell *matHeaderCellDef>{{'table.body.header.parameter' | translate}}</th>
       <td mat-cell class="select-event" *matCellDef="let element; let i = index" (click)="selectedRow(i,element)">
@@ -30,49 +66,60 @@
       </td>
     </ng-container>
 
-    <!-- Weight Column -->
+    <!-- Stazione Column -->
     <ng-container matColumnDef="Stazione">
       <th mat-header-cell *matHeaderCellDef>{{'table.body.header.station' | translate}}</th>
       <td mat-cell *matCellDef="let element ; let i = index" (click)="selectedRow(i,element)" class="select-event"
-        [matTooltip]="element.area.name" matTooltipPosition="left">
+        matTooltipPosition="left">
         {{element.stazione.name}}</td>
     </ng-container>
 
-    <!-- Symbol Column -->
+    <!-- Azione Column -->
+    <!--TODO Creare una condizione che ci permetta di vederlo solo quando siamo in validazione-->
     <ng-container matColumnDef="symbol">
-      <th mat-header-cell *matHeaderCellDef><span class="visually-hidden">{{'table.body.header.action' | translate}}</span></th>
+      <th mat-header-cell *matHeaderCellDef><span
+          class="visually-hidden">{{'table.body.header.action' | translate}}</span></th>
+
       <td mat-cell *matCellDef="let element; let i = index">
         <div>
-          <button mat-icon-button aria-label=""
-            [matTooltip]="(element.area.extraInfo.length>1) ? (element.locked ? ('button.aria_label.user_lock' | translate) + element.userLock : ('button.aria_label.writing' | translate)) : ('button.aria_label.read_only' | translate)">
-            <i class="material-icons" *ngIf="element.locked">lock</i>
-            <i class="material-icons" *ngIf="!element.locked">{{element?.parametro?.extraInfo?.length<1
-                ?'menu_book':'mode_edit'}}</i>
+          <button mat-icon-button aria-label="" [matTooltip]="getTranslateTooltip(element) | translate">
+            <i class="material-icons">{{getIconsToState(element)}}</i>
           </button>
+          <!-- Questo codice è relativo al button => tooltip quando si visualizza o meno la traccia
+          [matTooltip]="element.visible ? ('button.aria_label.hide_station' | translate) + element.stazione.name : ('button.aria_label.show_station' | translate) + element.stazione.name" -->
           <button mat-icon-button #id
-            [matTooltip]="element.visible ? ('button.aria_label.hide_station' | translate) + element.stazione.name : ('button.aria_label.show_station' | translate) + element.stazione.name"
             (click)="clickVisibilityButton(element,i)">
-            <i class="material-icons">{{element.visible?'visibility':'visibility_off'}} </i>
+            <i class="material-icons">{{element.visible ? 'visibility' : 'visibility_off'}} </i>
           </button>
           <button mat-icon-button [matTooltip]="tooltipInfoText(element)"
             [color]="(element.visibleOrigin || element.visibleNotValid) ? 'info-tooltip' : ''">
             <i class="material-icons">info</i>
             <span class="visually-hidden">{{tooltipInfoText(element)}}</span>
           </button>
-          <button mat-icon-button (click)="onContextMenuAction(element,'delete')"
-            [matTooltip]="('button.aria_label.delete' | translate) + element.parametro.name"
-            [attr.aria-label]="('button.aria_label.delete' | translate) + element.parametro.name"
-            color="danger">
+          <!-- <button mat-icon-button (click)="onContextMenuAction(element,'delete')"
+                  [matTooltip]="('button.aria_label.delete' | translate) + element.parametro.name"
+                  [attr.aria-label]="('button.aria_label.delete' | translate) + element.parametro.name"
+                  >
             <i class="material-icons">delete</i>
-          </button>
+          </button> -->
+          <!-- <ng-container *ngIf="(parametroSelezionato$ | async)?.parameter?.parametro?.key === element?.parametro?.key">
+            <ng-container *ngIf="(eventi$ | async) as eventi">
+              <button mat-icon-button (click)="openDialogEventi(eventi)" class="blinking-icon"
+                [matTooltip]="'visualizza gli eventi per ' + element?.parametro?.name"
+                [attr.aria-label]="'eventi disponibili per ' + element?.parametro?.name" *ngIf="eventi.length > 0 ">
+                <i class="material-icons">notification_important</i>
+              </button>
+            </ng-container>
+          </ng-container> -->
         </div>
+
       </td>
     </ng-container>
 
     <tr mat-header-row *matHeaderRowDef="displayedColumns, sticky: true"></tr>
-    <tr mat-row (contextmenu)="onContextMenu($event, row)" class="row-parameters"
-      (click)="selectRow(row)"
-      [class.demo-row-is-clicked]="clickedRows.has(row)" *matRowDef="let row; columns: displayedColumns; let i = index">
+    <tr mat-row class="row-parameters" (contextmenu)="onContextMenu($event, row)"
+      [class.selected]="(parametroSelezionato$ | async)?.parameter?.parametro?.key === row?.parametro?.key"
+      *matRowDef="let row; columns: displayedColumns; let i = index">
     </tr>
   </table>
 </div>
@@ -81,18 +128,25 @@
   [style.top]="contextMenuPosition.y" [matMenuTriggerFor]="contextMenu">
 </div>
 
+<!--Menu a scomparsa per le azioni sull'item-->
 <mat-menu #contextMenu="matMenu" class="context-menu">
   <ng-template matMenuContent let-item="item">
-    <!-- <button mat-menu-item (click)="onContextMenuAction(item,'delete')">{{ 'contex_menu.parameters.delete_list_par' | translate}}</button> -->
+    <button mat-menu-item
+      (click)="onContextMenuAction(item, !item.visibleNotValid ? 'showNotValidData' : 'notShowNotValidData')">
+      {{item?.visibleNotValid ? ('contex_menu.parameters.hide_not_valid_data' | translate) : ('contex_menu.parameters.show_not_valid_data' | translate)}}</button>
+
     <button mat-menu-item (click)="onContextMenuAction(item,'showOriginData')">
-      {{item.visibleOrigin ?('contex_menu.parameters.hide_original_data' | translate):('contex_menu.parameters.show_original_data' | translate)}}</button>
-    <button mat-menu-item (click)="onContextMenuAction(item,'confronta')">{{'contex_menu.parameters.compare_time' | translate}}</button>
-    <!-- <button mat-menu-item (click)="onContextMenuAction(item,'')">{{'contex_menu.parameters.show_graphic_1' | translate}}</button>
-    <button mat-menu-item (click)="onContextMenuAction(item,'')">{{'contex_menu.parameters.show_graphic_2' | translate}}</button> -->
-    <button mat-menu-item (click)="onContextMenuAction(item,'showNotValidData')">
-      {{item.visibleNotValid ? ('contex_menu.parameters.hide_not_valid_data' | translate) : ('contex_menu.parameters.show_not_valid_data' | translate)}}</button>
-    <button mat-menu-item (click)="onContextMenuAction(item,'color-picker')">{{'contex_menu.parameters.change_color' | translate}}</button>
-    <button mat-menu-item (click)="onContextMenuAction(item,'parametri-correlati')">{{'Parametri di confronto' | translate}}</button>
-    <button mat-menu-item  (click)="onContextMenuAction(item,'taratura')">{{'Richiesta taratura' | translate}}</button>
+      {{item.visibleOrigin ? ('contex_menu.parameters.hide_original_data' | translate) : ('contex_menu.parameters.show_original_data' | translate)}}</button>
+    <button mat-menu-item *ngIf="hasConfronto(item)"
+      (click)="onContextMenuAction(item,'confronta')">{{'contex_menu.parameters.compare_time' | translate}}</button>
+
+    <button mat-menu-item
+      (click)="onContextMenuAction(item,'color-picker')">{{'contex_menu.parameters.change_color' | translate}}</button>
+    <button mat-menu-item
+      (click)="onContextMenuAction(item,'parametri-correlati')">{{'contex_menu.parameters.parameters_compare' | translate}}</button>
+    <button mat-menu-item
+      (click)="onContextMenuAction(item,'taratura')">{{'contex_menu.parameters.request_calibration' | translate}}</button>
+    <button mat-menu-item
+      (click)="onContextMenuAction(item,'delete')">{{'contex_menu.parameters.delete_list_par' | translate}}</button>
   </ng-template>
 </mat-menu>

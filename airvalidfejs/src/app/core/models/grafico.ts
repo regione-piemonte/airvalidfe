@@ -3,7 +3,8 @@
  *SPDX-License-Identifier: EUPL-1.2-or-later
  */
 import { IParameter } from './dataService';
-import { ITimeSelected } from '../../shared/components/validazione-dettaglio/models/time-selected.model';
+import { ITimeSelected } from '@components/shared/validazione-dettaglio/models/time-selected.model';
+import {IGeneratePoint, ScaleEnum} from "@components/shared/grafico/compositive_grafic/models";
 
 export interface IGrafico {
   area: Area;
@@ -35,7 +36,10 @@ export interface ITaratura {
   cylinderConcentration: number;
   converterEfficiency: unknown;
   timeFound: boolean;
+  calibrationApplied:    boolean;
+
 }
+
 
 export interface Area {
   name: string
@@ -75,7 +79,39 @@ export interface Dataset extends ITimeSelected {
 
 
 export interface IOutput {
-  dataset: Dataset[],
-  index: number,
-  parameter: Partial<IParameter>
+  dataset: Dataset[];
+  index: number;
+  parameter: Partial<IParameter>;
+  // mi serve per inserire i valori modificati nel dettaglio
+  changedDataset?: Dataset[];
 }
+
+export type TypeScale = {
+  fondoScala?: string;
+  minFondoScala?: string;
+  oldScale: ScaleEnum;
+}
+
+export type TypeUnion = {
+  name?: string
+};
+
+
+export interface IProcessData {
+  dataIndex: Array<Dataset>;
+  parametro: IParameter;
+  dataSeries: Partial<IGeneratePoint>[];
+  min: number;
+  max: number;
+  after?: boolean;
+  decimal: number;
+}
+
+export interface IIndexStartEnd {
+  lunghezza: number;
+  indexStart: number;
+  indexEnd: number;
+  indiceGrafico: number;
+}
+
+export type extractedIndexStartEndParamsType<T> = T & { start: number, end: number, batch: Array<{ startValue: number, endValue: number }> };

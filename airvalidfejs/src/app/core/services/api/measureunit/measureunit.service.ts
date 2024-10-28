@@ -5,7 +5,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { environment } from 'src/environments/environment';
+import { environment } from '@environments/environment';
+import {IResponseMeasureList} from "@services/core/data/data.service";
 
 @Injectable({
   providedIn: 'root',
@@ -16,7 +17,7 @@ export class MeasureunitService {
   // Restituisce l'elenco dei nomi delle unità di misura presenti nella banca dati
   // nel campo extraInfo viene resa disponibile la sigla html dell'unità di misura
   // {dbId}: identificatore del data base reg=regionale cop=Arpa per validazione
-  getMeasureUnitList(): Observable<any> {
+  getMeasureUnitList(): Observable<Array<IResponseMeasureList>> {
     return this.http.get<any>(environment.apiEndpoint + 'measureunitnames/cop');
   }
 

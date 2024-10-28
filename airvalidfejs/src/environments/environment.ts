@@ -4,17 +4,37 @@
 
 export const environment = {
   production: false,
-  
+  //apiEndpoint:"https://tst-aria.csi.it/ariaweb/airvalidsrv/",
+  /*apiEndpoint:"https://tst-secure.sistemapiemonte.it/ambiente/aria/airvalidsrv2/",*/
   basicAuth: {
-    username: '',
-    password: '',
+    username: 'csi.demo 20',
+    password: 'Pi$Mont!2022',
   },
 
-  apiEndpoint:'',
-  
+  // apiEndpoint:'https://tst-secure.regione.piemonte.it/ambiente/ariaval',
+  apiEndpoint:'http://localhost:8000/',
+  /*basicAuth:{
+    username:"test",
+    password:"B%16d%4@J"
+  },*/
+  baseUrl: 'http://localhost:3000',
+  logout: '/srpie_liv1_WRUP/Shibboleth.sso/Logout',
 
-  timerPollingDataLock: 8 * 60 * 1000, //ms
-  version: '1.0.0',
+  timerPollingDataLock: 1 * 60 * 1000, //ms
+  version: '0.26.2',
+  path_new_tab: '',
+  // Per la disabilitazione del wizard iniziale
+  wizard: {
+    validazione: false,
+    reportistica: false,
+    elaborazione: false
+  },
+
+  scelta_reportistica : {
+    standard: false,
+    specialistica: true,
+    controlli: false
+  }
 };
 
 /*

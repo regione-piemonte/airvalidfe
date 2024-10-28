@@ -1,0 +1,39 @@
+<div mat-dialog-title class="dialog-title">
+  <h2 mat-dialog-title>{{'dialog_remove_report.title' | translate}}</h2>
+  <button mat-icon-button aria-label="close dialog" mat-dialog-close class="btn-dialog--close">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+<mat-dialog-content class="dialog--remove">
+  <p>{{'dialog_remove_parameter.body' | translate}}</p>
+  <ng-container *ngIf="listReport$ | async as listReport">
+    <ng-container *ngFor="let item of listReport | keyvalue">
+      <ng-container *ngIf="item.value && item.value.length >= 1">
+        <h3 class="mt-1">{{ getTitle(item.key) }}</h3>
+        <form [formGroup]="forms[item.key]">
+          <mat-form-field appearance="fill">
+            <mat-label>{{ 'button.remove_report' | translate}}</mat-label>
+            <mat-select formControlName="report" multiple #report>
+              <div [ngClass]="{'select--btn': item.value.length > 1,'select-one--btn': item.value.length <= 1}">
+                <button (click)="report.close()" class="mat-raised-button mat-primary" mat-button>
+                  {{'button.conferma' | translate}}
+                </button>
+              </div>
+              <mat-option *ngFor="let element of item.value" [value]="element">
+                {{ element.formato }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </form>
+      </ng-container>
+      <ng-template #noReports>
+        <h3>Non sono presenti report da eliminare</h3> 
+      </ng-template>
+    </ng-container>
+  </ng-container>
+  <mat-dialog-actions class="btn-action-modal px-lg-2 justify-content-between">
+    <button mat-button class="mat-raised-button" (click)="close()"
+      aria-label="chiudi la finestra">{{'button.annulla' | translate}}</button>
+    <button mat-button class="mat-raised-button mat-primary" (click)="removeReports()"
+      aria-label="Rimuovi i parametri e chiudi la finestra">{{'button.prosegui' | translate}}</button>
+  </mat-dialog-actions>
+</mat-dialog-content>

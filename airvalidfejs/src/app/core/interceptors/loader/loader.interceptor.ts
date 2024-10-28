@@ -1,7 +1,3 @@
-/*
- *Copyright Regione Piemonte - 2023
- *SPDX-License-Identifier: EUPL-1.2-or-later
- */
 import { Injectable } from '@angular/core';
 import {
   HttpRequest,
@@ -11,18 +7,27 @@ import {
 } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { NgxSpinnerService } from "ngx-spinner";
+import { NgxSpinnerService } from 'ngx-spinner';
 
 @Injectable()
 export class LoaderInterceptor implements HttpInterceptor {
 
-  constructor(private spinner: NgxSpinnerService) {}
+  constructor(private readonly _spinnerService: NgxSpinnerService) {}
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
-    //this.spinner.show('global');
+
+    // patch per far girare lo spinner per i servizi di reportistica ed evitare spinner inutili per gli altri servizi
+    const shouldShowSpinner = request.urlWithParams.includes('report');
+    const shouldShowResultSpinner = request.urlWithParams.includes('/result/');
+    if (shouldShowSpinner || shouldShowResultSpinner) {
+      this._spinnerService.show('global');
+    }
+
     return next.handle(request).pipe(
       finalize(() => {
-       // this.spinner.hide('global');
+        if (shouldShowSpinner) {
+          this._spinnerService.hide('global');
+        }
       }),
     );
   }

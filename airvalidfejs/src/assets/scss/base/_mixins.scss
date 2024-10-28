@@ -11,9 +11,7 @@ p {
     -webkit-box-shadow: inset $top $left $blur $blur-dis $color !important;
     -moz-box-shadow: inset $top $left $blur $blur-dis $color !important;
     box-shadow: inset $top $left $blur $blur-dis $color !important;
-  }
-
-  @else {
+  } @else {
     -webkit-box-shadow: $top $left $blur $blur-dis $color !important;
     -moz-box-shadow: $top $left $blur $blur-dis $color !important;
     box-shadow: $top $left $blur $blur-dis $color !important;
@@ -24,7 +22,6 @@ p {
   // usage @extend %box-shadow-focus
 
   @include box-shadow-my(0, 0, 0, 3px, $grey-400, true);
-
 }
 
 // regola per oscurare visibilmente elementi ma per renderli sempre leggibili
@@ -69,7 +66,6 @@ p {
   }
 }
 
-
 .text {
   &--error {
     color: $red;
@@ -91,7 +87,6 @@ p {
     font-weight: bold;
   }
 }
-
 
 @mixin colorState($type) {
   font-weight: bolder;
@@ -115,21 +110,26 @@ p {
 
 @mixin cardType($type) {
   border-left: 8px solid;
+  border-color: map-get($theme-variant-color, $type);
+}
 
-  @if $type==blueColor {
-    border-color: $blue-700;
-  }
+@mixin snackbarType($type) {
+  border: 2px solid;
+  border-left: 8px solid;
+  border-color: map-get($theme-variant-color, $type);
+  background-color: $white;
+  color: $black;
+  @extend .fw-bold;
+}
 
-  @if $type==redColor {
-    border-color: $red;
-  }
+@each $index, $color in $standard-table-highlighted {
+  .highlighted-cell--#{$index} {
+    background-color: $color;
+    $valid-indices: 3, 4;
 
-  @if $type==orangeColor {
-    border-color: $orange;
-  }
-
-  @if $type==greenColor {
-    border-color: $green-600;
+    @if index($valid-indices, $index) {
+      color: $white;
+    }
   }
 }
 
@@ -139,7 +139,6 @@ p {
   }
 }
 
-
 .wrap-text {
   word-break: break-all;
 }
@@ -147,7 +146,6 @@ p {
 a {
   @extend .wrap-text;
 }
-
 
 @mixin title-page($type) {
   @if $type==split-area {
@@ -178,193 +176,200 @@ a {
   height: 10px;
 }
 
+%diamond-state {
+  width: 7px;
+  height: 7px;
+  transform: rotate(45deg);
+}
+
 %circle-state {
   width: 10px;
   height: 10px;
   border-radius: 50%;
 }
 
-
 // mixin per il resize del font generale sul sito gestito dalla funzione
 // changeSize() presennte nel file header.component.html
 // viene richiamata nel file _font-resize.scss e vengono passati 3 valori in base alla dimensione prescelta
 
 @mixin font-resize($size) {
-  @if $size=='sm' {
+  @if $size== "sm" {
     font-size: 75%;
   }
 
-  @if $size=='md' {
+  @if $size== "md" {
     font-size: 100%;
   }
 
-  @if $size=='lg' {
+  @if $size== "lg" {
     font-size: 125%;
   }
 
   // layout generale
   //as-split-area {
-    as-split {
-      .as-split-area {
-        h2 {
-          line-height: 1;
-          @if $size=='sm' {
+  as-split {
+    .as-split-area {
+      h2 {
+        line-height: 1;
+
+        @if $size== "sm" {
+          @include font-size(10px);
+        }
+
+        @if $size== "md" {
+          @include font-size(12px);
+        }
+
+        @if $size== "lg" {
+          @include font-size(16px);
+        }
+      }
+
+      h3,
+      h4 {
+        @if $size== "sm" {
+          @include font-size(10px);
+        }
+
+        @if $size== "md" {
+          @include font-size(12px);
+        }
+
+        @if $size== "lg" {
+          @include font-size(18px);
+        }
+      }
+
+      .title-reference-period {
+        margin: 0px;
+
+        @if $size== "sm" {
+          @include font-size(10px);
+        }
+
+        @if $size== "md" {
+          @include font-size(12px);
+        }
+
+        @if $size== "lg" {
+          @include font-size(18px);
+        }
+      }
+
+      dl {
+        dd,
+        dt {
+          @if $size== "sm" {
+            @include font-size(10px);
+          }
+
+          @if $size== "md" {
             @include font-size(12px);
           }
 
-          @if $size=='md' {
-            @include font-size(14px);
-          }
-
-          @if $size=='lg' {
+          @if $size== "lg" {
             @include font-size(16px);
-          }
-        }
-
-        h3 {
-          @if $size=='sm' {
-            @include font-size(10px);
-          }
-
-          @if $size=='md' {
-            @include font-size(12px);
-          }
-
-          @if $size=='lg' {
-            @include font-size(18px);
-          }
-        }
-        .title-reference-period {
-          margin: 0px;
-          @if $size=='sm' {
-            @include font-size(10px);
-          }
-
-          @if $size=='md' {
-            @include font-size(12px);
-          }
-
-          @if $size=='lg' {
-            @include font-size(18px);
-          }
-        }
-        dl {
-          dd,dt {
-            @if $size=='sm' {
-              @include font-size(10px);
-            }
-
-            @if $size=='md' {
-              @include font-size(12px);
-            }
-
-            @if $size=='lg' {
-              @include font-size(18px);
-            }
-          }
-        }
-
-        .mat-header-cell,
-        .mat-cell {
-          @if $size=='sm' {
-            @include font-size(10px);
-          }
-
-          @if $size=='md' {
-            @include font-size(12px);
-          }
-
-          @if $size=='lg' {
-            @include font-size(16px);
-          }
-
-          &.mat-column-validato {
-            input {
-              @extend .text-end;
-
-              @if $size=='sm' {
-                width: 40px;
-                height: 15px;
-              }
-
-              @if $size=='md' {
-                width: 50px;
-                height: 15px;
-              }
-
-              @if $size=='lg' {
-                width: 70px;
-                height: 30px;
-              }
-
-
-            }
-          }
-
-          .material-icons {
-            @if $size=='sm' {
-              @include font-size(14px);
-            }
-
-            @if $size=='md' {
-              @include font-size(18px);
-            }
-
-            @if $size=='lg' {
-              @include font-size(20px);
-            }
-          }
-
-        }
-
-        tr {
-          &.mat-row {
-            @if $size=='lg' {
-              height: 40px
-            }
-
-          }
-        }
-
-        // mat button con icona
-        .mat-button {
-
-          i {
-            @if $size=='sm' {
-              @include font-size(12px);
-            }
-
-            @if $size=='md' {
-              @include font-size(16px);
-            }
-
-            @if $size=='lg' {
-              @include font-size(18px);
-            }
-
           }
         }
       }
-      .toggle {
-        &--decimal {
-          .mat-slide-toggle-content {
-            @if $size=='sm' {
-              @include font-size(8px);
+
+      .mat-header-cell,
+      .mat-cell {
+        @if $size== "sm" {
+          @include font-size(10px);
+        }
+
+        @if $size== "md" {
+          @include font-size(12px);
+        }
+
+        @if $size== "lg" {
+          @include font-size(16px);
+        }
+
+        &.mat-column-validato {
+          input {
+            @extend .text-end;
+            font-weight: bolder;
+
+            @if $size== "sm" {
+              width: 40px;
+              height: 15px;
             }
 
-            @if $size=='md' {
-              @include font-size(12px);
+            @if $size== "md" {
+              width: 50px;
+              height: 15px;
             }
 
-            @if $size=='lg' {
-              @include font-size(16px);
+            @if $size== "lg" {
+              width: 70px;
+              height: 30px;
             }
+          }
+        }
+
+        .material-icons {
+          @if $size== "sm" {
+            @include font-size(12px);
+          }
+
+          @if $size== "md" {
+            @include font-size(14px);
+          }
+
+          @if $size== "lg" {
+            @include font-size(18px);
+          }
+        }
+      }
+
+      tr {
+        &.mat-row {
+          @if $size== "lg" {
+            height: 40px;
+          }
+        }
+      }
+
+      // mat button con icona
+      .mat-button {
+        i {
+          @if $size== "sm" {
+            @include font-size(12px);
+          }
+
+          @if $size== "md" {
+            @include font-size(16px);
+          }
+
+          @if $size== "lg" {
+            @include font-size(18px);
           }
         }
       }
     }
-  //}
 
+    .toggle {
+      &--decimal {
+        .mat-slide-toggle-content {
+          @if $size== "sm" {
+            @include font-size(8px);
+          }
+
+          @if $size== "md" {
+            @include font-size(12px);
+          }
+
+          @if $size== "lg" {
+            @include font-size(16px);
+          }
+        }
+      }
+    }
+  }
+
+  //}
 
   // menu laterale dx aperto
   .main-menu--true {
@@ -373,15 +378,15 @@ a {
         .mat-list-item-content {
           a {
             .titlePage {
-              @if $size=='sm' {
+              @if $size== "sm" {
                 @include font-size(8px);
               }
 
-              @if $size=='md' {
-                @include font-size(12px);
+              @if $size== "md" {
+                @include font-size(11px);
               }
 
-              @if $size=='lg' {
+              @if $size== "lg" {
                 @include font-size(16px);
               }
             }
@@ -393,50 +398,67 @@ a {
 
   // button
   .mat-button-wrapper {
-    @if $size=='sm' {
+    @if $size== "sm" {
       @include font-size(10px);
     }
 
-    @if $size=='md' {
+    @if $size== "md" {
       @include font-size(12px);
     }
 
-    @if $size=='lg' {
+    @if $size== "lg" {
       @include font-size(16px);
     }
   }
 
-
-  // modal
-  .mat-dialog-container {
-    h2, h3 {
-      @if $size=='sm' {
+  // button modale scelta render
+  #btn-toggle-group--render {
+    .mat-button-wrapper {
+      @if $size== "sm" {
         @include font-size(14px);
       }
 
-      @if $size=='md' {
-        @include font-size(18px);
-      }
-
-      @if $size=='lg' {
-        @include font-size(22px);
-      }
-    }
-    p {
-      @if $size=='sm' {
-        @include font-size(12px);
-      }
-
-      @if $size=='md' {
+      @if $size== "md" {
         @include font-size(16px);
       }
 
-      @if $size=='lg' {
+      @if $size== "lg" {
         @include font-size(20px);
       }
     }
   }
+  // modal
+  .mat-dialog-container {
+    h2,
+    h3,
+    h4 {
+      @if $size== "sm" {
+        @include font-size(14px);
+      }
 
+      @if $size== "md" {
+        @include font-size(18px);
+      }
+
+      @if $size== "lg" {
+        @include font-size(22px);
+      }
+    }
+
+    p {
+      @if $size== "sm" {
+        @include font-size(12px);
+      }
+
+      @if $size== "md" {
+        @include font-size(16px);
+      }
+
+      @if $size== "lg" {
+        @include font-size(20px);
+      }
+    }
+  }
 }
 
 @mixin box-alert($type) {
@@ -463,34 +485,35 @@ a {
     border-left-color: $yellow;
     background-color: $yellow-400;
   }
-
 }
 
 @mixin text-color($type) {
   @extend .fw-bold;
-  @if $type == error {
+
+  @if $type==error {
     color: $red;
   }
-  @if $type == info {
+
+  @if $type==info {
     color: $primary-color;
   }
-  @if $type == success {
+
+  @if $type==success {
     color: $green-600;
   }
-  @if $type == warning {
+
+  @if $type==warning {
     color: $yellow;
   }
 }
-
 
 #app-ariaweb {
   @each $type in $types {
     .text-#{$type} {
       @include text-color($type);
-    } 
+    }
   }
 }
-
 
 // mixin per ottenere il box-shadow - inset=false(outset) per averlo all'esterno / inset=true per averlo all'interno
 @mixin box-shadow($offset-x, $offset-y, $blur-radius, $spread-radius, $color, $inset: false) {
@@ -498,9 +521,7 @@ a {
     -webkit-box-shadow: inset $offset-x $offset-y $blur-radius $spread-radius $color !important;
     -moz-box-shadow: inset $offset-x $offset-y $blur-radius $spread-radius $color !important;
     box-shadow: inset $offset-x $offset-y $blur-radius $spread-radius $color !important;
-  }
-
-  @else {
+  } @else {
     -webkit-box-shadow: $offset-x $offset-y $blur-radius $spread-radius $color !important;
     -moz-box-shadow: $offset-x $offset-y $blur-radius $spread-radius $color !important;
     box-shadow: $offset-x $offset-y $blur-radius $spread-radius $color !important;
@@ -514,10 +535,24 @@ a {
   @if $offset !=null {
     outline-offset: $offset;
   }
-
 }
 
 %focus-elements {
   @include outline(2px, solid, transparent, 4px);
   @include box-shadow(0px, 0px, 0px, 3px, $orange, $inset: false);
+}
+
+@mixin border-panel($type) {
+  border-left: 4px solid;
+  border-left-color: map-get($theme-variant-color, $type);
+}
+
+%list-unstyled {
+  ul {
+    @extend .list-group;
+    @extend .list-group-flush;
+    li {
+      @extend .list-group-item;
+    }
+  }
 }

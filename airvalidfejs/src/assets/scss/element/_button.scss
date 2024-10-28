@@ -148,6 +148,12 @@
     }
     &.mat-primary-text {
       color: $blue;
+
+      .icon {
+        &--danger {
+          color: $red;
+        }
+      }
     }
     &.mat-button-base {
       &:not(.mat-primary):not(.mat-primary-text) {
@@ -193,6 +199,9 @@
     background-color: $blue-800;
     button {
       color: $white;
+      .mat-menu-submenu-icon {
+        color: $white;
+      }
       &:hover {
         background-color: #4689F8;
       }
@@ -203,7 +212,10 @@
     &--cancel:hover i.material-icons {
       color: $red;
     }
-    &--valid:hover i.material-icons {
+  }
+
+  .parameters--valid:not(.mat-button-disabled) {
+    &:hover i.material-icons {
       color: $green;
     }
   }
@@ -248,12 +260,12 @@
           &:not(.mat-button-toggle-disabled) {
             background-color: transparent;
             .mat-button-toggle-label-content {
-              color: $yellow;
+              color: $darkmode;
             }
             &.mat-button-toggle-checked {
               background-color: $blue-900;
               .mat-button-toggle-label-content {
-                color: $yellow;
+                color: $darkmode;
               }
 
             }

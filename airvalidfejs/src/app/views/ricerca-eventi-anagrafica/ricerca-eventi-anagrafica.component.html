@@ -1,0 +1,15 @@
+<!--  
+ Copyright Regione Piemonte - 2024
+ SPDX-License-Identifier: EUPL-1.2-or-later
+ -->
+<div class="search-page">
+
+  <div class="container-fluid my-5">
+    <h2 class="my-5">Form di ricerca eventi ed anagrafica</h2>
+  </div>
+
+  <app-form-ricerca-eventi (formRicercaEventi)="ricercaEventi($event)" (eventoReset)="resetFilter()"></app-form-ricerca-eventi>
+  <app-risultati-ricerca *ngIf="responseRicercaEventi" (filtroItem)="ricercaPerFiltro($event)"
+                         (newPagination)="newPagination($event)"
+                         (newCount)="ricercaEventiNewCount($event)" (eventoReset)="resetFilter()" [result]="responseRicercaEventi"></app-risultati-ricerca>
+</div>

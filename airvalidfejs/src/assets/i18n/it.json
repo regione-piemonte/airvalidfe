@@ -2,13 +2,15 @@
   "button": {
     "conferma": "conferma",
     "annulla": "annulla",
-    "prosegui": "prosegui",
+    "prosegui": "continua",
+    "indietro": "indietro",
     "chiudi": "chiudi",
     "settings": "Menu impostazioni",
-    "exit":"esci",
+    "saved": "Salva",
+    "exit": "esci",
+    "add_elaboration": "Aggiungi elaborazione",
     "group": {
-      "scelta_servizio": [
-        {
+      "scelta_servizio": [{
           "name": "Validazione",
           "value": "validazione"
         },
@@ -17,12 +19,11 @@
           "value": "reportistica"
         },
         {
-          "name": "Elaborazione",
+          "name": "Elaborazioni",
           "value": "elaborazione"
         }
       ],
-      "scelta_scala": [
-        {
+      "scelta_scala": [{
           "name": "Assoluta",
           "value": "assoluta"
         },
@@ -35,8 +36,7 @@
           "value": "manuale"
         }
       ],
-      "scelta_periodo": [
-        {
+      "scelta_periodo": [{
           "name": "Precedente",
           "value": "prec",
           "tooltip": "Vai al giorno precedente",
@@ -81,42 +81,503 @@
       ],
       "scelta_periodo_parametri": {
         "label": "Seleziona il periodo",
-        "toggle_group": [
-          {
+        "toggle_group": [{
+          "name": "Annuale",
+          "value": "annuale"
+        }],
+        "toggle_group_validazione": [{
             "name": "Giornaliera",
             "value": "giornaliera"
           },
           {
             "name": "Mensile",
             "value": "mensile"
+          }
+        ],
+        "toggle_group_reportistica": [{
+            "name": "Giornaliera",
+            "value": "giornaliera"
           },
           {
-            "name": "Annuale",
-            "value": "annuale"
+            "name": "Mensile",
+            "value": "mensile"
+          }
+        ],
+        "toggle_group_elaborazione": [{
+            "name": "Personalizzata",
+            "value": "giornaliera"
+          },
+          {
+            "name": "Giornaliera",
+            "value": "mensile"
           }
         ]
       },
       "tooltip": {
         "no_selection": "Selezionare almeno un parametro",
-        "prev_day":"Selezionare la giornata precedente",
-        "next_day": "Selezionare la giornata successiva",
+        "prev_day": "Selezione precedente",
+        "next_day": "Selezione successiva",
         "custom_range": "Seleziona un periodo personalizzato",
         "one_day": "Seleziona 1 giorno",
         "three_day": "Seleziona 3 giorni",
         "one_week": "Seleziona una settimana",
         "one_month": "Seleziona un mese",
-        "reset_range": "Ripristina l'intero periodo"
-      }
+        "reset_range": "Ripristina l'intero periodo",
+        "unfold_more": "Espandi tutto",
+        "unfold_less": "Comprimi tutto"
+      },
+      "scelta_elaborazione": {
+        "label": "Seleziona il tipo di elaborazione",
+        "toggle_group": [{
+            "text": "Statistica",
+            "value": "statistica",
+            "active": true,
+            "toggle_group": [{
+                "text": "Media",
+                "value": "media",
+                "group": "statistica",
+                "active": true,
+                "toggle_group": [{
+                    "text": "Media giornaliera",
+                    "value": "dailymean",
+                    "group": "statistica",
+                    "sub_group": "media"
+                  },
+                  {
+                    "text": "Media per ora",
+                    "value": "meanbyhour",
+                    "group": "statistica",
+                    "sub_group": "media"
+                  },
+                  {
+                    "text": "Media oraria",
+                    "value": "hourlymean",
+                    "group": "statistica",
+                    "sub_group": "media"
+                  },
+                  {
+                    "text": "Media mobile",
+                    "value": "slidingmean",
+                    "group": "statistica",
+                    "sub_group": "media"
+                  },
+                  {
+                    "text": "Media globale",
+                    "value": "globalmean",
+                    "group": "statistica",
+                    "sub_group": "media"
+                  }
+                ]
+              },
+              {
+                "text": "Max - Min",
+                "value": "massimominimo",
+                "group": "statistica",
+                "active": true,
+                "toggle_group": [{
+                    "text": "Massimo giornaliero",
+                    "value": "dailymaximum",
+                    "group": "statistica",
+                    "sub_group": "massimominimo"
+                  },
+                  {
+                    "text": "Minimo giornaliero",
+                    "value": "dailyminimum",
+                    "group": "statistica",
+                    "sub_group": "massimominimo"
+                  },
+                  {
+                    "text": "Rapporto massimo minimo",
+                    "value": "maxminratio",
+                    "group": "statistica",
+                    "sub_group": "massimominimo"
+                  },
+                  {
+                    "text": "Massimo orario",
+                    "value": "hourlymaximum",
+                    "group": "statistica",
+                    "sub_group": "massimominimo"
+                  },
+                  {
+                    "text": "Minimo orario",
+                    "value": "hourlyminimum",
+                    "group": "statistica",
+                    "sub_group": "massimominimo"
+                  },
+                  {
+                    "text": "Massimo assoluto per ora",
+                    "value": "absmaximumbyhour",
+                    "group": "statistica",
+                    "sub_group": "massimominimo"
+                  },
+                  {
+                    "text": "Minimo assoluto per ora",
+                    "value": "absminimumbyhour",
+                    "group": "statistica",
+                    "sub_group": "massimominimo"
+                  },
+                  {
+                    "text": "Massimo assoluto",
+                    "value": "absmaximum",
+                    "group": "statistica",
+                    "sub_group": "massimominimo"
+                  },
+                  {
+                    "text": "Minimo assoluto",
+                    "value": "absminimum",
+                    "group": "statistica",
+                    "sub_group": "massimominimo"
+                  }
+                ]
+              },
+              {
+                "text": "Deviazione standard",
+                "value": "deviazionestandard",
+                "group": "statistica",
+                "active": true,
+                "toggle_group": [{
+                    "text": "Deviazione standard",
+                    "value": "dailystddev",
+                    "group": "statistica",
+                    "sub_group": "deviazionestandard"
+                  },
+                  {
+                    "text": " Coefficiente variazione",
+                    "value": "dailyvarcoeff",
+                    "group": "statistica",
+                    "sub_group": "deviazionestandard"
+                  }
+                ]
+              },
+              {
+                "text": "Differenze",
+                "value": "differenze",
+                "group": "statistica",
+                "active": true,
+                "toggle_group": [{
+                    "text": "Differenza giornaliere",
+                    "value": "dailydifferences",
+                    "group": "statistica",
+                    "sub_group": "differenze"
+                  },
+                  {
+                    "text": "Differenze orarie",
+                    "value": "hourlydifferences",
+                    "group": "statistica",
+                    "sub_group": "differenze"
+                  }
+                ]
+              },
+              {
+                "text": "Frequenza per ora",
+                "value": "freqbyhour",
+                "group": "statistica",
+                "active": true
+              },
+              {
+                "text": "Scalatura",
+                "value": "scalatura",
+                "group": "statistica",
+                "active": true,
+                "toggle_group": [{
+                    "text": "Scalatura",
+                    "value": "scaling",
+                    "group": "statistica",
+                    "sub_group": "scalatura"
+                  },
+                  {
+                    "text": "Scalatura da medie orarie",
+                    "value": "hourlyscaling",
+                    "group": "statistica",
+                    "sub_group": "scalatura"
+                  },
+                  {
+                    "text": "Scalatura da medie giornaliere",
+                    "value": "dailyscaling",
+                    "group": "statistica",
+                    "sub_group": "scalatura"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "text": "Settimanale",
+            "value": "settimanale",
+            "active": true,
+            "toggle_group": [{
+                "text": "Media per ora sulla settimana",
+                "value": "meanbyhouronweek",
+                "group": "settimanale",
+                "active": true
+              },
+              {
+                "text": "Media per ora lavorativa",
+                "value": "meanbyworkhour",
+                "group": "settimanale",
+                "active": true
+              },
+              {
+                "text": "Media per ora del sabato",
+                "value": "meanbysaturdayhour",
+                "group": "settimanale",
+                "active": true
+              },
+              {
+                "text": "Media per ora festiva",
+                "value": "meanbyholidayhour",
+                "group": "settimanale",
+                "active": true
+              },
+              {
+                "text": "Riduzione infrasettimanale",
+                "value": "riduzioneinfrasettimanale",
+                "group": "settimanale",
+                "active": true,
+                "toggle_group": [{
+                    "text": "Riduzione lavorativo/sabato",
+                    "value": "reductionworkdaysaturday",
+                    "group": "settimanale",
+                    "sub_group": "riduzioneinfrasettimanale"
+                  },
+                  {
+                    "text": "Riduzione lavorativo/festivo",
+                    "value": "reductionworkdayholiday",
+                    "group": "settimanale",
+                    "sub_group": "riduzioneinfrasettimanale"
+                  },
+                  {
+                    "text": "Riduzione massimo lavorativo/sabato",
+                    "value": "reductionmaxworkdaysaturday",
+                    "group": "settimanale",
+                    "sub_group": "riduzioneinfrasettimanale"
+                  },
+                  {
+                    "text": "Riduzione massimo lavorativo/festivo",
+                    "value": "reductionmaxworkdayholiday",
+                    "group": "settimanale",
+                    "sub_group": "riduzioneinfrasettimanale"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "text": "Confronto",
+            "value": "confronto",
+            "active": true,
+            "toggle_group": [{
+                "text": "Parametri",
+                "value": "parametri",
+                "group": "confronto",
+                "active": true,
+                "toggle_group": [{
+                    "text": "Media massimo-minimo giornalieri",
+                    "value": "dailymeanmaxmin",
+                    "group": "confronto",
+                    "sub_group": "parametri"
+                  },
+                  {
+                    "text": "Media massimo-minimo per ora",
+                    "value": "hourlymeanmaxmin",
+                    "group": "confronto",
+                    "sub_group": "parametri"
+                  },
+                  {
+                    "text": "Media per ora giorni lavorativi/sabato/festivi",
+                    "value": "meanbyhourforworksaturdayholidaydays",
+                    "group": "confronto",
+                    "sub_group": "parametri"
+                  },
+                  {
+                    "text": "Dati suddivisi per giorno",
+                    "value": "datasplitbyday",
+                    "group": "confronto",
+                    "sub_group": "parametri"
+                  },
+                  {
+                    "text": "Dati suddivisi per mese",
+                    "value": "datasplitbymonth",
+                    "group": "confronto",
+                    "sub_group": "parametri"
+                  },
+                  {
+                    "text": "Dati suddivisi per anno",
+                    "value": "datasplitbyyear",
+                    "group": "confronto",
+                    "sub_group": "parametri"
+                  }
+                ]
+              },
+              {
+                "text": "Periodi",
+                "value": "periodi",
+                "group": "confronto",
+                "active": false,
+                "toggle_group": [{
+                    "text": "Medie giornaliere",
+                    "value": "medie_giornaliere",
+                    "group": "confronto",
+                    "sub_group": "periodi"
+                  },
+                  {
+                    "text": "Medie mensili",
+                    "value": "medie_mensili",
+                    "group": "confronto",
+                    "sub_group": "periodi"
+                  },
+                  {
+                    "text": "Massimi",
+                    "value": "massimi",
+                    "group": "confronto",
+                    "sub_group": "periodi"
+                  },
+                  {
+                    "text": "Minimi",
+                    "value": "minimi",
+                    "group": "confronto",
+                    "sub_group": "periodi"
+                  },
+                  {
+                    "text": "Dati orari",
+                    "value": "dati_orari",
+                    "group": "confronto",
+                    "sub_group": "periodi"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "text": "Analisi speciali",
+            "value": "analisispeciali",
+            "active": false,
+            "toggle_group": [{
+                "text": "Coefficienti di correlazione",
+                "value": "coefficienti_correlazione",
+                "group": "analisispeciali"
+              },
+              {
+                "text": "Differenza PM10-PM2.5",
+                "value": "differenza_pm",
+                "group": "analisispeciali"
+              },
+              {
+                "text": "IPA e Metalli",
+                "value": "ipa_metalli",
+                "group": "analisispeciali"
+              },
+              {
+                "text": "Grafico a dispersione",
+                "value": "grafico_dispersione",
+                "group": "analisispeciali"
+              },
+              {
+                "text": "Analisi di trend",
+                "value": "analisi_trend",
+                "group": "analisispeciali"
+              },
+              {
+                "text": "Rapporto NO2/Nox",
+                "value": "rapporto_no2_nox",
+                "group": "analisispeciali"
+              },
+              {
+                "text": "Analisi delle persistenze",
+                "value": "analisi_persistenze",
+                "group": "analisispeciali"
+              },
+              {
+                "text": "Rapporti fra parametri",
+                "value": "rapporti_parametri",
+                "group": "analisispeciali"
+              },
+              {
+                "text": "Box plot",
+                "value": "box_plot",
+                "group": "analisispeciali"
+              },
+              {
+                "text": "Scatter plot",
+                "value": "scatter_plot",
+                "group": "analisispeciali"
+              }
+            ]
+          }
+        ]
+      },
+      "scelta_render": [{
+          "text": "Standard",
+          "value": "standard"
+        },
+        {
+          "text": "Controlli",
+          "value": "controlli"
+        },
+        {
+          "text": "Specialistici",
+          "value": "specialistico"
+        }
+      ],
+      "scelta_render_specialistico": [{
+          "text": "Misure non validate",
+          "value": "nonvalidato",
+          "group": "Controlli"
+        },
+        {
+          "text": "Misure validate ma con valore nullo",
+          "value": "validatonullo",
+          "group": "Controlli"
+        },
+        {
+          "text": "Misure non certificate",
+          "value": "noncertificato",
+          "group": "Controlli"
+        },
+        {
+          "text": "Misure mancanti",
+          "value": "assenti",
+          "group": "Controlli"
+        },
+        {
+          "text": "IPA e metalli",
+          "value": "ipametalli",
+          "group": "Controlli"
+        }
+      ],
+      "scelta_render_standard": [{
+          "text": "Giornaliera",
+          "value": "daily",
+          "group": "Standard"
+        },
+        {
+          "text": "Variabile",
+          "value": "variable",
+          "group": "Standard"
+        },
+        {
+          "text": "Annuale",
+          "value": "yearly",
+          "group": "Standard"
+        }
+      ]
+    },
+    "scelta_reportistica": {
+      "label": "Seleziona il tipo di reportistica"
     },
     "refresh": "ricarica la tabella",
-    "refresh_page": "ricarica la pagina",
+    "refresh_page": "cambia periodo e parametri",
+    "change_period": "cambia periodo",
     "save": "salva i dati",
-    "open_menu": "espandi il menù",
-    "close_menu": "chiudi il menù",
     "valid": "valida tutto",
+    "open_menu": "espandi",
+    "close_menu": "chiudi il dettaglio",
     "certifica": "certifica tutto",
-    "decertifica": "decertifica tutto",
-    "add_params": "aggiungi parametro",
+    "add_params": "aggiungi",
+    "delete_params": "elimina tutti",
+    "add_report": "aggiungi report",
+    "remove_report": "Elimina tutti",
+    "delete_report": "Elimina tutti i report",
     "export": "esporta i dati",
     "save_settings": "Salva le impostazioni",
     "aria_label": {
@@ -124,18 +585,22 @@
       "annulla": "Annulla e chiudi la modale",
       "prosegui": "Prosegui al prossimo step",
       "chiudi": "Chiudi la modale",
-      "exit": "Esci dall'applicativo",
       "delete": "Rimuovi l'elemento: ",
+      "exit": "Esci dall'applicativo",
       "add_params": "Aggiungi parametro al grafico di validazione",
+      "add_elab": "Inserisci un nuovo tipo di elaborazione",
+      "delete_params": "Elimina tutti i parametri",
       "export_paramas": "Esporta i parametri",
       "show_station": "Mostra la stazione ",
       "hide_station": "Nascondi la stazione ",
       "user_lock": "Bloccato dall'utente ",
       "writing": "Scrittura",
       "read_only": "Sola lettura",
+      "add_report": "Aggiungi report",
+      "remove_report": "Rimuovi report",
       "go_to_page": {
-        "reportistica": "vai alla pagina di reportistica",
-        "validazione": "vai alla pagina di validazione",
+        "validazione": "vai alla pagina di reportistica",
+        "reportistica": "vai alla pagina di validazione",
         "elaborazione": "vai alla pagina di elaborazione"
       }
     },
@@ -150,7 +615,7 @@
   },
   "contex_menu": {
     "parameters": {
-      "delete_list_par": "Elimina da lista/paragrafo",
+      "delete_list_par": "Elimina da lista",
       "show_original_data": "Mostra dati originali",
       "hide_original_data": "Nascondi dati originali",
       "compare_time": "Confronta nel tempo",
@@ -159,8 +624,8 @@
       "show_not_valid_data": "Mostra dati non validi",
       "hide_not_valid_data": "Nascondi dati non validi",
       "change_color": "Assegna colore",
-      "parameters_compare": "Parametri di confronto",
-      "request_calibration": "Richiesta di taratura"
+      "parameters_compare": "Stazioni correlate",
+      "request_calibration": "Leggi info taratura"
     }
   },
   "table": {
@@ -182,7 +647,18 @@
         "State",
         "Verification"
       ],
-      "preset": ["Id", "Nome", "Rete", "Stazioni", "Parametri", "Azioni"]
+      "preset": [
+        "Id",
+        "Nome",
+        "Rete",
+        "Stazioni",
+        "Parametri",
+        "Azioni"
+      ],
+      "label": {
+        "show_parameter": "Mostra il parametro",
+        "hide_parameter": "Nascondi il parametro"
+      }
     },
     "pagination": {
       "per_page": "elementi per pagina",
@@ -191,20 +667,26 @@
       "previous_page": "Pagina precedente",
       "first_page": "Prima pagina",
       "last_page": "Ultima pagina"
+    },
+    "header_eventi": {
+      "origin": "Fonte",
+      "type": "Tipo",
+      "beginDate": "Data inizio",
+      "endDate": "Data fine",
+      "notes": "Note"
     }
   },
   "input": {
-    "required":"Tutti i campi con * sono obbligatori",
+    "required": "Tutti i campi con * sono obbligatori",
     "lang": {
       "label": "Scelta della lingua",
       "disabledLabel": "Lingue",
-      "option": [
-        {
+      "option": [{
           "value": "it",
           "name": "Italiano"
         },
         {
-          "value": "en",
+          "value": "gb",
           "name": "English"
         }
       ]
@@ -216,8 +698,7 @@
     },
     "font": {
       "label": "Seleziona il font",
-      "option": [
-        {
+      "option": [{
           "value": "small",
           "name": "Font piccolo"
         },
@@ -233,8 +714,7 @@
     },
     "layout": {
       "label": "Seleziona il layout",
-      "option": [
-        {
+      "option": [{
           "value": "default",
           "name": "Default layout"
         },
@@ -248,13 +728,22 @@
         }
       ]
     },
-    "toggle_preset":"Utilizza i preset",
+    "check_all": "Seleziona tutti",
+    "toggle_preset": "Utilizza i preset",
     "label_toggle_preset": "Scegli tra i preset salvati",
     "toggle_decimal": "Decimale",
     "toggle_original": "Arrotondamento",
-    "label_select_choice_render": "Visualizzazione dei dati",
-    "select_choice_render": [
-      {
+    "toggle_db_cop": "Database COP",
+    "toggle_db_reg": "Database REG",
+    "toggle_linear_select": {
+      "label": "Applica linearizzazione",
+      "constant": "costante",
+      "progressive": "progressiva"
+    },
+    "label_select_choice_render": "Dati utilizzati",
+    "label_select_choice_render_validazione": "Dati evidenziati",
+    "label_limiti" : "Visualizza limiti",
+    "select_choice_render": [{
         "value": "notvalid",
         "name": "Non validi"
       },
@@ -269,31 +758,68 @@
       {
         "value": "missing",
         "name": "Mancanti"
+      },
+      {
+        "value": "none",
+        "name": "Nessuna Evidenza"
       }
-    ]
+    ],
+    "select_default_net": {
+      "label": "Nessuna selezione"
+    }
+
   },
   "main_menu": {
     "validazione": "Validazione",
     "reportistica": "Reportistica",
-    "elaborazione": "Elaborazione",
+    "elaborazione": "Elaborazioni",
     "impostazioni": "Impostazioni"
   },
   "dialog_init_config": {
     "step_1": {
       "title": "Seleziona attività",
-      "paragraph": "Seleziona la tipologia di lavoro che vuoi eseguire",
+      "paragraph": "Utilizzare i tasti seguenti per impostare il periodo di interesse",
       "from": "Da",
-      "to": "A"
+      "to": "A",
+      "reportistica": {
+        "title": "Reportistica",
+        "paragraph": "Seleziona la tipologia di report che vuoi eseguire."
+      },
+      "elaborazione": {
+        "title": "Elaborazioni",
+        "paragraph": "Seleziona la tipologia di elaborazione che vuoi eseguire."
+      },
+      "elaborazioni_specialistiche": {
+        "title": "Seleziona il tipo di report specialistico"
+      }
     },
     "step_2": {
       "title": "Seleziona il periodo",
-      "paragraph": "Seleziona la tipologia di validazione o certificazione che vuoi effettuare"
+      "paragraph": "Seleziona la tipologia di validazione o certificazione che vuoi effettuare",
+      "title_db": "Seleziona il database",
+      "paragraph_db": "Seleziona il database da utilizzare"
     },
     "step_3": {
       "title": "Seleziona i parametri",
       "paragraph": "Seleziona la tipologia di lavoro che vuoi eseguire",
-      "preset": {},
-      "no_preset": {}
+      "paragraph_1": "Seleziona i parametri che vuoi validare o mettere a confronto",
+      "paragraph_2": "Puoi partire a scelta nel selezionare un parametro e successivamente le stazioni di riferimento",
+      "preset": {
+        "title": "Salva la configurazione",
+        "paragraph": "Inserisci un nome per salvare la configurazione",
+        "label": "Inserisci il nome",
+        "aria_label": "Salva questa configurazione con i parametri selezionati",
+        "check_template_1": "Seleziona i parametri che vuoi validare o mettere a confronto.",
+        "check_template_2": "Puoi partire a scelta nel selezionare un parametro e successivamente le stazioni di riferimento",
+        "check_template_label": "Scegli tra i preset salvati"
+      },
+      "no_preset": {},
+      "title_net": "Rete"
+    },
+    "step_elaborazione": {
+      "standard": "Standard",
+      "controlli": "Controlli",
+      "specialist": "Specialistica"
     }
   },
   "dialog_linear_correction": {
@@ -321,11 +847,17 @@
   },
   "dialog_anno": {
     "title": "Scelta anno",
-    "subtitle": "Selezionare l'anno"
+    "subtitle": "Selezionare l'anno",
+    "year": "Anno",
+    "aria_label": "Vai alla pagina di"
   },
   "dialog_export_csv": {
     "title": "Esportazione in CSV",
-    "subtitle": "Seleziona i parametri"
+    "subtitle": "Seleziona i parametri",
+    "field": "Separatore campi",
+    "decimal": " Separatore decimale",
+    "export": "Tipo esportazione",
+    "format_date": "Formato data"
   },
   "dialog_parameters": {
     "title": "Seleziona i parametri",
@@ -336,15 +868,28 @@
     "title": "Attenzione",
     "body": "Valore non valido. <br/>Inserire i valori decimali utilizzando il . come separatore"
   },
+  "dialog_remove_parameter": {
+    "title": "Rimozione parametro",
+    "body": "Selezionare i parametri da eliminare dalla lista"
+  },
+  "dialog_remove_report": {
+    "title": "Rimozione report",
+    "body": "Selezionare i report da eliminare dalla lista"
+  },
+  "dialog_not_remove": {
+    "title": "Attenzione",
+    "body": "È necessario salvare o ricaricare i dati prima di procedere."
+  },
   "page": {
     "validazione": {
       "split_grafico": {
-        "title_1": "GRAFICO 1 - DATI PER LA VALIDAZIONE",
-        "subtitle_1": "Periodo di riferimento",
-        "title_2": "GRAFICO 2",
-        "subtitle_2": "Intero periodo di riferimento",
+        "title_1": "MISURE IN ESAME",
+        "subtitle_1": "",
+        "title_2": "INTERO PERIODO CARICATO",
+        "subtitle_2": "",
         "from": "da",
         "to": "a",
+        "evidence": "Evidenza:",
         "aria_label": {
           "grafici": "Grafici per la validazione",
           "scala": "Scegli la scala",
@@ -360,18 +905,69 @@
         "title": "Dettaglio",
         "parametro": "Parametro",
         "stazione": "Stazione",
+        "area": "Area",
         "menu_contx_dx": {
           "correzione_lineare": "Modifica dati selezionati",
-          "valida": "Valida righe selezionate",
-          "invalida": "Invalida righe selezionate",
           "certifica": "Certifica righe selezionate",
-          "decertifica": "Decertifica righe selezionate"
+          "valida": {
+            "1": "Valido (1)",
+            "2": "Valido (2 - minore DL)",
+            "3": "Valido (3 - rimpiazzato con DL/2)"
+          },
+          "invalida": {
+            "-1": "Non valido (-1)",
+            "-99": "Non valido (-99 - manutenzione)"
+          }
         }
       },
       "modali": {
         "correzione_lineare": {
           "title": "Correzione lineare",
           "subtitle": "Inserisci i valori di offset e slope"
+        },
+        "seleziona_render_report_elab": {
+          "paragraph": "Report scelti: "
+        }
+      }
+    },
+    "reportistica": {
+      "split_left": {
+        "title": "Tabelle per la reportistica",
+        "valid_data": "Valori presenti: ",
+        "text-descrizione": "Solo i primi 100 valori sono visualizzati"
+      },
+      "split_right": {
+        "title": "Elenco report",
+        "title_accordion": "Report creato il: ",
+        "listAssenti": "Report Misure Assenti nel DB",
+        "listCertified": "Report Misure Certificate",
+        "listNotCertified": "Report Misure Non Certificate",
+        "listValidata": "Report Misure Validate",
+        "listNotValid": "Report Misure Non Validate",
+        "listValidationNull": "Report Misure validate con valore nullo",
+        "listIpaMetalli": "Report su IPA e metalli",
+        "listDaRivedere": "Report Misure da rivedere"
+      }
+    },
+    "elaborazione": {
+      "split_left": {
+        "title": "Grafici per l'elaborazione",
+        "no_graph": "Seleziona il tipo di analisi che vuoi visualizzare all'interno del grafico cliccando su"
+      },
+      "split_right": {
+        "paremter_split": {
+          "title": "Tabella dei parametri"
+        },
+        "detail_split": {
+          "title": "Dettaglio elaborazione",
+          "download": {
+            "tooltip": "Scarica i dati in formato csv"
+          },
+          "table": {
+            "data_ora": "Data/Ora",
+            "valore": "Valore",
+            "errore": "Errore"
+          }
         }
       }
     },
@@ -383,8 +979,113 @@
         "theme": "Seleziona il tema",
         "layout": "Seleziona il layout",
         "font": "Seleziona il font",
+        "net": "Seleziona la rete di default",
         "preset": "Tabella di riepilogo dei preset"
       }
     }
-  }
+  },
+  "snackbar": {
+    "setting": {
+      "success": "Impostazioni salvate con successo",
+      "error": "Attenzione! Le impostazioni non sono state salvate",
+      "reload": {
+        "title": "Ricaricare l'applicativo",
+        "message": "È necessario ricaricare per applicare le modifiche."
+      }
+    },
+    "export": {
+      "success": "Esportazione completata con successo",
+      "error": "Attenzione! Esportazione non riuscita"
+    },
+    "save": {
+      "success": "Salvataggio completato con successo",
+      "error": "Attenzione! Salvataggio non riuscito"
+    },
+    "valid": {
+      "success": "Validazione completata con successo",
+      "error": "Attenzione! Validazione non riuscita"
+    },
+    "certify": {
+      "success": "Certificazione completata con successo",
+      "error": "Attenzione! Certificazione non riuscita"
+    },
+    "delete": {
+      "success": "Eliminazione completata con successo",
+      "error": "Attenzione! Eliminazione non riuscita"
+    },
+    "add": {
+      "success": "Aggiunta completata con successo",
+      "error": "Attenzione! Aggiunta non riuscita"
+    },
+    "change_period": {
+      "title": "Informazione",
+      "message": "Selezione al di fuori del periodo caricato."
+    },
+    "no_data_show": {
+      "message": "Non ci sono dati per il periodo selezionato"
+    }
+  },
+  "dialog_interceptor": {
+    "error": {
+      "title": "Errore",
+      "message": "L'elaborazione richiesta non è compatibile con il periodo temporale in esame."
+    }
+  },
+  "reportistica": {
+    "standard": {
+      "AnnualSynth8HoursTable": "Tabella di sintesi",
+      "AnnualSynthDailyParamsTable": "Tabella di sintesi",
+      "AnnualSyntheticTable": "Tabella di sintesi",
+      "DailyTable": "Tabella giornaliera",
+      "DayMedium8HoursTable": "Statistiche giornaliere",
+      "DayMediumTable": "Medie giornaliere",
+      "DaysOfWeekTable": "Statistiche settimanali",
+      "DaysWeekDailyParamsTable": "Statistiche settimanali",
+      "EightHoursChartTable": "Medie mobile 8 ore",
+      "HoursChartTable": "Medie orarie",
+      "HoursMediumSyntheticTable": "Statistiche orarie",
+      "HoursMediumTable": "Statistiche orarie",
+      "MediumDailyParamsTable": "Medie giornaliere",
+      "MonthsMedium8HoursTable": "Statistiche mensili (medie su 8 ore)",
+      "MonthsMediumDailyParamsTable": "Statistiche mensili",
+      "MonthsMediumTable": "Statistiche mensili",
+      "PercentilesDailyParamsTable": "Percentili",
+      "PercentilesTable": "Percentili",
+      "SynthDailyParamsTable": "Tabella di sintesi",
+      "Synthetic8HoursTable": "Tabella di sintesi",
+      "SyntheticTable": "Tabella di sintesi",
+      "DailyParamsDefTable": "Medie giornaliere"
+    },
+    "standard_type": {
+      "title": "Tipo reportistica:",
+      "daily": "Report giornaliero",
+      "variable": "Report su periodo variabile",
+      "yearly":"Report di riepilogo annuale"
+    },
+    "label": {
+      "flag": "Livello di flag"
+    },
+    "toggle": {
+      "color":"Colori evidenziazione",
+      "reti": "Nomi reti",
+      "riga": "Anagrafica per righe",
+      "sintesi": "Tabella Sintesi",
+      "giorno_medio": "Tabella giorno medio",
+      "statistiche_giornaliere": "Tabella con statistiche giornaliere",
+      "statistiche_mensili": "Statistiche Mensili",
+      "matrice_oraria": "Matrice oraria",
+      "statistica_settimanale": "Statistica settimanale",
+      "percentili": "Percentili"
+    }
+  },
+  "levelSelect": [
+    {
+      "name": "usa solo dati validati",
+      "value": true
+    },
+    {
+      "name": "usa dati grezzi dove manca la validazione",
+      "value": false
+    }
+  ]
 }

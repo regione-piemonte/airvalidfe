@@ -1,0 +1,45 @@
+$shadow-card: 0px 0px 4px 3px rgba($black, 0.2);
+$shadow: 0px 0px 8px 3px rgba($black, 0.2);
+
+@mixin shadowCard($value) {
+  box-shadow: $value;
+  -webkit-box-shadow: $value;
+  -moz-box-shadow: $value;
+  border-radius: 5px; 
+}
+
+#airvalid {
+  .graph-elaboration {
+    @extend .my-4;
+    @extend .p-3;
+    @extend .pt-4;
+    @include shadowCard($shadow-card);
+    &.active-graph {
+      border: 2px solid $primary;
+      &:hover,
+      &:focus {
+        @include shadowCard($shadow);
+      }
+    }
+    container: layout / inline-size;
+
+    .graph-elaboration-container {
+      @extend .d-flex;
+      @extend .justify-content-between;
+      @extend .align-items-center;
+    }
+
+
+    @container (max-width: 800px) {
+      .btn-toggle-group--container, .graph-elaboration-container {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+      }
+
+      .graph-elaboration-container {
+        gap: 32px;
+      }
+  
+    }
+  }
+}

@@ -1,0 +1,147 @@
+[
+  {
+    "id_parametro": "01",
+    "allarme": "350",
+    "attenzione": "75"
+
+  },
+  {
+    "id_parametro": "01_prova",
+    "allarme": "350",
+    "attenzione": "75"
+
+  },
+  {
+    "id_parametro": "02",
+    "allarme": "10",
+    "attenzione": "7"
+
+  },
+  {
+    "id_parametro": "02_prova",
+    "allarme": "10",
+    "attenzione": "7"
+
+  },
+  {
+    "id_parametro": "03",
+    "allarme": "300.55",
+    "attenzione": "150.5"
+
+  },
+  {
+    "id_parametro": "04",
+    "allarme": "200",
+    "attenzione": "140"
+
+  },
+  {
+    "id_parametro": "04_prova",
+    "allarme": "200",
+    "attenzione": "140"
+
+  },
+  {
+    "id_parametro": "05",
+    "allarme": "240",
+    "attenzione": "180"
+
+  },
+  {
+    "id_parametro": "05_prova",
+    "allarme": "240",
+    "attenzione": "180"
+
+  },
+  {
+    "id_parametro": "21",
+    "allarme": "200",
+    "attenzione": "140"
+
+  },
+  {
+    "id_parametro": "21_prova",
+    "allarme": "200",
+    "attenzione": "140"
+
+  },
+  {
+    "id_parametro": "22",
+    "allarme": "30",
+    "attenzione": "24"
+
+  },
+  {
+    "id_parametro": "22_prova",
+    "allarme": "30",
+    "attenzione": "24"
+
+  },
+  {
+    "id_parametro": "AS",
+    "allarme": "6",
+    "attenzione": "3.6"
+
+  },
+  {
+    "id_parametro": "BENZENE",
+    "allarme": "5",
+    "attenzione": "3.5"
+
+  },
+  {
+    "id_parametro": "BENZprov",
+    "allarme": "5",
+    "attenzione": "3.5"
+
+  },
+  {
+    "id_parametro": "BENZpr",
+    "allarme": "5",
+    "attenzione": "3.5"
+
+  },
+  {
+    "id_parametro": "CADMIO",
+    "allarme": "5",
+    "attenzione": "3"
+
+  },
+  {
+    "id_parametro": "NICHEL",
+    "allarme": "20",
+    "attenzione": "14"
+
+  },
+  {
+    "id_parametro": "BENZprov",
+    "allarme": "5",
+    "attenzione": "3.5"
+
+  },
+  {
+    "id_parametro": "PIOMBO",
+    "allarme": "0.5",
+    "attenzione": "0.35"
+
+  },
+  {
+    "id_parametro": "PM10_B",
+    "allarme": "50",
+    "attenzione": "35"
+
+  },
+  {
+    "id_parametro": "PM10_GBV",
+    "allarme": "50",
+    "attenzione": "35"
+
+  },
+  {
+    "id_parametro": "PM2.5",
+    "allarme": "25",
+    "attenzione": "17"
+
+  }
+
+]

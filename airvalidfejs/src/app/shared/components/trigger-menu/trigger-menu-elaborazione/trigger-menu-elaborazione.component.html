@@ -1,0 +1,44 @@
+<div class="btn-toggle-group--container" id="btn-toggle-group--render">
+  <ng-container *ngFor="let render of renderTableElaborazione">
+    <button mat-button [matMenuTriggerFor]="renderMenu" #menuTrigger="matMenuTrigger" *ngIf="render.active"
+      [class.btn-toggle-group--primary-selected]="selectedRender && render.value == selectedRender.group"
+      (click)="$event.stopPropagation();$event.preventDefault();" class="btn-toggle-group--primary">
+      {{ render.text }}
+    </button>
+    <mat-menu #renderMenu="matMenu">
+      <ng-container *ngFor="let group of render.toggle_group">
+        <button mat-menu-item [matMenuTriggerFor]="childMenu" #menuTrigger="matMenuTrigger"
+          [class.selected]="selectedRender && group.value == selectedRender.sub_group"
+          (click)="$event.stopPropagation();$event.preventDefault();"
+          *ngIf="group.toggle_group && group.toggle_group.length > 0 && group.active">
+          {{ group.text }}
+        </button>
+        <button mat-menu-item *ngIf="!group.toggle_group || group.toggle_group.length === 0"
+          (click)="updateValue(group)" [class.selected]="group.isSelected" >
+          {{group.text}}
+        </button>
+        <mat-menu #childMenu="matMenu">
+          <span *ngFor="let child of group.toggle_group">
+            <span *ngIf="child.toggle_group && child.toggle_group.length > 0">
+              <button mat-menu-item color="primary" [matMenuTriggerFor]="childMenu" [class.selected]="selectedRender && child.value == selectedRender.sub_group">
+                <span>{{child.text}}</span>
+              </button>
+              <mat-menu #childMenu2="matMenu" [overlapTrigger]="false">
+                <span *ngFor="let child_sub of child.toggle_group">
+                  <button mat-menu-item color="primary" [matMenuTriggerFor]="childMenu2">
+                    <span>{{child_sub.text}}</span>
+                  </button>
+                </span>
+              </mat-menu>
+            </span>
+            <span *ngIf="!child.toggle_group || child.toggle_group.length === 0">
+              <button mat-menu-item (click)="updateValue(child)" [class.selected]="child.isSelected" >
+                {{child.text}}
+              </button>
+            </span>
+          </span>
+        </mat-menu>
+      </ng-container>
+    </mat-menu>
+  </ng-container>
+</div>

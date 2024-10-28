@@ -10,15 +10,13 @@ import { UserSettingService } from './user-setting.service';
   providedIn: 'root'
 })
 export class ThemeColorService {
-  private themeColorSubject: BehaviorSubject<string>;
-  public currentColor$: Observable<string>;
-  
+  private themeColorSubject: BehaviorSubject<string> = new BehaviorSubject<string>('light');
+  public currentColor$: Observable<string> = this.themeColorSubject.asObservable();
+
 
   constructor(
     private readonly userSettingService: UserSettingService ,
   ) {
-    this.themeColorSubject = new BehaviorSubject<string>('light');
-    this.currentColor$ = this.themeColorSubject.asObservable();
 
     this.userSettingService.getTheme().subscribe((theme) => this.setThemeColor(theme));
   }

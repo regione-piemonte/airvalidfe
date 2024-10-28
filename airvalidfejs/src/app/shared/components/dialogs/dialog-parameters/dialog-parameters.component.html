@@ -1,163 +1,239 @@
-<!--  
+<!--
  Copyright Regione Piemonte - 2023
  SPDX-License-Identifier: EUPL-1.2-or-later
  -->
- <div mat-dialog-title class="dialog-title">
-  <h2 mat-dialog-title>Seleziona i parametri</h2>
-  <button
-    class="mat-elevation-z0 btn-dialog--close"
-    mat-icon-button
-    aria-label="Chiudi la modale"
-    mat-dialog-close
-  >
+<div mat-dialog-title class="dialog-title">
+  <h2 mat-dialog-title>{{'dialog_init_config.step_3.title' | translate}}</h2>
+  <button class="mat-elevation-z0 btn-dialog--close" mat-icon-button aria-label="Chiudi la modale" mat-dialog-close>
     <mat-icon>close</mat-icon>
   </button>
 </div>
 <div>
-  <mat-slide-toggle [(ngModel)]="presetCheck" (change)="changePreset()"
-    >Utilizza i preset</mat-slide-toggle
-  >
+  <!-- <mat-slide-toggle [(ngModel)]="presetCheck" (change)="changePreset()">
+    {{ 'input.toggle_preset' | translate }}
+  </mat-slide-toggle> -->
 </div>
 
 <mat-dialog-content>
-  <div
-    *ngIf="!presetCheck; then selectionParams; else presetCheckTemplate"
-  ></div>
-  <ng-template #selectionParams>
-    <form [formGroup]="form">
-      <p>
-        Seleziona i parametri che vuoi validare o mettere a confronto <br />
-        Puoi partire a scelta nel selezionare un parametro e successivamente le
-        stazioni di riferimento
-      </p>
-      <div class="parameterSettings">
-        <mat-form-field
-          appearance="fill"
-          *ngIf="listaAreeTerritoriali$ | async as listaAreeTerritoriali"
-        >
-          <mat-label>Rete</mat-label>
-          <mat-select
-            formControlName="areeTerritoriali"
-            multiple
-            (closed)="closedSelect($event)"
-          >
-            <mat-option
-              *ngFor="let element of listaAreeTerritoriali"
-              [value]="element"
-              >{{ element.name }}</mat-option
-            >
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field
-          appearance="fill"
-          *ngIf="listStazioni$ | async as listaStazioni"
-        >
-          <mat-label>Stazioni</mat-label>
-          <mat-select formControlName="stazioni" multiple>
-            <mat-option
-              *ngFor="let element of listaStazioni"
-              [value]="element"
-              >{{ element.name }}</mat-option
-            >
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field
-          appearance="fill"
-          *ngIf="listParametri$ | async as listaParametri"
-        >
-          <mat-label>Parametri</mat-label>
-          <mat-select formControlName="parametri" multiple>
-            <mat-option
-              *ngFor="let element of listaParametri"
-              [value]="element"
-              >{{ element.name }}</mat-option
-            >
-          </mat-select>
-        </mat-form-field>
-      </div>
-    </form>
-    <mat-accordion
-      *ngIf="
-        form.value.areeTerritoriali &&
-        form.value.stazioni &&
-        form.value.parametri
-      "
-    >
-      <mat-expansion-panel
-        (opened)="savePresetExpansion = true"
-        (closed)="savePresetExpansion = false"
-      >
-        <mat-expansion-panel-header>
-          <mat-panel-title>
-            <h3 class="text-info">Salva la configurazione</h3>
-          </mat-panel-title>
-        </mat-expansion-panel-header>
-        <p>Inserisci un nome per salvare la configurazione</p>
-        <form [formGroup]="formConfPreset">
-          <mat-form-field class="me-4" appearance="fill">
-            <mat-label>Inserisci il nome</mat-label>
-            <input matInput formControlName="nameConfPreset" value="" />
+  <mat-tab-group  (selectedTabChange)="onTabChange($event)">
+    <mat-tab label="Standard">
+      <form [formGroup]="form">
+        <p>
+          {{ 'dialog_init_config.step_3.paragraph_1' | translate }}
+        </p>
+        <!-- <p>
+            {{ 'dialog_init_config.step_3.paragraph_2' | translate }}
+          </p> -->
+        <div class="parameterSettings">
+          <mat-form-field appearance="fill" *ngIf="listaAreeTerritoriali$ | async as listaAreeTerritoriali">
+            <mat-label>
+              {{ 'dialog_init_config.step_3.title_net' | translate }}
+            </mat-label>
+            <mat-select class="select-more-option" formControlName="areeTerritoriali" multiple [compareWith]="isEqual"
+              #areeTerritoriali>
+              <div class="select--border">
+                <mat-checkbox (change)="selectAll($event, 'areeTerritoriali', listaAreeTerritoriali)">
+                  {{'input.check_all' | translate}}
+                </mat-checkbox>
+              </div>
+              <div class="select--btn">
+                <button (click)="areeTerritoriali.close()" class="mat-raised-button mat-primary" mat-button>
+                  {{'button.conferma' | translate}}
+                </button>
+              </div>
+              <mat-option *ngFor="let element of listaAreeTerritoriali" [value]="element">{{ element.name }}
+              </mat-option>
+            </mat-select>
           </mat-form-field>
-          <div class="d-flex justify-content-end">
-            <button
-              mat-button
-              class="mat-raised-button mat-primary"
-              (click)="saveConfig()"
-              [disabled]="!formConfPreset.valid"
-              aria-label="Salva questa configurazione con i parametri selezionati"
-            >
-              Salva
-            </button>
-          </div>
-        </form>
-        <div>
-          {{result}}
+          <mat-form-field appearance="fill" *ngIf="listStazioni$ | async as listaStazioni">
+            <mat-label>{{ 'table.body.preset.3' | translate}}</mat-label>
+            <mat-select formControlName="stazioni" multiple #stazioni>
+              <div class="select--border">
+                <mat-checkbox (change)="selectAll($event, 'stazioni', listaStazioni)">
+                  {{'input.check_all' | translate}}
+                </mat-checkbox>
+              </div>
+              <div class="select--btn">
+                <button (click)="stazioni.close()" class="mat-raised-button mat-primary" mat-button>
+                  {{'button.conferma' | translate}}
+                </button>
+              </div>
+              <mat-option *ngFor="let element of listaStazioni" [value]="element">{{ element.name }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" *ngIf="listParametri$ | async as listaParametri">
+            <mat-label>{{ 'table.body.preset.4' | translate}}</mat-label>
+            <mat-select formControlName="parametri" multiple #parametri>
+              <div class="select--border">
+                <mat-checkbox (change)="selectAll($event, 'parametri', listaParametri)">
+                  {{'input.check_all' | translate}}
+                </mat-checkbox>
+              </div>
+              <div class="select--btn">
+                <button (click)="parametri.close()" class="mat-raised-button mat-primary" mat-button>
+                  {{'button.conferma' | translate}}
+                </button>
+              </div>
+              <mat-option *ngFor="let element of listaParametri" [value]="element">{{ element.name }}</mat-option>
+            </mat-select>
+          </mat-form-field>
         </div>
-      </mat-expansion-panel>
-    </mat-accordion>
-  </ng-template>
+      </form>
+      <mat-accordion *ngIf="form.value.areeTerritoriali && form.value.stazioni && form.value.parametri">
+        <mat-expansion-panel (opened)="savePresetExpansion = true" (closed)="savePresetExpansion = false">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <h3 class="text-info">{{ 'dialog_init_config.step_3.preset.title' | translate }}</h3>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <p>{{ 'dialog_init_config.step_3.preset.paragraph' | translate }}</p>
+          <form [formGroup]="formConfPreset">
+            <mat-form-field class="me-4" appearance="fill">
+              <mat-label>{{ 'dialog_init_config.step_3.preset.label' | translate }}</mat-label>
+              <input matInput formControlName="nameConfPreset" value="" />
+            </mat-form-field>
+            <div class="d-flex justify-content-end">
+              <button mat-button class="mat-raised-button mat-primary" (click)="saveConfig()"
+                [disabled]="!formConfPreset.valid"
+                attr.aria-label="{{'dialog_init_config.step_3.preset.aria_label' | translate}}">
+                {{'button.saved' | translate}}
+              </button>
+            </div>
+          </form>
+          <div>
+            {{ result }}
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </mat-tab>
+    <mat-tab label="Preset">
+      <p>
+        {{ 'dialog_init_config.step_3.preset.check_template_1' | translate }}
+      </p>
+      <!-- <p>
+          {{ 'dialog_init_config.step_3.preset.check_template_2' | translate }}
+        </p> -->
+      <form [formGroup]="formPreset">
+        <mat-form-field appearance="fill" style="width: 100%">
+          <mat-label>
+            {{ "dialog_init_config.step_3.preset.check_template_label" | translate }}
+          </mat-label>
+          <mat-select formControlName="presetParams">
+            <mat-option *ngFor="let element of selectPreset" [value]="element">{{element}}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </form>
+      <dl *ngIf="listSensori"></dl>
+    </mat-tab>
+    <mat-tab label="Avanzato">
+      <p>
+        {{ 'dialog_init_config.step_3.paragraph_1' | translate }}
+      </p>
 
-  <ng-template #presetCheckTemplate>
-    <p>
-      Seleziona i parametri che vuoi validare o mettere a confronto. <br />
-      Puoi partire a scelta nel selezionare un parametro e successivamente le
-      stazioni di riferimento
-    </p>
-    <form [formGroup]="formPreset">
-      <mat-form-field appearance="fill" style="width: 100%">
-        <mat-label>Scegli tra i preset salvati</mat-label>
-        <mat-select formControlName="presetParams">
-          <mat-option *ngFor="let element of selectPreset" [value]="element">{{
-            element
-          }}</mat-option>
-        </mat-select>
-      </mat-form-field>
-    </form>
-    <dl *ngIf="listSensori"></dl>
-  </ng-template>
+      <form [formGroup]="formAdvancedSuggest">
+        <fieldset class="tab--fieldset">
+          <legend>Filtri</legend>
+          <section>
+            <mat-form-field>
+              <mat-label>Gestione rete</mat-label>
+              <mat-select formControlName="publicManagement">
+                <mat-option [value]="null">-</mat-option>
+                <mat-option [value]="true">Arpa</mat-option>
+                <mat-option [value]="false">Privata</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>Tipo sensore</mat-label>
+              <mat-select formControlName="national">
+                <mat-option [value]="null">-</mat-option>
+                <mat-option [value]="true">Nazionale</mat-option>
+                <mat-option [value]="false">Regionale</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </section>
+
+          <section>
+            <mat-form-field>
+              <mat-label>Tipo di stazione</mat-label>
+              <mat-select formControlName="mobile">
+                <mat-option [value]="null">-</mat-option>
+                <mat-option [value]="true">Mobile</mat-option>
+                <mat-option [value]="false">Fissa</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>Visualizzazione sensore</mat-label>
+              <mat-select formControlName="publicView">
+                <mat-option [value]="null">-</mat-option>
+                <mat-option [value]="true">Pubblico</mat-option>
+                <mat-option [value]="false">Riservato</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </section>
+        </fieldset>
+
+        <fieldset class="tab--fieldset">
+          <section class="row">
+            <mat-form-field class="col-11">
+              <mat-label>Ricerca il parametro</mat-label>
+              <mat-chip-list #chipListParameter aria-label="Seleziona le stazioni">
+                <mat-chip [selectable]="true" [removable]="true" (removed)="removeOption(parameter, 'parametro')"
+                          *ngFor="let parameter of selectedParameters">
+                  {{ parameter.name }}
+                  <button matChipRemove *ngIf="removable">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </mat-chip>
+              </mat-chip-list>
+
+              <input type="text" matInput formControlName="parameterName"
+                     (focusin)="focusInParameter($event, 'parametro')"
+                     [matAutocomplete]="autoParameter" [matChipInputFor]="chipListParameter"/>
+              <mat-autocomplete #autoParameter="matAutocomplete" (optionSelected)="addOption($event.option.value, 'parametro')">
+                <mat-option *ngFor="let option of filterParameterdOptions" [value]="option">
+                  {{ option.name }}
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+          </section>
+
+          <section class="row mb-4">
+            <mat-form-field class="col-11">
+              <mat-label>Ricerca la stazione</mat-label>
+              <mat-chip-list #chipListStation aria-label="Seleziona le stazioni">
+                <mat-chip [selectable]="true" [removable]="true" (removed)="removeOption(station, 'stazione')"
+                  *ngFor="let station of selectedStations">{{ station.name }}
+                  <button matChipRemove *ngIf="removable">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </mat-chip>
+              </mat-chip-list>
+              <input type="text" matInput formControlName="stationName" [matAutocomplete]="autoStation" [matChipInputFor]="chipListStation"
+                     (focusin)="focusInParameter($event, 'stazione')"
+                     [matChipInputSeparatorKeyCodes]="separatorKeysCodes" (matChipInputTokenEnd)="addToken($event)"
+                (keydown.enter)="addOption(formAdvancedSuggest.get('stationName')!.value, 'stazione'); $event.preventDefault()" />
+              <mat-autocomplete #autoStation="matAutocomplete" (optionSelected)="addOption($event.option.value, 'stazione')">
+                <mat-option *ngFor="let option of filterStationdOptions" [value]="option">
+                  {{ option.name }}
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+
+          </section>
+        </fieldset>
+
+      </form>
+    </mat-tab>
+  </mat-tab-group>
 </mat-dialog-content>
-
 <mat-dialog-actions class="btn-action-modal px-lg-2 justify-content-between">
-  <button
-    mat-button
-    class="mat-raised-button"
-    (click)="close()"
-    aria-label="Chiudi la modale"
-  >
-
-    {{'button.annulla' | translate}}
+  <button mat-button class="mat-raised-button" (click)="close()" aria-label="Chiudi la modale">
+    {{ 'button.annulla' | translate }}
   </button>
-  <button
-    mat-button
-    class="mat-raised-button mat-primary"
-    (click)="save()"
 
-    [disabled]="!form.valid"
-    aria-label="Salva i parametri"
-  >
-
-    {{'button.prosegui' | translate}}
+  <button mat-button class="mat-raised-button mat-primary" (click)="save()" [disabled]="((form.enabled && !form.valid) || form.disabled) && (formAdvancedSuggest.disabled || !selectedStations.length || !selectedParameters.length)"
+    aria-label="Salva i parametri">
+    {{ 'button.prosegui' | translate }}
   </button>
 </mat-dialog-actions>

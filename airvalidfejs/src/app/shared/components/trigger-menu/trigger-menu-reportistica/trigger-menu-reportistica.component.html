@@ -1,0 +1,23 @@
+<div class="btn-toggle-group--container" id="btn-toggle-group--render" *ngIf="renderTableReportistica?.length">
+  <button mat-button [disabled]="environment?.scelta_reportistica?.standard ?? false" [matMenuTriggerFor]="reportStandard" class="btn-toggle-group--primary"
+    [class.btn-toggle-group--primary-selected]="isStandardSelected">
+    {{renderTableReportistica[0]?.text}}
+  </button>
+  <button mat-button [disabled]="environment?.scelta_reportistica?.controlli ?? false"  [matMenuTriggerFor]="reportSpecialistica" class="btn-toggle-group--primary"
+    [class.btn-toggle-group--primary-selected]="isSpecialisticoSelected">
+    {{renderTableReportistica[1]?.text}}
+  </button>
+  <!-- <button mat-button [disabled]="environment?.scelta_reportistica?.specialistica ?? false"  class="btn-toggle-group--primary">
+    {{renderTableReportistica[2]?.text}}
+  </button> -->
+</div>
+<mat-menu #reportSpecialistica="matMenu">
+  <button mat-menu-item *ngFor="let render of renderTableReportisticaSpecialistica"
+    (click)="updateValue(render, 'controlli')">{{render.text}}</button>
+</mat-menu>
+<mat-menu #reportStandard='matMenu'>
+  <button mat-menu-item *ngFor="let render of renderTableReportisticaStandard"
+          (click)="updateValue(render, 'standard')">{{render.text}}</button>
+</mat-menu>
+<ng-content></ng-content>
+

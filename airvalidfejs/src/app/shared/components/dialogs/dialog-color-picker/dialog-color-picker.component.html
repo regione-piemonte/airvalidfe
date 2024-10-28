@@ -3,7 +3,7 @@
  SPDX-License-Identifier: EUPL-1.2-or-later
  -->
 <div mat-dialog-title class="dialog-title">
-    <h2 mat-dialog-title>Seleziona i parametri</h2>
+    <h2 mat-dialog-title>{{'dialog_init_config.step_3.title' | translate}}</h2>
     <button mat-icon-button aria-label="Chiudi la modale" mat-dialog-close>
       <mat-icon>close</mat-icon>
     </button>
@@ -15,6 +15,6 @@
 </mat-dialog-content>
 
 <mat-dialog-actions class="btn-action-modal px-lg-2 justify-content-between">
-    <button mat-button class="mat-raised-button"(click)="close()" aria-label="chiudi la modale">{{'button.annulla' | translate}}</button>
+    <button mat-button class="mat-raised-button" (click)="close()" aria-label="chiudi la modale">{{'button.annulla' | translate}}</button>
     <button mat-button class="mat-raised-button mat-primary"(click)="save()" aria-label="salva il colore selezionato">{{'button.save' | translate}}</button>
 </mat-dialog-actions>

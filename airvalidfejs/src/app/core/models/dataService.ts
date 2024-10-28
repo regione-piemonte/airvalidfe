@@ -13,11 +13,18 @@ export interface IParameter {
   visibleOrigin: boolean;
   visibleNotValid: boolean;
   locked: boolean;
+  myLock?: boolean;
   userLock: string;
   stazione: Stazione;
   area: Area;
   parametro: Parametro;
   selected?: boolean;
+  measurementId?: string;
+  userInfo?: string;
+  data?: number;
+  dataFormatted?: string;
+  year?: number;
+  key?:string;
 }
 
 export interface Stazione {
@@ -41,14 +48,15 @@ export interface Area {
 }
 
 export interface Parametro {
-  name: string
-  key: string
-  active: boolean
-  extraInfo: string
-  flags: any
-  beginDate: number
-  endDate: any
-  measureUnitId: string
-  measurementPeriod: number
-  decimalDigits: number
+  name: string;
+  key: string;
+  active: boolean;
+  extraInfo: string;
+  flags: any;
+  beginDate: number;
+  endDate: any;
+  measureUnitId: string;
+  measurementPeriod: number;
+  decimalDigits: number;
+  virtual?: boolean;
 }

@@ -5,8 +5,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { forkJoin , iif , Observable , of , switchMap } from 'rxjs';
-import { environment } from 'src/environments/environment';
-import { IDettaglioConfigParam } from '../../../models/response/dettaglio-config-param';
+import { environment } from '@environments/environment';
+import { IDettaglioConfigParam } from '@models/response/dettaglio-config-param';
 
 export interface ISensoriCorrelati {
   codice_istat_comune: string;

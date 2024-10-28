@@ -1,0 +1,73 @@
+<div class="mt-3 content-align px-4">
+  <div class="mb-3 d-flex justify-content-between align-items-center">
+    <h2 class="mb-0">{{title}} - {{renderChoice}}</h2>
+    <div class="d-inline-flex">
+      <button mat-button (click)="accordion.openAll()" [matTooltip]="('button.group.tooltip.unfold_more' | translate)" class="me-2">
+        <mat-icon>
+          unfold_more
+        </mat-icon>
+      </button>
+      <button mat-button (click)="accordion.closeAll()" [matTooltip]="('button.group.tooltip.unfold_less' | translate)">
+        <mat-icon>
+          unfold_less
+        </mat-icon>
+      </button>
+    </div>
+  </div>
+  <ng-container *ngIf="(reportData$ | async) as report">
+    <div class="reference-period report-period">
+      <div class="block--date">
+        <dl>
+          <dt>
+            Data inizio:
+          </dt>
+          <dd>
+            {{period$.dataInizio | date: 'dd/MM/yyyy'}}
+          </dd>
+        </dl>
+        <dl>
+          <dt>
+            Data fine:
+          </dt>
+          <dd>
+            {{period$.dataFine | date: 'dd/MM/yyyy'}}
+          </dd>
+        </dl>
+      </div>
+      <h2>{{titleDateTime(titleReport)}}</h2>
+    </div>
+  </ng-container>
+  <p>
+    <em>{{'page.reportistica.split_left.text-descrizione' | translate}}</em>
+  </p>
+  <mat-accordion multi>
+    <mat-expansion-panel *ngFor="let item of lista" class="mb-2">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <h3>
+            {{'page.reportistica.split_left.valid_data' | translate}}<span class="chip--primary">{{item.totData}}</span> {{item.parametro}}
+          </h3>
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      <div class="table-container">
+        <table mat-table [dataSource]="item.data" class="w-100">
+
+          <!-- Titolo Column -->
+          <ng-container matColumnDef="timestamp">
+            <mat-header-cell *matHeaderCellDef> Time </mat-header-cell>
+            <mat-cell *matCellDef="let element"> {{element.timestamp | date: 'dd/MM/YYYY HH:mm'}} </mat-cell>
+          </ng-container>
+
+          <!-- Valore Column -->
+          <ng-container matColumnDef="valore_validato">
+            <mat-header-cell *matHeaderCellDef> Valore </mat-header-cell>
+            <mat-cell *matCellDef="let element"> {{element.valore_validato}} </mat-cell>
+          </ng-container>
+
+          <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+          <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+        </table>
+      </div>
+    </mat-expansion-panel>
+  </mat-accordion>
+</div>

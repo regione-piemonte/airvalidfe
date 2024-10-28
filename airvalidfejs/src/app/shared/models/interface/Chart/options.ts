@@ -30,9 +30,9 @@ interface IXAxis {
   type: string;
   boundaryGap: boolean;
 }
-
+// icon: { back: string } per il bottone di reset dello zoom
 interface IToolbox {
-  feature: { dataZoom: { yAxisIndex: string } };
+  feature: { dataZoom: { yAxisIndex: string, icon: { back: string } } };
   show: boolean;
 }
 

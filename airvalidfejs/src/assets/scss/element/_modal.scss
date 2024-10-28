@@ -11,6 +11,7 @@
     .btn-dialog {
       &--close {
         border-radius: 0%;
+        border: none;
         @extend .d-flex;
         @extend .justify-content-center;
         @extend .align-items-center;
@@ -18,8 +19,8 @@
         width: 35px;
         height: 35px;
 
-        top: 0px;
-        right: 0px;
+        top: 15px;
+        right: 15px;
 
         .mat-button-focus-overlay {
           display: none;
@@ -34,7 +35,6 @@
         }
 
         &:hover {
-
           //background-color: $primary;
           .mat-button-wrapper {
             color: $black;
@@ -47,10 +47,11 @@
   .mat-dialog-container {
     @extend .position-relative;
     max-height: 80vh;
+    min-width: 33vw;
 
-    @include media-breakpoint-up(xxl) {
-      max-width: 33vw;
-    }
+    // @include media-breakpoint-up(xxl) {
+    //   max-width: 33vw;
+    // }
 
     .mat-dialog-content {
       margin: auto;
@@ -63,7 +64,7 @@
       // dialog-init-config.component.html
       .btn-type-modal {
         @extend .d-flex;
-        justify-content: space-between;
+        justify-content: space-around;
 
         @media all and (max-width: 993px) {
           flex-direction: column;
@@ -72,7 +73,7 @@
 
         @extend .align-items-center;
 
-        .mat-button-toggle-group-appearance-standard .mat-button-toggle+.mat-button-toggle {
+        .mat-button-toggle-group-appearance-standard .mat-button-toggle + .mat-button-toggle {
           border-left: none;
         }
       }
@@ -96,9 +97,7 @@
     }
   }
 
-
   .box-alert {
-
     &--error {
       @include box-alert(error);
     }
@@ -120,7 +119,6 @@
     &--settings {
       height: auto;
 
-      
       h3 {
         &:not(.mat-dialog-title) {
           @extend .mt-3;
@@ -137,7 +135,7 @@
         .mat-cell,
         .mat-header-cell {
           @include font-size(16px);
-          @extend .p-3;
+          //@extend .p-3;
 
           .material-icons {
             @include font-size(18px);
@@ -147,10 +145,166 @@
         .cell-element--multi {
           &:not(:last-child) {
             &::after {
-              content: '-';
+              content: "-";
             }
           }
         }
+      }
+    }
+    &--remove {
+      form {
+        mat-form-field {
+          width: 100%;
+        }
+      }
+    }
+  }
+
+  // modal scelta render tabella
+  .modal {
+    &--render-table {
+      min-width: 30vw;
+
+      .btn-toggle-group--container {
+        @extend .d-flex;
+        gap: 32px;
+        justify-content: space-around;
+
+        &#btn-toggle-group--render {
+          .btn-toggle-group {
+            &--primary {
+              background-color: $white;
+              border: 1px solid $grey-500;
+              border-radius: 8px;
+              width: 150px;
+              line-height: 48px;
+              color: $black;
+              @extend .text-capitalize;
+              @extend .fw-normal;
+
+              &:hover {
+                background-color: $blue-500;
+                color: $white;
+              }
+
+              &.btn-toggle-group--primary-selected {
+                background-color: $blue-500;
+                color: $white;
+              }
+
+              &.mat-button-disabled {
+                background-color: $grey-400;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .select {
+    &--border {
+      @extend .pb-3;
+      @extend .m-3;
+      border-bottom: 2px solid $grey-400;
+
+      .mat-checkbox-label {
+        @extend .text-uppercase;
+      }
+    }
+
+    &--btn {
+      padding-right: 20px;
+      text-align: right;
+      position: sticky;
+      top: calc(80% - 20px);
+      height: 0px;
+      z-index: 1000;
+    }
+  }
+  .select-one--btn {
+    @extend .select--btn;
+    top: calc(50% - 20px);
+  }
+
+  .modal-dragdrop {
+    &.cdk-drag {
+      cursor: move;
+    }
+
+    .table--events {
+      width: 100%;
+      overflow: auto;
+      height: 50vh;
+    }
+
+    table {
+      width: 100%;
+      overflow-y: auto;
+
+      tbody {
+        tr {
+          &:nth-child(even) {
+            background-color: $grey-400;
+          }
+
+          &:nth-child(odd) {
+          }
+
+          .blinking-icon {
+            background-color: transparent;
+            border: none;
+          }
+        }
+      }
+    }
+  }
+}
+
+.eventi--panel {
+  // width: 70vw;
+
+  tr.mat-row {
+    &:not(.detail-row) {
+      z-index: 3;
+      position: relative;
+    }
+    &.detail-row {
+      z-index: 1;
+      position: relative;
+    }
+    &.expanded-row {
+      background-color: $blue-200;
+    }
+  }
+}
+
+#btn-toggle-group--render {
+  .btn-toggle-group {
+    &--primary {
+      background-color: $white;
+      border: 1px solid $grey-500;
+      border-radius: 8px;
+      width: 150px;
+      line-height: 48px;
+      color: $black;
+      @extend .text-capitalize;
+      @extend .fw-normal;
+
+      &:hover {
+        background-color: $blue-500;
+        color: $white;
+      }
+
+      &.btn-toggle-group--primary-selected {
+        background-color: $blue-500;
+
+        .mat-button-wrapper {
+          color: $white;
+        }
+      }
+      &.mat-button-disabled {
+        background-color: $grey-400;
       }
     }
   }

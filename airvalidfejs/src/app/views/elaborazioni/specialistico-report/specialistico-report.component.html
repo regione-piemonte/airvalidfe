@@ -1,0 +1,141 @@
+<div class="split-layout-content--height">
+  <as-split direction="horizontal"
+    *ngIf="validazioneLayout$ && validazioneLayout$!.set === 'default' || validazioneLayout$ && validazioneLayout$!.set === 'col'"
+    (dragEnd)="onSplitAreaResize($event, 'default', 'left')">
+    <ng-container *ngIf="layuot$ | async as layout">
+      <as-split-area [size]="validazioneLayout$!.default.slide_a ?? 0">
+        <div class="d-flex justify-content-between align-items-baseline mt-3 mx-3 flex-column">
+          <ng-container *ngIf="$graficoDate | async as dataGrafico">
+            <ng-container *ngIf="grafici">
+              <h2>{{grafici.reportName}} - {{grafici.reportDescription}} </h2>
+              <div class="reference-period report-period">
+                <div class="block--date">
+                  <dl>
+                    <dt>
+                      {{(dataGrafico.anni ? 'Primo anno' : 'Data inizio')}}
+                    </dt>
+                    <dd>
+                      {{dataInizioGrafico(dataGrafico)}}
+                    </dd>
+                  </dl>
+                  <dl>
+                    <dt>
+                      {{(dataGrafico.anni ? 'Secondo anno' : 'Data fine')}}
+                    </dt>
+                    <dd>
+                      {{dataFineGrafico(dataGrafico)}}
+                    </dd>
+                  </dl>
+                </div>
+              </div>
+            </ng-container>
+          </ng-container>
+          <div echarts [options]="echartsOptions" [extentions]="echartsExtentions" (chartInit)="chartInit($event)"
+            class="w-100" style="height: 600px;">
+          </div>
+        </div>
+      </as-split-area>
+      <as-split-area [size]="validazioneLayout$!.default.slide_b ?? 0">
+        <div class="d-flex justify-content-between align-items-baseline my-3 mx-3 flex-column ">
+          <h2>{{'page.elaborazione.split_right.paremter_split.title' | translate}} </h2>
+
+          <ng-container *ngIf="getSerie() as series">
+            <table mat-table [dataSource]="series" class="w-100 table--parameters" *ngIf="series.length">
+              <!--Prima colonna - Parametro -->
+              <ng-container matColumnDef="parametro">
+                <th mat-header-cell *matHeaderCellDef>{{ 'table.body.header.parameter' | translate }}</th>
+                <td mat-cell class="select-event" *matCellDef="let element; let i = index">
+                  <div style="display: flex">
+                    <div style="width: 15px; height: 15px; margin-right: 10px"
+                      [style.background-color]="element.lineStyle.color"></div>
+                    <strong>{{ element.nameList}}</strong>
+                  </div>
+                </td>
+              </ng-container>
+              <!--Seconda colonna - Action -->
+              <ng-container matColumnDef="action">
+                <th mat-header-cell *matHeaderCellDef>{{ 'table.body.header.action' | translate }}</th>
+                <td mat-cell *matCellDef="let element ; let i = index" class="select-event">
+                  <button mat-icon-button (click)="actionClick(element,i, $event)"
+                    [attr.title]="(clickedRows.has(element)) ? ('table.body.label.show_parameter' | translate) : ('table.body.label.hide_parameter' | translate)">
+                    <mat-icon>{{ clickedRows.has(element) ? 'visibility_off' : 'visibility' }}</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="displayedColumns, sticky: true"></tr>
+              <tr mat-row class="row-parameters" *matRowDef="let row; columns: displayedColumns; let i = index"></tr>
+            </table>
+          </ng-container>
+        </div>
+      </as-split-area>
+    </ng-container>
+  </as-split>
+  <as-split direction="horizontal" *ngIf="validazioneLayout$ && validazioneLayout$!.set === 'reverse'"
+    (dragEnd)="onSplitAreaResize($event, 'reverse', 'right')">
+    <as-split-area [size]="validazioneLayout$!.reverse.slide_a ?? 0">
+      <div class="d-flex justify-content-between align-items-baseline my-3 mx-3 flex-column">
+        <h2>{{'page.elaborazione.split_right.paremter_split.title' | translate}} </h2>
+        <ng-container *ngIf="getSerie() as series">
+          <table mat-table [dataSource]="series" class="w-100 table--parameters" *ngIf="series.length">
+            <!--Prima colonna - Parametro -->
+            <ng-container matColumnDef="parametro">
+              <th mat-header-cell *matHeaderCellDef>{{ 'table.body.header.parameter' | translate }}</th>
+              <td mat-cell class="select-event" *matCellDef="let element; let i = index">
+                <div style="display: flex">
+                  <div style="width: 15px; height: 15px; margin-right: 10px"
+                    [style.background-color]="element.lineStyle.color"></div>
+                  <strong>{{ element.nameList}}</strong>
+                </div>
+              </td>
+            </ng-container>
+            <!--Seconda colonna - Action -->
+            <ng-container matColumnDef="action">
+              <th mat-header-cell *matHeaderCellDef>{{ 'table.body.header.action' | translate }}</th>
+              <td mat-cell *matCellDef="let element ; let i = index" class="select-event">
+                <button mat-icon-button (click)="actionClick(element,i, $event)"
+                  [attr.title]="(clickedRows.has(element)) ? ('table.body.label.show_parameter' | translate) : ('table.body.label.hide_parameter' | translate)">
+                  <mat-icon>{{ clickedRows.has(element) ? 'visibility_off' : 'visibility' }}</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns, sticky: true"></tr>
+            <tr mat-row class="row-parameters" *matRowDef="let row; columns: displayedColumns; let i = index"></tr>
+          </table>
+        </ng-container>
+      </div>
+    </as-split-area>
+    <as-split-area [size]="validazioneLayout$!.reverse.slide_b ?? 0">
+      <div class="d-flex justify-content-between align-items-baseline mt-3 mx-3 flex-column">
+        <ng-container *ngIf="$graficoDate | async as dataGrafico">
+          <ng-container *ngIf="grafici">
+            <h2>{{grafici.reportName}} - {{grafici.reportDescription}} </h2>
+            <div class="reference-period report-period">
+              <div class="block--date">
+                <dl>
+                  <dt>
+                    {{(dataGrafico.anni ? 'Primo anno' : 'Data inizio')}}
+                  </dt>
+                  <dd>
+                    {{dataInizioGrafico(dataGrafico)| date: 'dd/MM/yyyy'}}
+                  </dd>
+                </dl>
+                <dl>
+                  <dt>
+                    {{(dataGrafico.anni ? 'Secondo anno' : 'Data fine')}}
+                  </dt>
+                  <dd>
+                    {{dataFineGrafico(dataGrafico)| date: 'dd/MM/yyyy'}}
+                  </dd>
+                </dl>
+              </div>
+            </div>
+          </ng-container>
+        </ng-container>
+        <div echarts [options]="echartsOptions" [extentions]="echartsExtentions" (chartInit)="chartInit($event)"
+          class="w-100" style="height: 600px;">
+        </div>
+      </div>
+    </as-split-area>
+  </as-split>
+
+</div>

@@ -4,40 +4,134 @@
   display: inline-flex;
   margin-right: 5px;
 }
+#app-ariaweb {
 
+  .theme {
+    &--dark {
+      .btn-toggle-group--container#btn-toggle-group--render .btn-toggle-group--primary {
+        color: $darkmode;
+        border-color: $darkmode;
+        background-color: transparent;
+      }
+      .graph-elaboration {
+
+        .mat-form-field-appearance-fill .mat-form-field-flex {
+          background-color: rgba($white, .3);
+          color: $darkmode;
+        }
+      }
+  
+      .mat-expansion-panel {
+        background-color: transparent;
+        color: $darkmode;
+        border: 1px solid $darkmode;
+        .mat-expansion-panel-header-description, .mat-expansion-indicator::after,
+        .mat-expansion-panel-header-title, .mat-header-cell {
+          color: $darkmode;
+        }
+      }
+      .mat-card {
+        background-color: transparent;
+        color: $darkmode;
+        border: 1px solid $darkmode;
+      }
+      .selected {
+        background-color: $blue-900;
+        .mat-card {
+          background-color: transparent;
+          color: $darkmode;
+          border: 1px solid $blue-900;
+        }
+        &:hover {
+          background-color: $blue-900;
+        }
+        .mat-cell {
+          color: $darkmode;
+        }
+      }
+    }
+  }
+}
 .selected {
   background-color: $blue-200;
+  &:hover {
+    background-color: $blue-200;
+  }
 }
 #app-ariaweb {
-  .overflow-x--visible{
+  .overflow-x--visible {
     overflow-x: auto;
     overflow-y: hidden;
   }
-  .summary-table{
+  .summary-table {
     min-width: 500px;
     width: 100%;
     tbody {
       .mat-column-verification_flag {
-        @extend .text-center;
+        @extend .d-flex;
+        @extend .align-items-center;
+        @extend .justify-content-center;
       }
       .mat-column-Parametro {
         max-width: 200px;
       }
+      .selected-row {
+        background-color: $blue-200;
+      }
     }
 
     &:not(.table--parameters) {
-      tr{
-        .mat-cell, .mat-header-cell {
+      tr {
+        .mat-cell,
+        .mat-header-cell {
           &:not(:first-child):not(.mat-column-Parametro):not(.mat-column-giorno) {
             @extend .text-center;
           }
-          &.mat-column-validity_flag_state, &.mat-column-verification_flag {
+          &.mat-column-validity_flag_state,
+          &.mat-column-verification_flag {
             @extend .text-center;
           }
         }
       }
     }
-    
+    th.mat-header-cell:last-of-type,
+    td.mat-cell:last-of-type,
+    td.mat-footer-cell:last-of-type {
+      padding-right: 5px;
+    }
+  }
+
+  .table--parameters {
+    .mat-column-valore,
+    .mat-column-errore {
+      text-align: right;
+    }
+  }
+
+  .table-wrapper--settings {
+    max-height: 300px;
+    overflow-y: scroll;
+    /* width */
+    &::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    /* Track */
+    &::-webkit-scrollbar-track {
+      background: $grey;
+      box-shadow: inset 0 0 5px $grey-200;
+    }
+
+    /* Handle */
+    &::-webkit-scrollbar-thumb {
+      background: $grey-800;
+      border-radius: 10px;
+    }
+
+    /* Handle on hover */
+    &::-webkit-scrollbar-thumb:hover {
+      background: $grey-500;
+    }
   }
 
   // gestione tabella pagina impostazioni utente
@@ -47,17 +141,17 @@
     }
 
     // .mat-cell, .mat-header-cell {
-      // @include font-size(16px);
-      //.material-icons {
-        // @include font-size(18px);
-      // }
+    // @include font-size(16px);
+    //.material-icons {
+    // @include font-size(18px);
+    // }
     // }
 
     // per aggiungere il segno meno come spaziatura ai valori della tabella
     .cell-element--multi {
       &:not(:last-child) {
         &::after {
-          content: '-';
+          content: "-";
         }
       }
     }
@@ -66,14 +160,15 @@
   .mat-paginator-container {
     min-height: auto;
   }
-  
 
   // regole tabella che fanno parte della pagina validazioni
   tr {
     &.mat-row {
       height: auto;
-      &:hover {
-        background-color: $blue-200;
+      &:not(.selected) {
+        &:hover {
+          background-color: $grey-200;
+        }
       }
     }
     &.mat-header-row {
@@ -88,10 +183,15 @@
         width: 40px;
       }
     }
+    .mat-column-Eventi {
+      // padding-left: 0px;
+      button {
+        margin-left: -25px;
+      }
+    }
     .mat-column-validity_flag_state {
       position: relative;
       .state-circle {
-       
         position: absolute;
         top: calc(50% - 5px);
         left: calc(50% - 5px);
@@ -106,29 +206,32 @@
           border-bottom-color: $green-500;
         }
         &--3 {
-          width: 0;
-          height: 0;
-          border-left: 5px solid transparent;
-          border-bottom: 10px solid $green-500;
-          border-right: 5px solid transparent;
-          position: relative;
-          margin-top: 3px;
-          
-          &:after {
-            content: "";
-            width: 0;
-            height: 0;
-            border-left: 3px solid transparent;
-            border-bottom: 6px solid $white;
-            border-right: 3px solid transparent;
-            position: absolute;
-            top: 3px;
-            left: -2.5px;
-          }
+          @extend %diamond-state;
+          background-color: $green-500;
+
+          // width: 0;
+          // height: 0;
+          // border-left: 5px solid transparent;
+          // border-bottom: 10px solid $green-500;
+          // border-right: 5px solid transparent;
+          // position: relative;
+          // margin-top: 3px;
+
+          // &:after {
+          //   content: "";
+          //   width: 0;
+          //   height: 0;
+          //   border-left: 3px solid transparent;
+          //   border-bottom: 6px solid $white;
+          //   border-right: 3px solid transparent;
+          //   position: absolute;
+          //   top: 3px;
+          //   left: -2.5px;
+          // }
         }
         &--grey {
           @extend %circle-state;
-          background-color: #9EA2B6;
+          background-color: #9ea2b6;
         }
         &---1 {
           @extend %square-state;
@@ -138,17 +241,23 @@
           @extend %square-state;
           background-color: $orange-400;
         }
-
       }
       .state-valid {
-        &--1,&--2,&--3,&---1,&---99 {
+        &--1,
+        &--2,
+        &--3,
+        &---1,
+        &---99 {
           @extend %circle-state;
           background-color: $blue-400;
         }
-
       }
       .state-invalid {
-        &--1,&--2,&--3,&---1,&---99 {
+        &--1,
+        &--2,
+        &--3,
+        &---1,
+        &---99 {
           @extend %square-state;
           background-color: $blue-600;
         }
@@ -157,13 +266,81 @@
   }
 
   .change-value {
-    background-color: $grey-400;
+    background-color: $yellow-400;
   }
-  
-  .mat-cell, .mat-header-cell {
+
+  .mat-cell,
+  .mat-header-cell {
     // font-size: 10px;
     .material-icons {
       // font-size: 14px;
     }
+  }
+
+  .blinking-icon {
+    color: $blue;
+  }
+
+  .mat-column-sideHeader {
+    background-color: $blue;
+    color: $white;
+    height: 35px;
+    border: 1px solid;
+    width: 40%;
+    padding: 5px 15px;
+  }
+
+  .table-report-standard {
+    .mat-cell:not(.mat-column-sideHeader) {
+      padding: 5px 25px;
+    }
+    .mat-cell {
+      &.cell-highlighted {
+        background-color: $yellow;
+      }
+    }
+  }
+  .overflow-container-table {
+    @extend .mb-3;
+    overflow: auto;
+    max-height: 550px;
+    .table-report-standard,
+    .table-report-standard-horizontal {
+      @extend .mat-elevation-z8;
+      min-width: 780px;
+      .mat-header-cell,
+      .mat-cell {
+        &:not(:first-child) {
+          text-align: center;
+          min-width: 40px;
+        }
+      }
+    }
+  }
+
+  // tabella eventi pagina validazioni
+  tr {
+    .mat-column-origin {
+      width: 75px;
+    }
+    .mat-column-type {
+      width: 160px;
+    }
+    .mat-column-beginDate {
+      width: 150px;
+    }
+    .mat-column-endDate {
+      width: 150px;
+    }
+    .mat-column-symbol {
+      width: 165px;
+    }
+  }
+}
+
+.row-clicked {
+  .mat-cell:not(.mat-column-azione) {
+
+      color: $grey-500;
   }
 }

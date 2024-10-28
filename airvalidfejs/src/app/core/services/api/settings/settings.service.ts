@@ -2,11 +2,30 @@
  *Copyright Regione Piemonte - 2023
  *SPDX-License-Identifier: EUPL-1.2-or-later
  */
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { environment } from 'src/environments/environment';
-import { IDettaglioReg } from '../../../models/response/dettaglio-Reg.models';
+import {HttpClient} from '@angular/common/http';
+import {Injectable} from '@angular/core';
+import {catchError, EMPTY, filter, map, Observable, of, switchMap, throwError} from 'rxjs';
+import {environment} from '@environments/environment';
+import {IDettaglioReg} from '@models/response/dettaglio-Reg.models';
+import {IUserSetting} from '@models/user-settinng.interface';
+import {LocalService} from "@services/core/locale/local.service";
+
+
+export interface IBodySetConfigSensor {
+  listSensorId: Array<string>;
+  timeUnit: string;
+  beginTime: number;
+  endTime: number;
+  activityType: string;
+  activityOptions: string;
+}
+
+export interface IResponseConfig {
+  groupId: string;
+  id: string;
+  type: number;
+  value: string;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +33,7 @@ import { IDettaglioReg } from '../../../models/response/dettaglio-Reg.models';
 export class SettingsService {
 
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(private readonly http: HttpClient, private readonly localService: LocalService) {}
 // Legge la lista delle configurazioni degli insiemi di sensori selezionati per
 // l'utente corrente
 // Attualmente questo tipo di configurazione può essere memorizzato solo nella
@@ -115,9 +134,27 @@ getDetPreference(value: string): Observable<IDettaglioReg> {
 //@Consumes(MediaType.APPLICATION_JSON)
 //@Path("/datasetconfigs/{dbId}/{name}")
 
-setConfigSensorsList(body:any,nameConfig:string): Observable<any> {
-  //let body={"prova":"prova","listSensorId":["11.01234.801.21","11.01235.802.05"],"timeUnit":"TIMESTAMP","beginTime":1682892000000,"endTime":1683237600000,"activityType":"validation","activityOptions":""}
-  return this.http.put<any>(environment.apiEndpoint+"datasetconfigs/reg/"+nameConfig,body);
+setConfigSensorsList(listaId: Array<string>,nameConfig: string): Observable<any> {
+  return this.localService.getDataWithDataStore((start, end) => this.http.put<any>(`${environment.apiEndpoint}datasetconfigs/reg/${nameConfig}`,this._createBodySetConfigSensor(listaId,{start:start!, end:end!})));
+}
+
+/**
+ * Creates a body configuration object for setting sensor configuration.
+ *
+ * @param {Array<string>} listSensorId - The list of sensor IDs.
+ * @param {start: string, emd: string} - Valori dello store per le date
+ * @return {IBodySetConfigSensor} The body configuration object for setting sensor configuration.
+ */
+private _createBodySetConfigSensor(listSensorId: Array<string>,{start, end}:{start:string; end: string;}): IBodySetConfigSensor {
+  return {
+    //"prova":"prova",
+    listSensorId, //["11.01234.801.21","11.01235.802.05"],
+    timeUnit: 'TIMESTAMP',
+    beginTime: +start!, //1682892000000,
+    endTime: +end!, //1683237600000,
+    activityType: 'validation',
+    activityOptions: '',
+  };
 }
 
 
@@ -197,6 +234,37 @@ setConfigSensorsList(body:any,nameConfig:string): Observable<any> {
 setConfigList(): Observable<any> {
   let body={groupId: "gruppo_prova", id: "prova06", type: 4, value: ""}
   return this.http.put<any>(environment.apiEndpoint+"preferences/reg/gruppo_prova/test",body);
+}
+
+
+getConfigApp(): Observable<IResponseConfig> {
+  return this.http.get<IResponseConfig>(environment.apiEndpoint + "preferences/reg/settings/settingapp").pipe(
+    catchError((error) => {
+      // console.error('Errore nella richiesta HTTP', error);
+      return EMPTY; // Restituisci un valore predefinito (null) in caso di errore
+    }),
+    filter((result) => result !== null) // Filtra solo i risultati non nulli
+  );
+}
+setConfigApp(body: IResponseConfig): Observable<number> {
+  return this.http.put<number>(environment.apiEndpoint + "preferences/reg/settings/settingapp", body)
+    .pipe(
+      catchError((error) => {
+        // console.error('Errore nella richiesta PUT', error);
+        return throwError(() => error);
+      })
+    );
+}
+
+deleteConfigApp(body: any): Observable<any> {
+  // console.info('body', body);
+  return this.http.delete<any>(environment.apiEndpoint + "preferences/reg/settings/settingapp", body)
+    .pipe(
+      catchError((error) => {
+        // console.error('Errore nella richiesta PUT', error);
+        return throwError( () => error);
+      })
+    );
 }
 
 // Cancella una preferenza applicativa memorizzata nella banca dati per

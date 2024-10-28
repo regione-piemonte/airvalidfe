@@ -1,0 +1,103 @@
+<div class="mt-3 mb-5 content-align px-4">
+  <div class="ms-1 d-flex align-items-start justify-content-between mb-3">
+    <div class="title-header">
+      <div *ngFor="let title of header">
+        <ng-container *ngTemplateOutlet="headingTemplate; context: { level: title.titleLevel, value: title.value }">
+        </ng-container>
+      </div>
+    </div>
+    <div class="d-inline-flex">
+      <button mat-button (click)="accordion.openAll()" [matTooltip]="('button.group.tooltip.unfold_more' | translate)"
+        class="me-2">
+        <mat-icon>
+          unfold_more
+        </mat-icon>
+      </button>
+      <button mat-button (click)="accordion.closeAll()" [matTooltip]="('button.group.tooltip.unfold_less' | translate)">
+        <mat-icon>
+          unfold_less
+        </mat-icon>
+      </button>
+    </div>
+  </div>
+  <div class="reference-period report-period">
+    <div class="block--date">
+      <dl>
+        <dt>
+          Data inizio:
+        </dt>
+        <dd>
+          {{period.dataInizio | date: 'dd/MM/yyyy'}}
+        </dd>
+      </dl>
+      <dl>
+        <dt>
+          Data fine:
+        </dt>
+        <dd>
+          {{period.dataFine | date: 'dd/MM/yyyy'}}
+        </dd>
+      </dl>
+    </div>
+    <h3 class="d-flex justify-content-end"> {{'page.reportistica.split_right.title_accordion' | translate}}{{formato}}
+    </h3>
+  </div>
+
+  <mat-accordion multi>
+    <ng-container *ngFor="let tabella of tabelle; let i = index">
+      <div *ngIf=" (type !== 'daily') &&
+      (i > 0 && tabella.header && tabelle[i - 1]?.header &&
+      (tabelle[i - 1].header[0]?.value !== tabella.header[0]?.value ||
+       tabelle[i - 1].header[1]?.value !== tabella.header[1]?.value) ||
+      i === tabelle.length - 1)" class="separation-line" tabindex="-1"></div>
+      <mat-expansion-panel class="mb-2">
+        <mat-expansion-panel-header>
+          <mat-panel-title class="justify-content-between">
+            <ng-container [ngSwitch]="true">
+              <ng-container *ngSwitchCase="tabella.header && tabella.header.length === 1">
+                <h3>{{ tabella.header[0].value }}</h3>
+              </ng-container>
+              <ng-container *ngSwitchCase="tabella.header && tabella.header.length > 1 && tabella.header.length <= 5">
+                <div class="d-flex align-items-baseline">
+                  <h3>{{ tabella.header[0].value }} -
+                    {{ (type !== 'daily') ? tabella.header[1]?.value : tableTypeTitle(tabella.header[1]?.value) }} <span
+                      *ngIf="tabella.header[3]?.value">- {{tableTypeTitle(tabella.header[3]?.value)}} </span></h3>
+                </div>
+              </ng-container>
+              <ng-container *ngSwitchDefault>
+                <h3>{{tabella.titleName}}</h3>
+              </ng-container>
+            </ng-container>
+            <button mat-icon-button (click)="scaricaCsv(i, $event)" mat-icon-button color="primary" matTooltip="Scarica file csv"><i class="material-icons">download</i></button>
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <!-- <div class="">
+          <pre style="border: solid black 1px; display: flex" *ngFor="let row of tabella.data">
+                <pre style="margin-left: 5px; margin-right: 5px" *ngFor="let subRow of row.row">{{ subRow.value }}</pre>
+          </pre>
+        </div> -->
+        <app-standard-table [data$]="tabella"></app-standard-table>
+      </mat-expansion-panel>
+    </ng-container>
+    <!-- controllo se sia presente almeno una tabella -->
+    <div class="box-alert" [ngClass]="'box-alert--warning'" *ngIf="tabelle.length === 0" tabindex="-1">
+      <h2 mat-dialog-title>Attenzione</h2>
+      <p>Reportistica non disponbile per parametri con periodicità inferiore ai 60 minuti.</p>
+    </div>
+
+  </mat-accordion>
+
+
+</div>
+
+
+<!-- Inizio generazione template titoli -->
+<ng-template #headingTemplate let-level="level" let-value="value">
+  <ng-container [ngSwitch]="level">
+    <h2 *ngSwitchCase="'L1'">{{ value }}</h2>
+    <h3 *ngSwitchCase="'L2'">{{ value | decodeHtml }}</h3>
+    <!-- <h4 *ngSwitchCase="'L3'">{{ value }}</h4> -->
+    <!-- <p *ngSwitchDefault>{{ value }}</p> Tag di default se il livello non è L1, L2 o L3 -->
+  </ng-container>
+</ng-template>
+<!-- Fine generazione template titoli -->

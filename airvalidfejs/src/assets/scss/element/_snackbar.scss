@@ -1,0 +1,19 @@
+#app-ariaweb {
+  .snackbar {
+    &--info {
+      @include snackbarType(blueColor);
+    }
+  
+    &--danger {
+      @include snackbarType(redColor);
+    }
+  
+    &--success {
+      @include snackbarType(greenColor);
+    }
+  
+    &--warning {
+      @include snackbarType(orangeColor);
+    }
+  }
+}

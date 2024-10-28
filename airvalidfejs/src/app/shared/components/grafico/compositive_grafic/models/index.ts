@@ -2,11 +2,11 @@
  *Copyright Regione Piemonte - 2023
  *SPDX-License-Identifier: EUPL-1.2-or-later
  */
-import * as moment from 'moment';
 
 export interface ITooltip {
-  axisPointer: { label: { formatter: ( value: any ) => moment.Moment; backgroundColor: string; color: string } };
+  axisPointer: { label: { backgroundColor: string; color: string } };
   trigger: string;
+  formatter?: ( value: any ) => string;
   type: string;
 }
 
@@ -22,13 +22,15 @@ export interface IXAxis {
   axisLabel?: { formatter: ( value: number, index: number ) => string };
   type: string;
   boundaryGap: boolean;
+  min?: number | undefined;
+  max?: (value: {max: number, min: number}) => number | undefined;
 }
 
 export interface IYAxis {
   type: string;
   axisLabel: { formatter: string };
-  min?: number;
-  max?: number;
+  min?: string;
+  max?: string;
 }
 
 export interface IToolbox {
@@ -74,7 +76,7 @@ export interface IOptionGrafic {
   series: Array<Partial<ICreateItemData<any>>>;
 }
 
-export type ScaleType = 'assoluta' | 'relativa';
+export type ScaleType = 'assoluta' | 'relativa' | 'manuale';
 
 export interface IEchatsEvent {
   type: string
@@ -86,18 +88,22 @@ export interface IEchatsEvent {
   batch: any[]
 }
 
+export interface IItemStyle {
+  color?: string;
+  show?: boolean;
+  borderWidth?: number;
+  borderColor?: string;
+}
+
 export interface IGeneratePoint {
   value: any[];
   symbolSize: number;
   point_dataset: any;
-  itemStyle?: {
-    color?: string;
-    show?: boolean;
-    borderWidth?: number;
-    borderColor?: string;
-  },
+  itemStyle?: IItemStyle,
   symbol?: string;
   show: boolean;
+  index?: number;
+  name?: string;
 }
 
 export interface ILineStyle {
@@ -142,6 +148,7 @@ export interface ICreateItemData<T> {
   lineStyle: Partial<ILineStyle>;
   itemStyle?: {
     color?: string;
+    borderWidth?: number;
   };
   data: Array<Partial<IGeneratePoint>> | [ number , number ][];
   dataAfterRelativa?: Array<Partial<IGeneratePoint>> | [ number , number ][];
@@ -151,7 +158,7 @@ export interface ICreateItemData<T> {
       disabled: boolean,
       itemStyle: ItemStyle
     }>,
-    data: Array<{xAxis?: number}>[]
+    data: Array<{xAxis?: number, name?: string}>[]
   }>;
   showSymbol?: boolean,
   symbolSize?: number,
@@ -163,6 +170,7 @@ export interface ICreateItemData<T> {
     label: { show: boolean },
     data: Array<{xAxis: number}>
   },
+  z?: number,
 }
 
 export interface IGetLegend {
@@ -171,3 +179,10 @@ export interface IGetLegend {
 }
 
 export type PeriodType = '1' | '3' | '7' | '30' | 'full' | 'personalized' | 'succ' | 'prec';
+
+export enum ScaleEnum {
+  assoluta = 'assoluta',
+  relativa = 'relativa',
+  manuale = 'manuale',
+  impostaManuale = 'impostaManuale'
+}

@@ -3,17 +3,28 @@
  *SPDX-License-Identifier: EUPL-1.2-or-later
  */
 import { Injectable } from '@angular/core';
-import { BehaviorSubject , timer } from 'rxjs';
-import { MeasureunitService } from '../api/measureunit/measureunit.service';
-import { SettingsService } from '../api/settings/settings.service';
-import { IParameter , ObservableData } from '../../models/dataService';
-import { Dataset , IGrafico , IOutput , ITaratura } from '../../models/grafico';
-import { Interpolation } from '@angular/compiler';
-import { ITimeSelected } from '../../../shared/components/validazione-dettaglio/models/time-selected.model';
-import { PeriodType } from '../../../shared/components/grafico/compositive_grafic/models';
-import { IData , IStatus , Parametri , Selected } from '../../../views/validazione/validazione.component';
+import { BehaviorSubject } from 'rxjs';
+import { MeasureunitService , SettingsService } from '../api';
+import { IParameter , ObservableData } from '@models/dataService';
+import { Dataset , IGrafico , IOutput , ITaratura } from '@models/grafico';
+import { ITimeSelected } from '@components/shared/validazione-dettaglio/models/time-selected.model';
+import { PeriodType } from '@components/shared/grafico/compositive_grafic/models';
 import { ColorService } from '../utility/color.service';
-import { IDettaglioConfigParam } from '../../models/response/dettaglio-config-param';
+import { IDettaglioConfigParam } from '@models/response/dettaglio-config-param';
+import { Store } from '@ngrx/store';
+import { AppState } from '../../../state';
+import { setDataSet } from '@actions/*';
+import {IData, IStatus, Parametri, Selected} from "@models/validazione";
+
+
+export interface IResponseMeasureList {
+  name:      string;
+  key:       string;
+  active:    boolean;
+  extraInfo: null | string;
+  flags:     null;
+}
+
 
 @Injectable( {
   providedIn: 'root' ,
@@ -28,31 +39,30 @@ export class DataService {
   private parameter$ = new BehaviorSubject<Partial<ObservableData>>( {} );
   selectedParameter$ = this.parameter$.asObservable();
   private parametersListBus$ = new BehaviorSubject<Partial<IOutput>>( {} );
-  parametersList$ = this.parametersListBus$.asObservable();
-
-  private parametersShowNotValidBus$ = new BehaviorSubject<any>( [] );
-  parametersListShowNotValid$ = this.parametersShowNotValidBus$.asObservable();
 
   private reloadParameter$ = new BehaviorSubject<Partial<IOutput>>( {} );
   reloadParameterObs$ = this.reloadParameter$.asObservable();
 
-  private scaleType$ = new BehaviorSubject<string>( '' );
-  scaleTypeObs$ = this.scaleType$.asObservable();
 
-  private unitMeasureList: Array<any> = []
+  private unitMeasureList: Array<IResponseMeasureList> = []
   private unitMeasureCodeList: Array<any> = []
   private parametersList?: IOutput;
 
-  private data$ = new BehaviorSubject<IData | null>( null );
+  private data$ = new BehaviorSubject<IData | null>(null);
   dataObs$ = this.data$.asObservable();
 
   private taratura$ = new BehaviorSubject<Array<ITaratura> | null>( null );
   taraturaObs$ = this.taratura$.asObservable();
 
+  private resetParametroSelezionato = new BehaviorSubject<boolean>(false);
+  resetParametroSelezionato$ = this.resetParametroSelezionato.asObservable();
+
 
   constructor( private measureUnitService: MeasureunitService ,
                private readonly colorService: ColorService ,
-               private settingsService: SettingsService ) {
+               private settingsService: SettingsService,
+               private readonly storeService: Store<AppState> ,
+               ) {
 
     this.settingsService.setConfigList().subscribe()
     this.measureUnitService.getMeasureUnitList().subscribe( res => {
@@ -65,10 +75,23 @@ export class DataService {
   }
 
 
+  /**
+   * @description Setto lista Grafici memorizzati
+   * @param inputDataSet Array<IGrafico>
+   * @example
+   * this.setDataset(dataSet);
+   */
   setDataset( inputDataSet: Array<IGrafico> ) {
-    this.dataSet = inputDataSet
+    this.storeService.dispatch(setDataSet( inputDataSet ));
+    this.dataSet = inputDataSet;
   }
 
+  /**
+   * @description Ritorna lista Grafici memorizzati
+   * @returns Array<IGrafico>
+   * @example
+   * let dataSet = this.getDataset();
+   */
   getDataset() {
     return this.dataSet
   }
@@ -94,9 +117,20 @@ export class DataService {
     this.isSaved$.next( false )
   }
 
+  /**
+   * @description Pulisce il valore del Map
+   * Emette il valore true per dire che non ci sono dati da salvare
+   */
   clearSaveValue() {
-    this.toSaveValuesMap.clear()
+    this.toSaveValuesMap.clear();
     this.isSaved$.next( true )
+  }
+
+  /**
+  * @description Pulisco il valore del Map
+  */
+  clearAllValue() {
+    this.toSaveValuesMap.clear();
   }
 
   getToSaveValue() {
@@ -118,6 +152,10 @@ export class DataService {
     this.parameter$.next( parameter );
   }
 
+  resetSelectedParameter() {
+    this.resetParametroSelezionato.next(true)
+  }
+
   setParametersList( parametersList: IOutput ) {
     // salvo parametro salvato
     this.parametersList = parametersList;
@@ -135,13 +173,20 @@ export class DataService {
     return this.parametersList;
   }
 
-  setShowNotValidList( parametersListShowNotValid: IParameter ) {
-    this.parametersShowNotValidBus$.next( parametersListShowNotValid );
-  }
 
-
-  getUnitMeasure( id: number ) {
-    return this.unitMeasureList[ this.unitMeasureList.map( x => x.key ).findIndex( x => x == id ) ]
+  /**
+   * Retrieves the unit measure object with the given ID from the unitMeasureList.
+   *
+   * @param {number} id - The ID of the unit measure to retrieve.
+   * @returns {IResponseMeasureList} The unit measure object with the given ID, or undefined if it does not exist.
+   * @example
+   * let result = this.getUnitMeasure(23)
+   */
+  getUnitMeasure( id: number ): IResponseMeasureList {
+    if (!this.unitMeasureList || !this.unitMeasureList.length) {
+      throw new Error('Lista non presente');
+    }
+    return this.unitMeasureList[ this.unitMeasureList.map( ({key}) => key ).findIndex( key => +key === id ) ];
   }
 
   getCodeDescription( code: string ) {
@@ -153,10 +198,7 @@ export class DataService {
 
   reloadParameter( parameters: Partial<IOutput> ) {
     this.reloadParameter$.next( parameters );
-  }
-
-  setScaleType( type: string ) {
-    this.scaleType$.next( type );
+    this.taratura$.next([]);
   }
 
   /**
@@ -190,7 +232,7 @@ export class DataService {
   }
 
   /**
-   * @description Ritorno del dataSet con index
+   * @description Ritorno del dataSet specifico dal grafico con index passato
    * @param index
    * @returns IGrafico
    * @example
@@ -209,7 +251,10 @@ export class DataService {
    * @returns void
    */
   setDataSetByIndex( index: number , grafico: IGrafico ): void {
-    this.getDataset()[ index ] = grafico;
+    // ricostruisco lista dei grafici con il nuovo grafico
+    let iGraficos = this.getDataset().map( ( item, i)  => i == index ? grafico : item);
+    // setto la lista dei grafici
+    this.setDataset( iGraficos );
   }
 
   /**
@@ -260,11 +305,20 @@ export class DataService {
           .map( ( { timestamp } ) => timestamp )
           .indexOf( map.get( value )!.timestamp );
         // setto il valore del valore dataset changed
-        dataset[ indexValue ] = {
+        // dataset[ indexValue ] = {
+        //   ...dataset[ indexValue ] ,
+        //   ...map.get( value ) ,
+        // };
+        const newDataSet = {
           ...dataset[ indexValue ] ,
           ...map.get( value ) ,
-        };
-        newdataSet = JSON.parse( JSON.stringify( dataset ) );
+        }
+        if ( !newdataSet.length ) {
+          newdataSet = [ ...dataset.slice( 0 , indexValue ) , newDataSet , ...dataset.slice( indexValue + 1 ) ];
+        } else {
+          newdataSet = [ ...newdataSet.slice( 0 , indexValue ) , newDataSet , ...newdataSet.slice( indexValue + 1 ) ];
+        }
+        // newdataSet = JSON.parse( JSON.stringify( dataset ) );
       }
     }
     return newdataSet;
@@ -281,14 +335,13 @@ export class DataService {
   }
 
   /**
-   * @description Ritorna un nuovo array con i dati modificati
-   * @param data (array di dati)
-   * @param index (index del grafico)
-   * @param action (prec, succ)
+   * @description Riceve una lista di dati e aggiorna il grafico, l'action può essere prec o succ
+   * @param data Array<Dataset>
+   * @param index number - index del grafico
+   * @param action PeriodType - tipo di azione
    * @returns void
    * @example
    * this.setNewArrayDataSet(dataSet, index);
-   *
    */
   setNewArrayDataSet( data: Dataset[] , index: number , action?: PeriodType ) {
     let { dataset , ...grafico } = this.getDataSetByIndex( index );
@@ -301,7 +354,7 @@ export class DataService {
       dataset.splice( indexStart );
     }
 
-    dataset = action === 'succ' ? [ ...dataset , ...data ]: action === 'prec' ? [ ...data , ...dataset ]: dataset;
+    dataset = action === 'succ' ? [ ...dataset , ...data ] : action === 'prec' ? [ ...data , ...dataset ]: dataset;
 
     this.setDataSetByIndex( index , { dataset , ...grafico } );
   }
@@ -334,6 +387,8 @@ export class DataService {
     };
   }
 
+
+
   /**
    * @description Riceve un lista di Configurazioni IDettaglioConfigParam e restituisce il result IData
    * @param list (lista di Configurazioni IDettaglioConfigParam)
@@ -356,6 +411,18 @@ export class DataService {
   }
 
   /**
+  * @description Riceve una lista T è restituisce una lista di elementi unici
+   * @param list (lista di elementi generici)
+   * @param key (lista di chiavi per filtrare la lista)
+   * @returns Array<T>
+  */
+  getUniqueList<T, K extends keyof T>( list: Array<T> , key: K): Array<T> {
+    let uniqueKeys = [...new Set(list.map(item => item[key]))];
+    let uniqueArray = uniqueKeys.map(keyArray => list.find(item => item[key] === keyArray));
+    return uniqueArray as Array<T>;
+  }
+
+  /**
    * @description Ricevo una lista di IDettaglioConfigParam e restituisco un array di Parametri
    * @param data IData
    * @return void
@@ -373,6 +440,21 @@ export class DataService {
    */
   setTaratura( taratura: Array<ITaratura> ) {
     this.taratura$.next( taratura );
+  }
+
+  /**
+   * @description Elimino il valore del grafico dal dataset
+   * @param value { index?: number; name?: string }
+   * @example
+   * this.deleteDataSetByIndex(index);
+   * @returns void
+   */
+  deleteDataSetByIndex( value: { index?: number; name?: string; origin?: boolean} ) {
+    if ( value.origin && value.name) {
+      value.name = value.name! + ' - origin';
+    }
+    let index = value.index ? value.index : this.getIndexGraficoByName( value.name! );
+    this.dataSet = this.dataSet.filter( ( item, i ) => i !== index );
   }
 
 

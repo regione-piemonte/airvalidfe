@@ -3,6 +3,7 @@ export interface IUserSetting {
   theme:  string;
   font:   string;
   layout: Layout;
+  areeTerritoriali?: any
 }
 
 export interface Layout {
@@ -13,8 +14,8 @@ export interface Layout {
 }
 
 export interface Col {
-  slideA:  number;
-  slideB:  number;
-  slideC:  number;
-  slideD?: number;
+  slide_a?:  number;
+  slide_b?:  number;
+  slide_c?:  number;
+  slide_d?: number;
 }

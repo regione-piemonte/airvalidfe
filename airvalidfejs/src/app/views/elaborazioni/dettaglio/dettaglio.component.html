@@ -1,0 +1,40 @@
+<div class="mt-3 px-3" *ngIf="dettaglioGrafico$ | async as listaDettaglio">
+  <div class="d-flex justify-content-between">
+    <h2 class="mt-2">{{'page.elaborazione.split_right.detail_split.title' | translate}}</h2>
+    <button (click)="createCsv()" mat-button class="mat-primary-text" [matTooltip]="('page.elaborazione.split_right.detail_split.download.tooltip') | translate">
+      <mat-icon>download</mat-icon>
+    </button>
+  </div>
+  <mat-tab-group *ngIf="listaDettaglio!.data.length > 0" [selectedIndex]="indexTab" (selectedIndexChange)="changeIndex($event, listaDettaglio.data)" class="tab-dettaglio-elaborazione">
+    <mat-tab *ngFor="let item of listaDettaglio?.data" label="{{item.name}}" >
+      <div *ngFor="let value of item.listResult; let i= index">
+        <h3 class="my-3">{{value.description}} - [<span [innerHTML]="item.unitaMisura"></span>]</h3>
+
+        <table mat-table #table [dataSource]="value.values!" class="w-100 table--parameters">
+          <ng-container matColumnDef="data">
+            <th mat-header-cell *matHeaderCellDef>{{'page.elaborazione.split_right.detail_split.table.data_ora' | translate}}</th>
+            <td mat-cell class="select-event" *matCellDef="let element; let i = index">
+              {{element?.timestamp | formatTime: value.timebase!}}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="valore">
+            <th mat-header-cell *matHeaderCellDef>{{'page.elaborazione.split_right.detail_split.table.valore' | translate}}</th>
+            <td mat-cell *matCellDef="let element ; let i = index" class="select-event" matTooltipPosition="left">
+              {{element?.value}}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="errore">
+            <th mat-header-cell *matHeaderCellDef>{{'page.elaborazione.split_right.detail_split.table.errore' | translate}}</th>
+            <td mat-cell *matCellDef="let element ; let i = index" class="select-event" matTooltipPosition="left">
+              {{(element?.error) ? element.error : '-'}}</td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns, sticky: true"></tr>
+          <tr mat-row class="row-parameters" *matRowDef="let row; columns: displayedColumns; let i = index">
+          </tr>
+        </table>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>
