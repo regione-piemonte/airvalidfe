@@ -2,7 +2,7 @@
  *Copyright Regione Piemonte - 2024
  *SPDX-License-Identifier: EUPL-1.2-or-later
  */
-mport {Dataset} from "@models/grafico";
+import {Dataset} from "@models/grafico";
 import {IParameter} from "@models/dataService";
 
 export type ActionParametersType = 'confronta' | 'delete' | 'showOriginData' | 'showNotValidData' | 'taratura' | 'color-picker' | 'parametri-correlati' | 'notShowNotValidData';
