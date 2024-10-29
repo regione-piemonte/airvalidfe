@@ -6,7 +6,9 @@ Airvalidfejs
 
 # Descrizione del prodotto
 Software di front-end realizzato in Angular  (https://github.com/angular/angular-cli) version 13.3.10. 
-L'interfaccia utente permette la visualizzazione grafica e tabellare delle misure del sistema regionale di rilevamento della quanlità dell'aria facilitando l'operatore nell'operazione di validazione e certificazione delle misure.
+L'interfaccia utente permette la visualizzazione grafica e tabellare delle misure del sistema regionale di rilevamento della qualità dell'aria facilitando l'operatore nell'operazione di validazione e certificazione delle misure.
+Permette anche di effettuare reportistiche e visualizzare grafici di un set di elaborazioni. 
+E' possibile anche effettaure delle ricerche sugli eventi e sull'anagrafica delle stazioni di rilevamento.
 
 
 # Configurazioni iniziali 

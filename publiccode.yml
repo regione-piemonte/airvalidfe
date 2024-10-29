@@ -2,8 +2,8 @@ publiccodeYmlVersion: "0.2"
 name: Airvalidfe
 applicationSuite: SRRQA - Rilevamento della Qualità dell'Aria
 url: "https://github.com/regione-piemonte/airvalidfe"
-softwareVersion: "1.0.0" 
-releaseDate: "2023-09-29"
+softwareVersion: "2.0.0" 
+releaseDate: "2024-10-29"
 logo: "img/logo-aria.svg"
 inputTypes:
   - text/plain
@@ -39,13 +39,16 @@ description:
           Consente di selezionare parametri in base al profilo di appartenenza
           e visualizzarne le misure in formato grafico e tabellare; 
           sul grafico si possono effettuare anche dei confronti dello stesso
-          paramtro su altri periodi dell'anno.
+          parametro su altri periodi dell'anno.
           E' possibile operare delle modifiche sul dato validato
           apportando delle correzioni manuali applicando una correzione lineare, 
           oppure è possibile applicare una correzione in seguito alla taratura
           dello strumento. Inoltre si puo' accettare la validazione o invalidare il dato. 
           Infine è possibile effettuare la certificazione del dato.
           Le misure possono inoltre essere scaricate in formato csv.
+          Si possono effettuare reportistiche e visualizzare grafici di un set di elaborazioni.
+          E' disponibile anche un form di ricerca per eventi avvenuti sulla strumentazione 
+          o ricerca di anagrafica.
     features:
        - validazione giornaliera
        - validazione mensile
@@ -54,12 +57,18 @@ description:
        - correzione delle misure
        - esportazione delle misure
        - visualizzazione grafica delle misure
+       - reportistica
+       - elaborazioni
+       - ricerche
     screenshots:
        - screenshots/1_login.png
        - screenshots/2_schermata_principale.png
        - screenshots/3_opzioni_misure.png
        - screenshots/4_opzioni_parametro.png
        - screenshots/5_opzioni_grafico.png
+       - screenshots/6_reportistica.png
+       - screenshots/7_elaborazioni.png
+       - screenshots/8_ricerca.png
 legal:
   license: EUPL-1.2
   mainCopyrightOwner: Regione Piemonte

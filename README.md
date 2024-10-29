@@ -4,7 +4,7 @@ Airvalidfe
 # Descrizione del prodotto
 Questo prodotto fa parte della suite **SRRQA - Rilevamento della Qualità dell'Aria**.
 
-Questo prodotto consente la validazione interattiva delle misure della rete, fornedno una visualizzazione in formato grafico e tabellare. 
+Questo prodotto consente la validazione interattiva delle misure della rete, fornendo una visualizzazione in formato grafico e tabellare. 
 Le funzioni offerte da questo prodotto sono le seguenti:
 * validazione;
 * accettazione con un click della proposta del validatore automatico;
@@ -16,7 +16,10 @@ Le funzioni offerte da questo prodotto sono le seguenti:
 * scale assoluta, relativa e manuale;
 * correzione lineare sui dati selezionati;
 * correzione per taratura
-* export in CSV.
+* export in CSV
+* reportistica (giornaliera, annuale, variabile e controlli)
+* elaborazioni (standard e specialistiche)
+* ricerca su eventi e anagrafica.
 
 
 
