@@ -1,3 +1,7 @@
+/*
+ *Copyright Regione Piemonte - 2024
+ *SPDX-License-Identifier: EUPL-1.2-or-later
+ */
 package it.csi.srrqa.airvalidsrv.solr;
 
 import java.util.List;

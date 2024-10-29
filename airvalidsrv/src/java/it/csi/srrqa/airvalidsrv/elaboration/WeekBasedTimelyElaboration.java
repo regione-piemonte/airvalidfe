@@ -1,5 +1,5 @@
 /*
- *Copyright Regione Piemonte - 2023
+ *Copyright Regione Piemonte - 2024
  *SPDX-License-Identifier: EUPL-1.2-or-later
  */
 package it.csi.srrqa.airvalidsrv.elaboration;
